@@ -150,8 +150,8 @@ class MockedWFInfo:
 
 class MockedWF:
     def __init__(
-            self,
-            none_global=True,
+        self,
+        none_global=True,
     ):
         self.none_global = none_global
 
