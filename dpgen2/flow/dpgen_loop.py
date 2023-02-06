@@ -368,7 +368,9 @@ def _loop(
         executor=step_executor,
         **step_config,
     )
-    scheduler_step.template.outputs.parameters["exploration_scheduler"].global_name = "exploration_scheduler"
+    scheduler_step.template.outputs.parameters[
+        "exploration_scheduler"
+    ].global_name = "exploration_scheduler"
     steps.add(scheduler_step)
 
     id_step = Step(
@@ -468,7 +470,9 @@ def _dpgen(
         executor=step_executor,
         **step_config,
     )
-    scheduler_step.template.outputs.parameters["exploration_scheduler"].global_name = "exploration_scheduler"
+    scheduler_step.template.outputs.parameters[
+        "exploration_scheduler"
+    ].global_name = "exploration_scheduler"
     steps.add(scheduler_step)
 
     id_step = Step(
