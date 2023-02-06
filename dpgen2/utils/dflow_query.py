@@ -1,3 +1,4 @@
+import logging
 import re
 from typing import (
     Any,
@@ -50,6 +51,11 @@ def get_last_scheduler(
     """
     get the output Scheduler of the last successful iteration
     """
+    outputs = wf.query_global_outputs()
+    if outputs is not None and hasattr(outputs, "parameters") and "exploration_scheduler" in outputs.parameters:
+        return outputs.parameters["exploration_scheduler"].value
+
+    logging.warn("Exploration scheduler not found in the global outputs")
     scheduler_keys_ = []
     for ii in keys:
         if get_subkey(ii) == "scheduler":
