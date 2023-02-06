@@ -54,16 +54,16 @@ def get_last_scheduler(
     for ii in keys:
         if get_subkey(ii) == "scheduler":
             scheduler_keys_.append(ii)
-    wf_info = wf.query()
+    scheduler_steps = wf.query_step_by_key(scheduler_keys_)
     scheduler_keys = []
-    for ii in scheduler_keys_:
-        if wf_info.get_step(key=ii)[0]["phase"] == "Succeeded":
-            scheduler_keys.append(ii)
+    for step in scheduler_steps:
+        if step["phase"] == "Succeeded":
+            scheduler_keys.append(step.key)
     if len(scheduler_keys) == 0:
         return None
     else:
         skey = sorted(scheduler_keys)[-1]
-        step = wf_info.get_step(key=skey)[0]
+        step = [step for step in scheduler_steps if step.key == skey][0]
         return step.outputs.parameters["exploration_scheduler"].value
 
 
