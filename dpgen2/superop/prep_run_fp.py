@@ -87,7 +87,7 @@ class PrepRunFp(Steps):
         self.step_keys[ii] = "--".join(["%s" % self.inputs.parameters["block_id"], ii])
         ii = "run-fp"
         self.step_keys[ii] = "--".join(
-            ["%s" % self.inputs.parameters["block_id"], ii + "-{{item}}"]
+            ["%s" % self.inputs.parameters["block_id"], ii + "-{{=item[5:]}}"]
         )
 
         self = _prep_run_fp(
@@ -164,8 +164,7 @@ def _prep_run_fp(
         template=PythonOPTemplate(
             run_op,
             slices=Slices(
-                "int('{{item}}')",
-                input_parameter=["task_name"],
+                "int('{{item}}'[5:])",
                 input_artifact=["task_path"],
                 output_artifact=["log", "labeled_data"],
                 **template_slice_config,
@@ -174,15 +173,13 @@ def _prep_run_fp(
             **run_template_config,
         ),
         parameters={
-            "task_name": prep_fp.outputs.parameters["task_names"],
+            "task_name": "{{item}}",
             "config": prep_run_steps.inputs.parameters["fp_config"],
         },
         artifacts={
             "task_path": prep_fp.outputs.artifacts["task_paths"],
         },
-        with_sequence=argo_sequence(
-            argo_len(prep_fp.outputs.parameters["task_names"]), format=fp_index_pattern
-        ),
+        with_param=prep_fp.outputs.parameters["task_names"],
         # with_param=argo_range(argo_len(prep_fp.outputs.parameters["task_names"])),
         key=step_keys["run-fp"],
         executor=run_executor,

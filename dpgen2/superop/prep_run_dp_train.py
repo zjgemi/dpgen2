@@ -91,7 +91,7 @@ class PrepRunDPTrain(Steps):
         self.step_keys[ii] = "--".join(["%s" % self.inputs.parameters["block_id"], ii])
         ii = "run-train"
         self.step_keys[ii] = "--".join(
-            ["%s" % self.inputs.parameters["block_id"], ii + "-{{item}}"]
+            ["%s" % self.inputs.parameters["block_id"], ii + "-{{=item[5:]}}"]
         )
 
         self = _prep_run_dp_train(
@@ -165,8 +165,7 @@ def _prep_run_dp_train(
         template=PythonOPTemplate(
             run_train_op,
             slices=Slices(
-                "int('{{item}}')",
-                input_parameter=["task_name"],
+                "int('{{item}}'[5:])",
                 input_artifact=["task_path", "init_model"],
                 output_artifact=["model", "lcurve", "log", "script"],
             ),
@@ -175,7 +174,7 @@ def _prep_run_dp_train(
         ),
         parameters={
             "config": train_steps.inputs.parameters["train_config"],
-            "task_name": prep_train.outputs.parameters["task_names"],
+            "task_name": "{{item}}",
         },
         artifacts={
             "task_path": prep_train.outputs.artifacts["task_paths"],
@@ -183,10 +182,7 @@ def _prep_run_dp_train(
             "init_data": train_steps.inputs.artifacts["init_data"],
             "iter_data": train_steps.inputs.artifacts["iter_data"],
         },
-        with_sequence=argo_sequence(
-            argo_len(prep_train.outputs.parameters["task_names"]),
-            format=train_index_pattern,
-        ),
+        with_param=prep_train.outputs.parameters["task_names"],
         # with_param=argo_range(train_steps.inputs.parameters["numb_models"]),
         key=step_keys["run-train"],
         executor=run_executor,
