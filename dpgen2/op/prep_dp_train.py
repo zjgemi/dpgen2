@@ -14,8 +14,8 @@ from dflow.python import (
     OP,
     OPIO,
     Artifact,
-    OPIOSign,
     BigParameter,
+    OPIOSign,
 )
 
 from dpgen2.constants import (
