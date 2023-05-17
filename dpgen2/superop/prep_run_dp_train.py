@@ -40,7 +40,9 @@ from dflow.python import (
 from dpgen2.constants import (
     train_index_pattern,
 )
-from dpgen2.op import RunDPTrain
+from dpgen2.op import (
+    RunDPTrain,
+)
 from dpgen2.utils.step_config import (
     init_executor,
 )
