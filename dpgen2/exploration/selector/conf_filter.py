@@ -59,7 +59,7 @@ class ConfFilters:
         self,
         conf: dpdata.System,
     ) -> bool:
-        natoms = sum(conf["atom_numbs"])
+        natoms = sum(conf["atom_numbs"])  # type: ignore
         selected_idx = np.arange(conf.get_nframes())
         for ff in self._filters:
             fsel = np.where(
@@ -74,4 +74,4 @@ class ConfFilters:
                 ]
             )[0]
             selected_idx = np.intersect1d(selected_idx, fsel)
-        return conf.sub_system(selected_idx)
+        return bool(conf.sub_system(selected_idx))
