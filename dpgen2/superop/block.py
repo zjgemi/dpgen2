@@ -60,6 +60,7 @@ from .prep_run_lmp import (
 
 block_default_optional_parameter = {
     "data_mixed_type": False,
+    "finetune_mode": "no",
 }
 
 
@@ -72,6 +73,7 @@ def make_collect_data_optional_parameter(block_optional_parameter):
 def make_run_dp_train_optional_parameter(block_optional_parameter):
     return {
         "mixed_type": block_optional_parameter["data_mixed_type"],
+        "finetune_mode": block_optional_parameter["finetune_mode"],
     }
 
 
