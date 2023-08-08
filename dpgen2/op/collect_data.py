@@ -41,7 +41,7 @@ class CollectData(OP):
             {
                 "name": str,
                 "type_map": List[str],
-                "optional_parameter": BigParameter(
+                "optional_parameter": Parameter(
                     dict,
                     default=CollectData.default_optional_parameter,
                 ),
