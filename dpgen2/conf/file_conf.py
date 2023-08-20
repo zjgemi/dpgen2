@@ -48,10 +48,10 @@ class FileConfGenerator(ConfGenerator):
         self,
         type_map,
     ) -> dpdata.MultiSystems:
-        if self.fmt in [ "deepmd/npy/mixed" ]: 
-          return self.generate_mixed(type_map)
+        if self.fmt in ["deepmd/npy/mixed"]:
+            return self.generate_mixed(type_map)
         else:
-          return self.generate_std(type_map)
+            return self.generate_std(type_map)
 
     def generate_std(
         self,
@@ -70,16 +70,15 @@ class FileConfGenerator(ConfGenerator):
         type_map,
     ) -> dpdata.MultiSystems:
         if len(self.files) > 1:
-          raise ValueError(
-            'the file format "deepmd/npy/mixed" is specified, '
-            'but more than one file is given, which is invalide '
-            'please provide one path that can be interpreted as '
-            'the dpdata.MultiSystems. '
-          )
+            raise ValueError(
+                'the file format "deepmd/npy/mixed" is specified, '
+                "but more than one file is given, which is invalide "
+                "please provide one path that can be interpreted as "
+                "the dpdata.MultiSystems. "
+            )
         assert "deepmd/npy/mixed" == self.fmt
         ms = dpdata.MultiSystems(type_map=type_map)
-        ms.from_deepmd_npy_mixed(
-          self.files[0], fmt="deepmd/npy/mixed", labeled=False)
+        ms.from_deepmd_npy_mixed(self.files[0], fmt="deepmd/npy/mixed", labeled=False)
         return ms
 
     @staticmethod
