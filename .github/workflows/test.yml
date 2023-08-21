@@ -6,7 +6,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: Default
     strategy:
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
