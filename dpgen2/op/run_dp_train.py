@@ -119,6 +119,12 @@ class RunDPTrain(OP):
         mixed_type = ip["optional_parameter"]["mixed_type"]
         finetune_mode = ip["optional_parameter"]["finetune_mode"]
         config = ip["config"] if ip["config"] is not None else {}
+        impl = ip["config"].get("impl", "tensorflow")
+        if impl == "tensorflow":
+            dp_command = "dp"
+        elif impl == "pytorch":
+            dp_command = "dp_pt"
+        finetune_args = config.get("finetune_args", "")
         config = RunDPTrain.normalize_config(config)
         task_name = ip["task_name"]
         task_path = ip["task_path"]
@@ -161,6 +167,11 @@ class RunDPTrain(OP):
         train_dict = RunDPTrain.write_other_to_input_script(
             train_dict, config, do_init_model, major_version
         )
+        if impl == "pytorch":
+            train_dict["training"]["validation_data"] = {
+                "systems": train_dict["training"]["training_data"]["systems"],
+                "batch_size": 1,
+            }
 
         if RunDPTrain.skip_training(
             work_dir, train_dict, init_model, iter_data, finetune_mode
@@ -187,23 +198,32 @@ class RunDPTrain(OP):
 
             # train model
             if do_init_model or finetune_mode == "train-init":
-                command = [
-                    "dp",
-                    "train",
-                    "--init-frz-model",
-                    str(init_model),
-                    train_script_name,
-                ]
+                if impl == "tensorflow":
+                    command = [
+                        dp_command,
+                        "train",
+                        "--init-frz-model",
+                        str(init_model),
+                        train_script_name,
+                    ]
+                elif impl == "pytorch":
+                    command = [
+                        dp_command,
+                        "train",
+                        "--init-model",
+                        str(init_model),
+                        train_script_name,
+                    ]
             elif finetune_mode == "finetune":
                 command = [
-                    "dp",
+                    dp_command,
                     "train",
                     train_script_name,
                     "--finetune",
                     str(init_model),
-                ]
+                ] + finetune_args.split()
             else:
-                command = ["dp", "train", train_script_name]
+                command = [dp_command, "train", train_script_name]
             ret, out, err = run_command(command)
             if ret != 0:
                 clean_before_quit()
@@ -219,12 +239,16 @@ class RunDPTrain(OP):
                 shutil.copy2("input_v2_compat.json", train_script_name)
 
             # freeze model
-            ret, out, err = run_command(["dp", "freeze", "-o", "frozen_model.pb"])
-            if ret != 0:
-                clean_before_quit()
-                raise FatalError(
-                    "dp freeze failed\n", "out msg", out, "\n", "err msg", err, "\n"
-                )
+            if impl == "tensorflow":
+                ret, out, err = run_command([dp_command, "freeze", "-o", "frozen_model.pb"])
+                if ret != 0:
+                    clean_before_quit()
+                    raise FatalError(
+                        "dp freeze failed\n", "out msg", out, "\n", "err msg", err, "\n"
+                    )
+                model_file = "frozen_model.pb"
+            elif impl == "pytorch":
+                model_file = "model.pt"
             fplog.write("#=================== freeze std out ===================\n")
             fplog.write(out)
             fplog.write("#=================== freeze std err ===================\n")
@@ -235,7 +259,7 @@ class RunDPTrain(OP):
         return OPIO(
             {
                 "script": work_dir / train_script_name,
-                "model": work_dir / "frozen_model.pb",
+                "model": work_dir / model_file,
                 "lcurve": work_dir / "lcurve.out",
                 "log": work_dir / "train.log",
             }
@@ -350,7 +374,8 @@ class RunDPTrain(OP):
 
     @staticmethod
     def training_args():
-        doc_init_model_prolicy = "The policy of init-model training. It can be\n\n\
+        doc_impl = "The implementation of DP. It can be 'tensorflow' or 'pytorch'. 'tensorflow' for default."
+        doc_init_model_policy = "The policy of init-model training. It can be\n\n\
     - 'no': No init-model training. Traing from scratch.\n\n\
     - 'yes': Do init-model training.\n\n\
     - 'old_data_larger_than:XXX': Do init-model if the training data size of the previous model is larger than XXX. XXX is an int number."
@@ -366,13 +391,21 @@ class RunDPTrain(OP):
         doc_init_model_start_pref_v = (
             "The start virial prefactor in loss when init-model"
         )
+        doc_finetune_args = "Extra arguments for finetuning"
         return [
+            Argument(
+                "impl",
+                str,
+                optional=True,
+                default="tensorflow",
+                doc=doc_impl,
+            ),
             Argument(
                 "init_model_policy",
                 str,
                 optional=True,
                 default="no",
-                doc=doc_init_model_prolicy,
+                doc=doc_init_model_policy,
             ),
             Argument(
                 "init_model_old_ratio",
@@ -416,6 +449,13 @@ class RunDPTrain(OP):
                 optional=True,
                 default=0.0,
                 doc=doc_init_model_start_pref_v,
+            ),
+            Argument(
+                "finetune_args",
+                str,
+                optional=True,
+                default="",
+                doc=doc_finetune_args,
             ),
         ]
 

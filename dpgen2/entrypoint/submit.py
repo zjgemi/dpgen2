@@ -436,7 +436,8 @@ def workflow_concurrent_learning(
                 "not match numb_models={numb_models}"
             )
     elif train_style == "dp-dist" and not old_style:
-        init_models_paths = [config["train"].get("student_model_path", None)]
+        init_models_paths = [config["train"]["student_model_path"]] if \
+            "student_model_path" in config["train"] else None
         config["train"]["numb_models"] = 1
     else:
         raise RuntimeError(
@@ -491,7 +492,7 @@ def workflow_concurrent_learning(
             lmp_config["teacher_model_path"]
         ), f"No such file: {lmp_config['teacher_model_path']}"
         lmp_config["teacher_model_path"] = BinaryFileInput(
-            lmp_config["teacher_model_path"], "pb"
+            lmp_config["teacher_model_path"]
         )
 
     fp_config = config.get("fp_config", {}) if old_style else {}
@@ -511,7 +512,7 @@ def workflow_concurrent_learning(
 
     fp_config["inputs"] = fp_inputs
     fp_config["run"] = config["fp"]["run_config"]
-    if fp_style == "deepmd":
+    if fp_style in ["deepmd", "deepmd_pt"]:
         assert (
             "teacher_model_path" in fp_config["run"]
         ), f"Cannot find 'teacher_model_path' in config['fp']['run_config'] when fp_style == 'deepmd'"
@@ -519,7 +520,7 @@ def workflow_concurrent_learning(
             fp_config["run"]["teacher_model_path"]
         ), f"No such file: {fp_config['run']['teacher_model_path']}"
         fp_config["run"]["teacher_model_path"] = BinaryFileInput(
-            fp_config["run"]["teacher_model_path"], "pb"
+            fp_config["run"]["teacher_model_path"]
         )
 
     init_data_prefix = (

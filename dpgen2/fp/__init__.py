@@ -3,6 +3,11 @@ from .deepmd import (
     PrepDeepmd,
     RunDeepmd,
 )
+from .deepmd_pt import (
+    DeepmdPtInputs,
+    PrepDeepmdPt,
+    RunDeepmdPt,
+)
 from .gaussian import (
     GaussianInputs,
     PrepGaussian,
@@ -29,5 +34,10 @@ fp_styles = {
         "inputs": DeepmdInputs,
         "prep": PrepDeepmd,
         "run": RunDeepmd,
+    },
+    "deepmd_pt": {
+        "inputs": DeepmdPtInputs,
+        "prep": PrepDeepmdPt,
+        "run": RunDeepmdPt,
     },
 }
