@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import random
 import re
@@ -147,7 +148,7 @@ class RunLmp(OP):
                     freeze_cmd = "dp_pt freeze %s -o %s" % (mm, mname)
                     ret, out, err = run_command(freeze_cmd, shell=True)
                     if ret != 0:
-                        raise TransientError(
+                        logging.error("".join((
                             "freeze failed\n",
                             "command was",
                             freeze_cmd,
@@ -157,7 +158,8 @@ class RunLmp(OP):
                             "err msg",
                             err,
                             "\n",
-                        )
+                        )))
+                        raise TransientError("freeze failed")
 
             if teacher_model is not None:
                 add_teacher_model(lmp_input_name)
@@ -169,7 +171,7 @@ class RunLmp(OP):
             command = " ".join([command, "-i", lmp_input_name, "-log", lmp_log_name])
             ret, out, err = run_command(command, shell=True)
             if ret != 0:
-                raise TransientError(
+                logging.error("".join((
                     "lmp failed\n",
                     "command was",
                     command,
@@ -179,7 +181,8 @@ class RunLmp(OP):
                     "err msg",
                     err,
                     "\n",
-                )
+                )))
+                raise TransientError("lmp failed")
 
         ret_dict = {
             "log": work_dir / lmp_log_name,

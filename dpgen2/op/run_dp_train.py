@@ -1,5 +1,6 @@
 import glob
 import json
+import logging
 import os
 import shutil
 from pathlib import (
@@ -227,9 +228,10 @@ class RunDPTrain(OP):
             ret, out, err = run_command(command)
             if ret != 0:
                 clean_before_quit()
-                raise FatalError(
+                logging.error("".join((
                     "dp train failed\n", "out msg", out, "\n", "err msg", err, "\n"
-                )
+                )))
+                raise FatalError("dp train failed")
             fplog.write("#=================== train std out ===================\n")
             fplog.write(out)
             fplog.write("#=================== train std err ===================\n")
@@ -243,9 +245,10 @@ class RunDPTrain(OP):
                 ret, out, err = run_command([dp_command, "freeze", "-o", "frozen_model.pb"])
                 if ret != 0:
                     clean_before_quit()
-                    raise FatalError(
+                    logging.error("".join((
                         "dp freeze failed\n", "out msg", out, "\n", "err msg", err, "\n"
-                    )
+                    )))
+                    raise FatalError("dp freeze failed")
                 model_file = "frozen_model.pb"
             elif impl == "pytorch":
                 model_file = "model.pt"

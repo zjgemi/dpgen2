@@ -1,4 +1,5 @@
 """Prep and Run Gaussian tasks."""
+import logging
 from typing import (
     Any,
     List,
@@ -155,9 +156,10 @@ class RunGaussian(RunFp):
         command = " ".join([command, gaussian_input_name])
         ret, out, err = run_command(command, shell=True)
         if ret != 0:
-            raise TransientError(
+            logging.error("".join((
                 "gaussian failed\n", "out msg", out, "\n", "err msg", err, "\n"
-            )
+            )))
+            raise TransientError("gaussian failed")
         # convert the output to deepmd/npy format
         sys = dpdata.LabeledSystem(gaussian_output_name, fmt="gaussian/log")
         sys.to("deepmd/npy", out_name)
