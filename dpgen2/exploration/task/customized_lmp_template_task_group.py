@@ -180,7 +180,7 @@ class CustomizedLmpTemplateTaskGroup(ConfSamplingTaskGroup):
                     # run shell command with dpgen2.utils.run_command
                     ret, out, err = run_command(ss, shell=True)
                     if ret != 0:
-                        raise FatalError(
+                        logging.error("".join((
                             f"customized shell command {ss} failed with return code {ret}\n",
                             "out msg",
                             out,
@@ -188,7 +188,8 @@ class CustomizedLmpTemplateTaskGroup(ConfSamplingTaskGroup):
                             "err msg",
                             err,
                             "\n",
-                        )
+                        )))
+                        raise FatalError(f"customized shell command {ss} failed with return code {ret}")
                 # loop over all pattern matched result dirs
                 for ff in [
                     ii for ii in sorted(os.listdir(os.getcwd())) if Path(ii).is_dir()

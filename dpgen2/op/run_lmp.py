@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import random
 import re
@@ -151,7 +152,7 @@ class RunLmp(OP):
             command = " ".join([command, "-i", lmp_input_name, "-log", lmp_log_name])
             ret, out, err = run_command(command, shell=True)
             if ret != 0:
-                raise TransientError(
+                logging.error("".join((
                     "lmp failed\n",
                     "command was",
                     command,
@@ -161,7 +162,8 @@ class RunLmp(OP):
                     "err msg",
                     err,
                     "\n",
-                )
+                )))
+                raise TransientError("lmp failed")
 
         ret_dict = {
             "log": work_dir / lmp_log_name,
