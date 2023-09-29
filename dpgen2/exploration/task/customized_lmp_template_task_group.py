@@ -187,7 +187,7 @@ class CustomizedLmpTemplateTaskGroup(ConfSamplingTaskGroup):
                                     "out msg",
                                     out,
                                     "\n",
-                                    "err msg",
+                                    "err msg: ",
                                     err,
                                     "\n",
                                 )
