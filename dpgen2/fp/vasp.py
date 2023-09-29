@@ -1,3 +1,4 @@
+import logging
 from pathlib import (
     Path,
 )
@@ -132,9 +133,12 @@ class RunVasp(RunFp):
         command = " ".join([command, ">", log_name])
         ret, out, err = run_command(command, shell=True)
         if ret != 0:
-            raise TransientError(
-                "vasp failed\n", "out msg", out, "\n", "err msg", err, "\n"
+            logging.error(
+                "".join(
+                    ("vasp failed\n", "out msg: ", out, "\n", "err msg: ", err, "\n")
+                )
             )
+            raise TransientError("vasp failed")
         # convert the output to deepmd/npy format
         sys = dpdata.LabeledSystem("OUTCAR")
         sys.to("deepmd/npy", out_name)

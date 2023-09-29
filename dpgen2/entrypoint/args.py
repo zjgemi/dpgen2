@@ -437,6 +437,7 @@ def submit_args(default_step_config=normalize_step_dict({})):
     doc_train = "The configuration for training"
     doc_explore = "The configuration for exploration"
     doc_fp = "The configuration for FP"
+    doc_name = "The workflow name, 'dpgen' for default"
 
     return (
         dflow_conf_args()
@@ -479,6 +480,7 @@ def submit_args(default_step_config=normalize_step_dict({})):
                 doc=doc_explore,
             ),
             Argument("fp", dict, [], [variant_fp()], optional=False, doc=doc_fp),
+            Argument("name", str, optional=True, default="dpgen", doc=doc_name),
         ]
     )
 
