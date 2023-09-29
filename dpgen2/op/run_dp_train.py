@@ -238,10 +238,10 @@ class RunDPTrain(OP):
                     "".join(
                         (
                             "dp freeze failed\n",
-                            "out msg",
+                            "out msg: ",
                             out,
                             "\n",
-                            "err msg",
+                            "err msg: ",
                             err,
                             "\n",
                         )
