@@ -156,12 +156,12 @@ class RunLmp(OP):
                     "".join(
                         (
                             "lmp failed\n",
-                            "command was",
+                            "command was: ",
                             command,
-                            "out msg",
+                            "out msg: ",
                             out,
                             "\n",
-                            "err msg",
+                            "err msg: ",
                             err,
                             "\n",
                         )
