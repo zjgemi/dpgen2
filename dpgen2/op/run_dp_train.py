@@ -212,10 +212,10 @@ class RunDPTrain(OP):
                     "".join(
                         (
                             "dp train failed\n",
-                            "out msg",
+                            "out msg: ",
                             out,
                             "\n",
-                            "err msg",
+                            "err msg: ",
                             err,
                             "\n",
                         )
