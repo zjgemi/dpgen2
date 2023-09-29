@@ -158,7 +158,7 @@ class RunGaussian(RunFp):
         if ret != 0:
             logging.error(
                 "".join(
-                    ("gaussian failed\n", "out msg", out, "\n", "err msg", err, "\n")
+                    ("gaussian failed\n", "out msg: ", out, "\n", "err msg: ", err, "\n")
                 )
             )
             raise TransientError("gaussian failed")
