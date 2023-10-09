@@ -30,6 +30,9 @@ from .download import (
     download,
     download_by_def,
 )
+from .gui import (
+    start_dpgui,
+)
 from .showkey import (
     showkey,
 )
@@ -259,6 +262,29 @@ def main_parser() -> argparse.ArgumentParser:
         help="if specified, download regardless whether check points exist.",
     )
 
+    ##########################################
+    # gui
+    parser_gui = subparsers.add_parser(
+        "gui",
+        help="Serve DP-GUI.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser_gui.add_argument(
+        "-p",
+        "--port",
+        type=int,
+        default=6042,
+        help="The port to serve DP-GUI on.",
+    )
+    parser_gui.add_argument(
+        "--bind_all",
+        action="store_true",
+        help=(
+            "Serve on all public interfaces. This will expose your DP-GUI instance "
+            "to the network on both IPv4 and IPv6 (where available)."
+        ),
+    )
+
     # workflow subcommands
     for cmd in workflow_subcommands:
         add_subparser_workflow_subcommand(subparsers, cmd)
@@ -372,6 +398,11 @@ def main():
             download=args.download,
             prefix=args.prefix,
             chk_pnt=args.no_check_point,
+        )
+    elif args.command == "gui":
+        start_dpgui(
+            port=args.port,
+            bind_all=args.bind_all,
         )
     elif args.command in workflow_subcommands:
         with open(args.CONFIG) as fp:

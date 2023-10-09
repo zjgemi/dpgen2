@@ -32,8 +32,11 @@ Homepage = "https://github.com/deepmodeling/dpgen2"
 documentation = "https://docs.deepmodeling.com/projects/dpgen2"
 repository = "https://github.com/deepmodeling/dpgen2"
 
-[project.entry-points.console_scripts]
+[project.scripts]
 dpgen2 = "dpgen2.entrypoint.main:main"
+
+[project.entry-points."dpgui"]
+"DP-GEN2 Submit" = "dpgen2.entrypoint.args:submit_args"
 
 [project.optional-dependencies]
 docs = [
@@ -48,6 +51,10 @@ docs = [
 ]
 test = [
      'fakegaussian>=0.0.3',
+    'dpgui',
+]
+gui = [
+    'dpgui',
 ]
 
 [tool.setuptools.packages.find]
