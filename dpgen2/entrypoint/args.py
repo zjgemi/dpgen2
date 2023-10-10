@@ -48,9 +48,7 @@ def dp_dist_train_args():
         Argument(
             "template_script", [list, str], optional=False, doc=doc_template_script
         ),
-        Argument(
-            "student_model_path", str, optional=True, doc=dock_student_model_path
-        ),
+        Argument("student_model_path", str, optional=True, doc=dock_student_model_path),
     ]
 
 
