@@ -436,7 +436,11 @@ def workflow_concurrent_learning(
                 "not match numb_models={numb_models}"
             )
     elif train_style == "dp-dist" and not old_style:
-        init_models_paths = [config["train"].get("student_model_path", None)]
+        init_models_paths = (
+            [config["train"]["student_model_path"]]
+            if "student_model_path" in config["train"]
+            else None
+        )
         config["train"]["numb_models"] = 1
     else:
         raise RuntimeError(
