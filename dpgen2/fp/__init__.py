@@ -3,6 +3,11 @@ from .deepmd import (
     PrepDeepmd,
     RunDeepmd,
 )
+from .fpop import (
+    AbacusInputs,
+    PrepFpOpAbacus,
+    RunFpOpAbacus,
+)
 from .gaussian import (
     GaussianInputs,
     PrepGaussian,
@@ -29,5 +34,10 @@ fp_styles = {
         "inputs": DeepmdInputs,
         "prep": PrepDeepmd,
         "run": RunDeepmd,
+    },
+    "fpop_abacus": {
+        "inputs": AbacusInputs,
+        "prep": PrepFpOpAbacus,
+        "run": RunFpOpAbacus,
     },
 }

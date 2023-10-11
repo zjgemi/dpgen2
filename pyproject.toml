@@ -21,7 +21,8 @@ dependencies = [
 	     'dargs>=0.3.1',
 	     'scipy',
 	     'lbg',
-          'packaging',
+	     'packaging',
+	     'fpop',
 ]
 requires-python = ">=3.7"
 readme = "README.md"
