@@ -228,9 +228,19 @@ class RunDPTrain(OP):
             ret, out, err = run_command(command)
             if ret != 0:
                 clean_before_quit()
-                logging.error("".join((
-                    "dp train failed\n", "out msg", out, "\n", "err msg", err, "\n"
-                )))
+                logging.error(
+                    "".join(
+                        (
+                            "dp train failed\n",
+                            "out msg: ",
+                            out,
+                            "\n",
+                            "err msg: ",
+                            err,
+                            "\n",
+                        )
+                    )
+                )
                 raise FatalError("dp train failed")
             fplog.write("#=================== train std out ===================\n")
             fplog.write(out)
@@ -242,12 +252,22 @@ class RunDPTrain(OP):
 
             # freeze model
             if impl == "tensorflow":
-                ret, out, err = run_command([dp_command, "freeze", "-o", "frozen_model.pb"])
+                ret, out, err = run_command(["dp", "freeze", "-o", "frozen_model.pb"])
                 if ret != 0:
                     clean_before_quit()
-                    logging.error("".join((
-                        "dp freeze failed\n", "out msg", out, "\n", "err msg", err, "\n"
-                    )))
+                    logging.error(
+                        "".join(
+                            (
+                                "dp freeze failed\n",
+                                "out msg: ",
+                                out,
+                                "\n",
+                                "err msg: ",
+                                err,
+                                "\n",
+                            )
+                        )
+                    )
                     raise FatalError("dp freeze failed")
                 model_file = "frozen_model.pb"
             elif impl == "pytorch":
@@ -325,11 +345,10 @@ class RunDPTrain(OP):
         iter_data,
         finetune_mode,
     ):
-        # we have init model and no iter data, skip training
-        if finetune_mode is not None and (
-            finetune_mode == "train-init" or finetune_mode == "finetune"
-        ):
+        # do not skip if we do finetuning
+        if finetune_mode is not None and finetune_mode == "finetune":
             return False
+        # we have init model and no iter data, skip training
         if (init_model is not None) and (iter_data is None or len(iter_data) == 0):
             with set_directory(work_dir):
                 with open(train_script_name, "w") as fp:

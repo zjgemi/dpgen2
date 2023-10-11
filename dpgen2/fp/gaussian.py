@@ -156,9 +156,19 @@ class RunGaussian(RunFp):
         command = " ".join([command, gaussian_input_name])
         ret, out, err = run_command(command, shell=True)
         if ret != 0:
-            logging.error("".join((
-                "gaussian failed\n", "out msg", out, "\n", "err msg", err, "\n"
-            )))
+            logging.error(
+                "".join(
+                    (
+                        "gaussian failed\n",
+                        "out msg: ",
+                        out,
+                        "\n",
+                        "err msg: ",
+                        err,
+                        "\n",
+                    )
+                )
+            )
             raise TransientError("gaussian failed")
         # convert the output to deepmd/npy format
         sys = dpdata.LabeledSystem(gaussian_output_name, fmt="gaussian/log")

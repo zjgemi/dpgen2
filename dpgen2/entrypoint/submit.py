@@ -436,8 +436,11 @@ def workflow_concurrent_learning(
                 "not match numb_models={numb_models}"
             )
     elif train_style == "dp-dist" and not old_style:
-        init_models_paths = [config["train"]["student_model_path"]] if \
-            "student_model_path" in config["train"] else None
+        init_models_paths = (
+            [config["train"]["student_model_path"]]
+            if "student_model_path" in config["train"]
+            else None
+        )
         config["train"]["numb_models"] = 1
     else:
         raise RuntimeError(
@@ -714,7 +717,9 @@ def submit_concurrent_learning(
             "conf_selector",
             selector,
         )
-        wf_config["inputs"]["do_finetune"] = False
+        # the modify-train-script step will be added as reuse step.
+        # the following hack is not needed anymore.
+        # wf_config["inputs"]["do_finetune"] = False
         # finetune will not be done again if the old process is reused.
 
     wf = Workflow(name=wf_config["name"])
@@ -760,6 +765,7 @@ def get_resubmit_keys(
         [
             "prep-train",
             "run-train",
+            "modify-train-script",
             "prep-lmp",
             "run-lmp",
             "select-confs",

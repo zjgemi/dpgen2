@@ -21,7 +21,8 @@ dependencies = [
 	     'dargs>=0.3.1',
 	     'scipy',
 	     'lbg',
-          'packaging',
+	     'packaging',
+	     'fpop',
 ]
 requires-python = ">=3.7"
 readme = "README.md"
@@ -32,8 +33,11 @@ Homepage = "https://github.com/deepmodeling/dpgen2"
 documentation = "https://docs.deepmodeling.com/projects/dpgen2"
 repository = "https://github.com/deepmodeling/dpgen2"
 
-[project.entry-points.console_scripts]
+[project.scripts]
 dpgen2 = "dpgen2.entrypoint.main:main"
+
+[project.entry-points."dpgui"]
+"DP-GEN2 Submit" = "dpgen2.entrypoint.args:submit_args"
 
 [project.optional-dependencies]
 docs = [
@@ -48,6 +52,10 @@ docs = [
 ]
 test = [
      'fakegaussian>=0.0.3',
+    'dpgui',
+]
+gui = [
+    'dpgui',
 ]
 
 [tool.setuptools.packages.find]
@@ -62,6 +70,9 @@ write_to = "dpgen2/_version.py"
 [tool.pyright]
 include = [
      "dpgen2",
+]
+exclude = [
+    "dpgen2/_version.py",
 ]
 
 [tool.isort]
