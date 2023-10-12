@@ -206,7 +206,7 @@ def make_naive_exploration_scheduler(
     sys_configs = (
         config["sys_configs"] if old_style else config["explore"]["configurations"]
     )
-    sys_prefix = config.get("sys_prefix")
+    sys_prefix = config["explore"].get("configuration_prefix")
     if sys_prefix is not None:
         for ii in range(len(sys_configs)):
             if isinstance(sys_configs[ii], list):
