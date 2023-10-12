@@ -5,9 +5,10 @@ from typing import (
     List,
 )
 
-from dargs import Argument
-
 import dpdata
+from dargs import (
+    Argument,
+)
 from dflow.python import (
     OP,
     OPIO,
@@ -30,29 +31,40 @@ class FpOpAbacusInputs(AbacusInputs):
     @staticmethod
     def args():
         doc_input_file = "A template INPUT file."
-        doc_pp_files = 'The pseudopotential files for the elements. '\
+        doc_pp_files = (
+            "The pseudopotential files for the elements. "
             'For example: {"H": "/path/to/H.upf", "O": "/path/to/O.upf"}.'
-        doc_element_mass = 'Specify the mass of some elements. '\
+        )
+        doc_element_mass = (
+            "Specify the mass of some elements. "
             'For example: {"H": 1.0079, "O": 15.9994}.'
+        )
         doc_kpt_file = "The KPT file, by default None."
-        doc_orb_files = 'The numerical orbital fiels for the elements, '\
-            'by default None. '\
+        doc_orb_files = (
+            "The numerical orbital fiels for the elements, "
+            "by default None. "
             'For example: {"H": "/path/to/H.orb", "O": "/path/to/O.orb"}.'
+        )
         doc_deepks_descriptor = "The deepks descriptor file, by default None."
         doc_deepks_model = "The deepks model file, by default None."
         return [
             Argument("input_file", str, optional=False, doc=doc_input_file),
             Argument("pp_files", dict, optional=False, doc=doc_pp_files),
-            Argument("element_mass", dict, optional=True, default=None,
-                     doc=doc_element_mass),
-            Argument("kpt_file", str, optional=True, default=None,
-                     doc=doc_kpt_file),
-            Argument("orb_files", dict, optional=True, default=None,
-                     doc=doc_orb_files),
-            Argument("deepks_descriptor", str, optional=True, default=None,
-                     doc=doc_deepks_descriptor),
-            Argument("deepks_model", str, optional=True, default=None,
-                     doc=doc_deepks_model),
+            Argument(
+                "element_mass", dict, optional=True, default=None, doc=doc_element_mass
+            ),
+            Argument("kpt_file", str, optional=True, default=None, doc=doc_kpt_file),
+            Argument("orb_files", dict, optional=True, default=None, doc=doc_orb_files),
+            Argument(
+                "deepks_descriptor",
+                str,
+                optional=True,
+                default=None,
+                doc=doc_deepks_descriptor,
+            ),
+            Argument(
+                "deepks_model", str, optional=True, default=None, doc=doc_deepks_model
+            ),
         ]
 
 
@@ -146,11 +158,13 @@ class RunFpOpAbacus(OP):
     @staticmethod
     def args():
         doc_cmd = "The command of abacus"
-        doc_out = "The output dir name of labeled data. "\
+        doc_out = (
+            "The output dir name of labeled data. "
             "In `deepmd/npy` format provided by `dpdata`."
+        )
         return [
-            Argument("command", str, optional=True, default="abacus",
-                     doc=doc_cmd),
-            Argument("out", str, optional=True,
-                     default=fp_default_out_data_name, doc=doc_out),
+            Argument("command", str, optional=True, default="abacus", doc=doc_cmd),
+            Argument(
+                "out", str, optional=True, default=fp_default_out_data_name, doc=doc_out
+            ),
         ]
