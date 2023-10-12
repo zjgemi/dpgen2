@@ -4,7 +4,7 @@ from .deepmd import (
     RunDeepmd,
 )
 from .fpop import (
-    AbacusInputs,
+    FpOpAbacusInputs,
     PrepFpOpAbacus,
     RunFpOpAbacus,
 )
@@ -36,7 +36,7 @@ fp_styles = {
         "run": RunDeepmd,
     },
     "fpop_abacus": {
-        "inputs": AbacusInputs,
+        "inputs": FpOpAbacusInputs,
         "prep": PrepFpOpAbacus,
         "run": RunFpOpAbacus,
     },
