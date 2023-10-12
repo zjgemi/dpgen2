@@ -1,17 +1,29 @@
-from pathlib import Path
-from typing import List
+from pathlib import (
+    Path,
+)
+from typing import (
+    List,
+)
 
 from dargs import Argument
 
 import dpdata
-from dflow.python import OP, OPIO, Artifact, BigParameter, OPIOSign
+from dflow.python import (
+    OP,
+    OPIO,
+    Artifact,
+    BigParameter,
+    OPIOSign,
+)
+from fpop.abacus import (
+    AbacusInputs,
+    PrepAbacus,
+    RunAbacus,
+)
 
-try:
-    from fpop.abacus import AbacusInputs, PrepAbacus, RunAbacus
-except ModuleNotFoundError:
-    AbacusInputs = PrepAbacus = RunAbacus = object
-
-from ..constants import fp_default_out_data_name
+from ..constants import (
+    fp_default_out_data_name,
+)
 
 
 class FpOpAbacusInputs(AbacusInputs):
@@ -69,12 +81,14 @@ class PrepFpOpAbacus(OP):
         self,
         ip: OPIO,
     ) -> OPIO:
-        op_in = OPIO({
-            "inputs": ip["config"]["inputs"],
-            "type_map": ip["type_map"],
-            "confs": ip["confs"],
-            "prep_image_config": ip["config"].get("prep", {}),
-        })
+        op_in = OPIO(
+            {
+                "inputs": ip["config"]["inputs"],
+                "type_map": ip["type_map"],
+                "confs": ip["confs"],
+                "prep_image_config": ip["config"].get("prep", {}),
+            }
+        )
         op = PrepAbacus()
         return op.execute(op_in)
 
@@ -105,12 +119,14 @@ class RunFpOpAbacus(OP):
         ip: OPIO,
     ) -> OPIO:
         run_config = ip["config"].get("run", {})
-        op_in = OPIO({
-            "task_name": ip["task_name"],
-            "task_path": ip["task_path"],
-            "backward_list": [],
-            "run_image_config": run_config,
-        })
+        op_in = OPIO(
+            {
+                "task_name": ip["task_name"],
+                "task_path": ip["task_path"],
+                "backward_list": [],
+                "run_image_config": run_config,
+            }
+        )
         op = RunAbacus()
         op_out = op.execute(op_in)
         workdir = op_out["backward_dir"].parent
@@ -120,10 +136,12 @@ class RunFpOpAbacus(OP):
         out_name = run_config.get("out", fp_default_out_data_name)
         sys.to("deepmd/npy", workdir / out_name)
 
-        return OPIO({
-            "log": workdir / "log",
-            "labeled_data": workdir / out_name,
-        })
+        return OPIO(
+            {
+                "log": workdir / "log",
+                "labeled_data": workdir / out_name,
+            }
+        )
 
     @staticmethod
     def args():
