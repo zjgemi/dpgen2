@@ -51,10 +51,13 @@ class FpOpAbacusInputs(AbacusInputs):
             Argument("input_file", str, optional=False, doc=doc_input_file),
             Argument("pp_files", dict, optional=False, doc=doc_pp_files),
             Argument(
-                "element_mass", dict, optional=True, default=None, doc=doc_element_mass
+                "element_mass", dict, optional=True, default=None,
+                doc=doc_element_mass
             ),
-            Argument("kpt_file", str, optional=True, default=None, doc=doc_kpt_file),
-            Argument("orb_files", dict, optional=True, default=None, doc=doc_orb_files),
+            Argument("kpt_file", str, optional=True, default=None,
+                     doc=doc_kpt_file),
+            Argument("orb_files", dict, optional=True, default=None,
+                     doc=doc_orb_files),
             Argument(
                 "deepks_descriptor",
                 str,
@@ -63,7 +66,8 @@ class FpOpAbacusInputs(AbacusInputs):
                 doc=doc_deepks_descriptor,
             ),
             Argument(
-                "deepks_model", str, optional=True, default=None, doc=doc_deepks_model
+                "deepks_model", str, optional=True, default=None,
+                doc=doc_deepks_model
             ),
         ]
 
@@ -94,9 +98,29 @@ class PrepFpOpAbacus(OP):
         ip: OPIO,
     ) -> OPIO:
         confs = []
+        # remove atom types with 0 atom from type map, for abacus need pp_files
+        # for all atom types in the type map
         for p in ip["confs"]:
             for f in p.rglob("type.raw"):
-                confs.append(f.parent)
+                system = f.parent
+                s = dpdata.System(system, fmt="deepmd/npy")
+                atom_numbs = []
+                atom_names = []
+                for numb, name in zip(s["atom_numbs"], s["atom_names"]):
+                    if numb > 0:
+                        atom_numbs.append(numb)
+                        atom_names.append(name)
+                if atom_names != s["atom_names"]:
+                    for i, t in enumerate(s["atom_types"]):
+                        s["atom_types"][i] = atom_names.index(
+                            s["atom_names"][t])
+                    s.data["atom_numbs"] = atom_numbs
+                    s.data["atom_names"] = atom_names
+                    target = "output/%s" % system
+                    s.to("deepmd/npy", target)
+                    confs.append(Path(target))
+                else:
+                    confs.append(system)
         op_in = OPIO(
             {
                 "inputs": ip["config"]["inputs"],
@@ -167,8 +191,10 @@ class RunFpOpAbacus(OP):
             "In `deepmd/npy` format provided by `dpdata`."
         )
         return [
-            Argument("command", str, optional=True, default="abacus", doc=doc_cmd),
+            Argument("command", str, optional=True, default="abacus",
+                     doc=doc_cmd),
             Argument(
-                "out", str, optional=True, default=fp_default_out_data_name, doc=doc_out
+                "out", str, optional=True, default=fp_default_out_data_name,
+                doc=doc_out
             ),
         ]
