@@ -16,11 +16,14 @@ from dflow.python import (
     BigParameter,
     OPIOSign,
 )
-from fpop.abacus import (
-    AbacusInputs,
-    PrepAbacus,
-    RunAbacus,
-)
+try:
+    from fpop.abacus import (
+        AbacusInputs,
+        PrepAbacus,
+        RunAbacus,
+    )
+except ModuleNotFoundError:
+    AbacusInputs = PrepAbacus = RunAbacus = object
 
 from ..constants import (
     fp_default_out_data_name,
@@ -51,13 +54,10 @@ class FpOpAbacusInputs(AbacusInputs):
             Argument("input_file", str, optional=False, doc=doc_input_file),
             Argument("pp_files", dict, optional=False, doc=doc_pp_files),
             Argument(
-                "element_mass", dict, optional=True, default=None,
-                doc=doc_element_mass
+                "element_mass", dict, optional=True, default=None, doc=doc_element_mass
             ),
-            Argument("kpt_file", str, optional=True, default=None,
-                     doc=doc_kpt_file),
-            Argument("orb_files", dict, optional=True, default=None,
-                     doc=doc_orb_files),
+            Argument("kpt_file", str, optional=True, default=None, doc=doc_kpt_file),
+            Argument("orb_files", dict, optional=True, default=None, doc=doc_orb_files),
             Argument(
                 "deepks_descriptor",
                 str,
@@ -66,8 +66,7 @@ class FpOpAbacusInputs(AbacusInputs):
                 doc=doc_deepks_descriptor,
             ),
             Argument(
-                "deepks_model", str, optional=True, default=None,
-                doc=doc_deepks_model
+                "deepks_model", str, optional=True, default=None, doc=doc_deepks_model
             ),
         ]
 
@@ -112,8 +111,7 @@ class PrepFpOpAbacus(OP):
                         atom_names.append(name)
                 if atom_names != s["atom_names"]:
                     for i, t in enumerate(s["atom_types"]):
-                        s["atom_types"][i] = atom_names.index(
-                            s["atom_names"][t])
+                        s["atom_types"][i] = atom_names.index(s["atom_names"][t])
                     s.data["atom_numbs"] = atom_numbs
                     s.data["atom_names"] = atom_names
                     target = "output/%s" % system
@@ -191,10 +189,8 @@ class RunFpOpAbacus(OP):
             "In `deepmd/npy` format provided by `dpdata`."
         )
         return [
-            Argument("command", str, optional=True, default="abacus",
-                     doc=doc_cmd),
+            Argument("command", str, optional=True, default="abacus", doc=doc_cmd),
             Argument(
-                "out", str, optional=True, default=fp_default_out_data_name,
-                doc=doc_out
+                "out", str, optional=True, default=fp_default_out_data_name, doc=doc_out
             ),
         ]
