@@ -16,11 +16,14 @@ from dflow.python import (
     BigParameter,
     OPIOSign,
 )
-from fpop.abacus import (
-    AbacusInputs,
-    PrepAbacus,
-    RunAbacus,
-)
+try:
+    from fpop.abacus import (
+        AbacusInputs,
+        PrepAbacus,
+        RunAbacus,
+    )
+except ModuleNotFoundError:
+    AbacusInputs = PrepAbacus = RunAbacus = object
 
 from ..constants import (
     fp_default_out_data_name,
