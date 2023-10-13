@@ -93,11 +93,15 @@ class PrepFpOpAbacus(OP):
         self,
         ip: OPIO,
     ) -> OPIO:
+        confs = []
+        for p in ip["confs"]:
+            for f in p.rglob("type.raw"):
+                confs.append(f.parent)
         op_in = OPIO(
             {
                 "inputs": ip["config"]["inputs"],
                 "type_map": ip["type_map"],
-                "confs": ip["confs"],
+                "confs": confs,
                 "prep_image_config": ip["config"].get("prep", {}),
             }
         )
