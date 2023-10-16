@@ -25,8 +25,6 @@ try:
     )
 except ModuleNotFoundError:
     AbacusInputs = PrepAbacus = RunAbacus = object
-else:
-    raise
 
 from ..constants import (
     fp_default_out_data_name,
