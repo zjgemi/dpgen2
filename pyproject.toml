@@ -23,6 +23,7 @@ dependencies = [
 	     'lbg',
 	     'packaging',
 	     'fpop',
+	     'dpgui',
 ]
 requires-python = ">=3.7"
 readme = "README.md"

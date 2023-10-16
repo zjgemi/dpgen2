@@ -31,7 +31,7 @@ from ..constants import (
 )
 
 
-class FpOpAbacusInputs(AbacusInputs):
+class FpOpAbacusInputs(AbacusInputs):  # type: ignore
     @staticmethod
     def args():
         doc_input_file = "A template INPUT file."
@@ -106,13 +106,13 @@ class PrepFpOpAbacus(OP):
                 s = dpdata.System(system, fmt="deepmd/npy")
                 atom_numbs = []
                 atom_names = []
-                for numb, name in zip(s["atom_numbs"], s["atom_names"]):
+                for numb, name in zip(s["atom_numbs"], s["atom_names"]):  # type: ignore https://github.com/microsoft/pyright/issues/5620
                     if numb > 0:
                         atom_numbs.append(numb)
                         atom_names.append(name)
                 if atom_names != s["atom_names"]:
-                    for i, t in enumerate(s["atom_types"]):
-                        s["atom_types"][i] = atom_names.index(s["atom_names"][t])
+                    for i, t in enumerate(s["atom_types"]):  # type: ignore https://github.com/microsoft/pyright/issues/5620
+                        s["atom_types"][i] = atom_names.index(s["atom_names"][t])  # type: ignore https://github.com/microsoft/pyright/issues/5620
                     s.data["atom_numbs"] = atom_numbs
                     s.data["atom_names"] = atom_names
                     target = "output/%s" % system
@@ -129,7 +129,7 @@ class PrepFpOpAbacus(OP):
             }
         )
         op = PrepAbacus()
-        return op.execute(op_in)
+        return op.execute(op_in)  # type: ignore in the case of not importing fpop
 
 
 class RunFpOpAbacus(OP):
@@ -167,7 +167,7 @@ class RunFpOpAbacus(OP):
             }
         )
         op = RunAbacus()
-        op_out = op.execute(op_in)
+        op_out = op.execute(op_in)  # type: ignore in the case of not importing fpop
         workdir = op_out["backward_dir"].parent
 
         # convert the output to deepmd/npy format

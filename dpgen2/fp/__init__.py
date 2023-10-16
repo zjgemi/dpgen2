@@ -1,12 +1,12 @@
+from .abacus import (
+    FpOpAbacusInputs,
+    PrepFpOpAbacus,
+    RunFpOpAbacus,
+)
 from .deepmd import (
     DeepmdInputs,
     PrepDeepmd,
     RunDeepmd,
-)
-from .fpop import (
-    FpOpAbacusInputs,
-    PrepFpOpAbacus,
-    RunFpOpAbacus,
 )
 from .gaussian import (
     GaussianInputs,
