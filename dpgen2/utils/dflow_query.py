@@ -58,6 +58,7 @@ def get_last_scheduler(
         outputs is not None
         and hasattr(outputs, "parameters")
         and "exploration_scheduler" in outputs.parameters
+        and hasattr(outputs.parameters["exploration_scheduler"], "value")
     ):
         return outputs.parameters["exploration_scheduler"].value
 
