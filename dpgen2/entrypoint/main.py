@@ -8,6 +8,7 @@ from typing import (
     Optional,
 )
 
+import dflow
 from dflow import (
     Step,
     Steps,
@@ -86,12 +87,6 @@ def main_parser() -> argparse.ArgumentParser:
     parser_run.add_argument(
         "CONFIG", help="the config file in json format defining the workflow."
     )
-    parser_run.add_argument(
-        "-o",
-        "--old-compatible",
-        action="store_true",
-        help="compatible with old-style input script used in dpgen2 < 0.0.6.",
-    )
 
     ##########################################
     # resubmit
@@ -123,12 +118,6 @@ def main_parser() -> argparse.ArgumentParser:
         "--keep-schedule",
         action="store_true",
         help="if set then keep schedule of the old workflow. otherwise use the schedule defined in the input file",
-    )
-    parser_resubmit.add_argument(
-        "-o",
-        "--old-compatible",
-        action="store_true",
-        help="compatible with old-style input script used in dpgen2 < 0.0.6.",
     )
 
     ##########################################
@@ -289,6 +278,14 @@ def main_parser() -> argparse.ArgumentParser:
     for cmd in workflow_subcommands:
         add_subparser_workflow_subcommand(subparsers, cmd)
 
+    parser_restart = subparsers.add_parser(
+        "restart",
+        help="restart a DPGEN2 workflow (for debug mode only).",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser_restart.add_argument("CONFIG", help="the config file in json format.")
+    parser_restart.add_argument("ID", help="the ID of the workflow.")
+
     # --version
     parser.add_argument(
         "-v",
@@ -331,7 +328,6 @@ def main():
             config = json.load(fp)
         submit_concurrent_learning(
             config,
-            old_style=args.old_compatible,
         )
     elif args.command == "resubmit":
         with open(args.CONFIG) as fp:
@@ -342,7 +338,6 @@ def main():
             wfid,
             list_steps=args.list,
             reuse=args.reuse,
-            old_style=args.old_compatible,
             replace_scheduler=(not args.keep_schedule),
         )
     elif args.command == "status":
@@ -404,6 +399,15 @@ def main():
             port=args.port,
             bind_all=args.bind_all,
         )
+    elif args.command == "restart":
+        with open(args.CONFIG) as fp:
+            config = json.load(fp)
+        wf = submit_concurrent_learning(
+            config,
+            no_submission=True,
+        )
+        wf.id = args.ID
+        wf.submit()
     elif args.command in workflow_subcommands:
         with open(args.CONFIG) as fp:
             config = json.load(fp)

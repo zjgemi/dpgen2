@@ -1,3 +1,8 @@
+from .abacus import (
+    FpOpAbacusInputs,
+    PrepFpOpAbacus,
+    RunFpOpAbacus,
+)
 from .deepmd import (
     DeepmdInputs,
     PrepDeepmd,

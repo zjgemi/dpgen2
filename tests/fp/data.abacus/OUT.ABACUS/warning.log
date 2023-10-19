@@ -1,0 +1,14 @@
+ In SCAN_BEGIN, can't find: LATTICE_PARAMETERS block.
+ Generate k-points file according to KSPACING: KPT
+ AUTO_SET NBANDS to 19
+                            startmag_type = 2
+                       charge from rho_at = 8.86329
+                         charge should be = 9
+
+ SETUP ATOMIC RHO FOR SPIN 1
+                 Electron number from rho = 18
+           total electron number from rho = 18
+                                should be = 18
+                 charge before normalized = 18
+                  charge after normalized = 18
+ scf  warning : Threshold on eigenvalues was too large.
