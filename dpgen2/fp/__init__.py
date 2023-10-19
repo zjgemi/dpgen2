@@ -13,11 +13,6 @@ from .deepmd_pt import (
     PrepDeepmdPt,
     RunDeepmdPt,
 )
-from .fpop import (
-    FpOpAbacusInputs,
-    PrepFpOpAbacus,
-    RunFpOpAbacus,
-)
 from .gaussian import (
     GaussianInputs,
     PrepGaussian,
