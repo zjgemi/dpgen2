@@ -1,4 +1,7 @@
 import textwrap
+from typing import (
+    List,
+)
 
 import dargs
 from dargs import (
@@ -53,7 +56,7 @@ def dp_dist_train_args():
             doc=doc_config,
         ),
         Argument(
-            "template_script", [list, str], optional=False, doc=doc_template_script
+            "template_script", [List[str], str], optional=False, doc=doc_template_script
         ),
         Argument("student_model_path", str, optional=True, doc=dock_student_model_path),
     ]
@@ -76,11 +79,11 @@ def dp_train_args():
         ),
         Argument("numb_models", int, optional=True, default=4, doc=doc_numb_models),
         Argument(
-            "template_script", [list, str], optional=False, doc=doc_template_script
+            "template_script", [List[str], str], optional=False, doc=doc_template_script
         ),
         Argument(
             "init_models_paths",
-            list,
+            List[str],
             optional=True,
             default=None,
             doc=doc_init_models_paths,
@@ -175,7 +178,7 @@ def lmp_args():
         ),
         Argument(
             "convergence",
-            list,
+            dict,
             [],
             [variant_conv()],
             optional=False,
@@ -191,7 +194,7 @@ def lmp_args():
             doc=doc_configuration,
             alias=["configuration"],
         ),
-        Argument("stages", list, optional=False, doc=doc_stages),
+        Argument("stages", List[List[dict]], optional=False, doc=doc_stages),
     ]
 
 
@@ -266,8 +269,8 @@ def input_args():
     doc_init_sys = "The inital data systems"
 
     return [
-        Argument("type_map", list, optional=False, doc=doc_type_map),
-        Argument("mass_map", list, optional=False, doc=doc_mass_map),
+        Argument("type_map", List[str], optional=False, doc=doc_type_map),
+        Argument("mass_map", List[float], optional=False, doc=doc_mass_map),
         Argument(
             "init_data_prefix",
             str,
@@ -280,7 +283,11 @@ def input_args():
             "do_finetune", bool, optional=True, default=False, doc=doc_do_finetune
         ),
         Argument(
-            "init_data_sys", [list, str], optional=False, default=None, doc=doc_init_sys
+            "init_data_sys",
+            [List[str], str],
+            optional=False,
+            default=None,
+            doc=doc_init_sys,
         ),
     ]
 
@@ -479,7 +486,7 @@ def submit_args(default_step_config=normalize_step_dict({})):
             ),
             Argument(
                 "upload_python_packages",
-                [list, str],
+                [List[str], str],
                 optional=True,
                 default=None,
                 doc=doc_upload_python_packages,

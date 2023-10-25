@@ -2,7 +2,8 @@
     "bohrium_config": {
 	"username":	"__write your bohrium username",
 	"password":	"__write your bohrium password",
-	"project_id" :	"__write your bohrium project ID",
+	"_project_id" :	"__write your bohrium project ID",
+	"project_id" :	123456,
 	"_comment" : "all"
     },
 

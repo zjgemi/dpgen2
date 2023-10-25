@@ -51,7 +51,7 @@ class TestArgs(unittest.TestCase):
             new_data["bohrium_config"],
             None,
         )
-        self.assertEqual(old_data["model_devi_jobs"], new_data["explore"]["stages"])
+        self.assertEqual(old_data["model_devi_jobs"], new_data["explore"]["stages"][0])
         new_data["explore"]["configurations"][0].pop("type")
         self.assertEqual(old_data["sys_configs"], new_data["explore"]["configurations"])
         self.assertEqual(
@@ -413,10 +413,10 @@ new_str = textwrap.dedent(
 		"concentration" : [[1.0, 0.0], [0.5, 0.5], [0.0, 1.0]]
 	    }
 	],
-	"stages":	[
+	"stages":	[[
 	    { "_idx": 0, "ensemble": "nvt", "nsteps": 20, "press": [1.0,2.0], "sys_idx": [0], "temps": [50,100], "trj_freq": 10, "n_sample" : 3 
 	    }
-	],
+	]],
 	"_comment" : "all"
     },
     "fp" : {
