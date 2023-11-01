@@ -198,7 +198,11 @@ class RunDPTrain(OP):
                 json.dump(train_dict, fp, indent=4)
 
             # train model
-            if do_init_model or finetune_mode == "train-init":
+            if impl == "tensorflow" and os.path.isfile("checkpoint"):
+                command = [dp_command, "train", "--restart", "model.ckpt", train_script_name]
+            elif impl == "pytorch" and os.path.isfile("model.pt"):
+                command = [dp_command, "train", "--restart", "model.pt", train_script_name]
+            elif do_init_model or finetune_mode == "train-init":
                 if impl == "tensorflow":
                     command = [
                         dp_command,
