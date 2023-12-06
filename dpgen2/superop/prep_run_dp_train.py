@@ -20,6 +20,7 @@ from dflow import (
     OutputArtifact,
     OutputParameter,
     Outputs,
+    S3Artifact,
     Step,
     Steps,
     Workflow,
@@ -132,6 +133,7 @@ class PrepRunDPTrain(Steps):
         run_config: dict = normalize_step_dict({}),
         upload_python_packages: Optional[List[os.PathLike]] = None,
         finetune: bool = False,
+        valid_data: Optional[S3Artifact] = None,
     ):
         self._input_parameters = {
             "block_id": InputParameter(type=str, value=""),
@@ -192,6 +194,7 @@ class PrepRunDPTrain(Steps):
             run_config=run_config,
             upload_python_packages=upload_python_packages,
             finetune=finetune,
+            valid_data=valid_data,
         )
 
     @property
@@ -225,6 +228,7 @@ def _prep_run_dp_train(
     run_config: dict = normalize_step_dict({}),
     upload_python_packages: Optional[List[os.PathLike]] = None,
     finetune: bool = False,
+    valid_data: Optional[S3Artifact] = None,
 ):
     prep_config = deepcopy(prep_config)
     run_config = deepcopy(run_config)
@@ -277,6 +281,7 @@ def _prep_run_dp_train(
             "init_model": train_steps.inputs.artifacts["init_models"],
             "init_data": train_steps.inputs.artifacts["init_data"],
             "iter_data": train_steps.inputs.artifacts["iter_data"],
+            "valid_data": valid_data,
         },
         with_sequence=argo_sequence(
             argo_len(prep_train.outputs.parameters["task_names"]),

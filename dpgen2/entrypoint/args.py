@@ -267,6 +267,8 @@ def input_args():
     doc_do_finetune = textwrap.dedent(doc_do_finetune)
     doc_init_data_prefix = "The prefix of initial data systems"
     doc_init_sys = "The inital data systems"
+    doc_valid_data_prefix = "The prefix of validation data systems"
+    doc_valid_sys = "The validation data systems"
 
     return [
         Argument("type_map", List[str], optional=False, doc=doc_type_map),
@@ -288,6 +290,20 @@ def input_args():
             optional=False,
             default=None,
             doc=doc_init_sys,
+        ),
+        Argument(
+            "valid_data_prefix",
+            str,
+            optional=True,
+            default=None,
+            doc=doc_valid_data_prefix,
+        ),
+        Argument(
+            "valid_data_sys",
+            [List[str], str],
+            optional=True,
+            default=None,
+            doc=doc_valid_sys,
         ),
     ]
 

@@ -8,6 +8,7 @@ from pathlib import (
 )
 from typing import (
     List,
+    Optional,
     Tuple,
 )
 
@@ -70,6 +71,7 @@ class RunDPTrain(OP):
                 "init_model": Artifact(Path, optional=True),
                 "init_data": Artifact(List[Path]),
                 "iter_data": Artifact(List[Path]),
+                "valid_data": Artifact(List[Path], optional=True),
             }
         )
 
@@ -132,6 +134,7 @@ class RunDPTrain(OP):
         init_model = ip["init_model"]
         init_data = ip["init_data"]
         iter_data = ip["iter_data"]
+        valid_data = ip["valid_data"]
         iter_data_old_exp = _expand_all_multi_sys_to_sys(iter_data[:-1])
         iter_data_new_exp = _expand_all_multi_sys_to_sys(iter_data[-1:])
         iter_data_exp = iter_data_old_exp + iter_data_new_exp
@@ -163,7 +166,7 @@ class RunDPTrain(OP):
 
         # update the input dict
         train_dict = RunDPTrain.write_data_to_input_script(
-            train_dict, init_data, iter_data_exp, auto_prob_str, major_version
+            train_dict, init_data, iter_data_exp, auto_prob_str, major_version, valid_data
         )
         train_dict = RunDPTrain.write_other_to_input_script(
             train_dict, config, do_init_model, major_version
@@ -299,6 +302,7 @@ class RunDPTrain(OP):
         iter_data: List[Path],
         auto_prob_str: str = "prob_sys_size",
         major_version: str = "1",
+        valid_data: Optional[List[Path]] = None,
     ):
         odict = idict.copy()
         data_list = [str(ii) for ii in init_data] + [str(ii) for ii in iter_data]
@@ -307,12 +311,23 @@ class RunDPTrain(OP):
             odict["training"]["systems"] = data_list
             odict["training"].setdefault("batch_size", "auto")
             odict["training"]["auto_prob_style"] = auto_prob_str
+            if valid_data is not None:
+                odict["training"]["validation_data"] = {
+                    "systems": [str(ii) for ii in valid_data],
+                    "batch_size": 1,
+                }
         elif major_version == "2":
             # v2 behavior
             odict["training"]["training_data"]["systems"] = data_list
             odict["training"]["training_data"].setdefault("batch_size", "auto")
             odict["training"]["training_data"]["auto_prob"] = auto_prob_str
-            odict["training"].pop("validation_data", None)
+            if valid_data is None:
+                odict["training"].pop("validation_data", None)
+            else:
+                odict["training"]["validation_data"] = {
+                    "systems": [str(ii) for ii in valid_data],
+                    "batch_size": 1,
+                }
         else:
             raise RuntimeError("unsupported DeePMD-kit major version", major_version)
         return odict

@@ -136,6 +136,7 @@ def make_concurrent_learning_op(
     collect_data_config: dict = default_config,
     cl_step_config: dict = default_config,
     upload_python_packages: Optional[List[os.PathLike]] = None,
+    valid_data: Optional[S3Artifact] = None,
 ):
     if train_style in ("dp", "dp-dist"):
         prep_run_train_op = PrepRunDPTrain(
@@ -145,6 +146,7 @@ def make_concurrent_learning_op(
             prep_config=prep_train_config,
             run_config=run_train_config,
             upload_python_packages=upload_python_packages,
+            valid_data=valid_data,
         )
     else:
         raise RuntimeError(f"unknown train_style {train_style}")
@@ -305,6 +307,7 @@ def make_finetune_step(
     init_models,
     init_data,
     iter_data,
+    valid_data=None,
 ):
     finetune_optional_parameter = {
         "mixed_type": config["inputs"]["mixed_type"],
@@ -319,6 +322,7 @@ def make_finetune_step(
         run_config=run_train_config,
         upload_python_packages=upload_python_packages,
         finetune=True,
+        valid_data=valid_data,
     )
     finetune_step = Step(
         "finetune-step",
@@ -384,6 +388,14 @@ def workflow_concurrent_learning(
         ]
         upload_python_packages = _upload_python_packages
 
+    valid_data = config["inputs"]["valid_data_sys"]
+    if valid_data is not None:
+        valid_data_prefix = config["inputs"]["valid_data_prefix"]
+        if valid_data_prefix is not None:
+            valid_data = [os.path.join(valid_data_prefix, ii) for ii in valid_data]
+        if isinstance(valid_data, str):
+            valid_data = expand_sys_str(valid_data)
+        valid_data = upload_artifact(valid_data)
     concurrent_learning_op = make_concurrent_learning_op(
         train_style,
         explore_style,
@@ -398,6 +410,7 @@ def workflow_concurrent_learning(
         collect_data_config=collect_data_config,
         cl_step_config=cl_step_config,
         upload_python_packages=upload_python_packages,
+        valid_data=valid_data,
     )
     scheduler = make_naive_exploration_scheduler(config)
 
@@ -469,6 +482,7 @@ def workflow_concurrent_learning(
             init_models,
             init_data,
             iter_data,
+            valid_data=valid_data,
         )
 
         init_models = finetune_step.outputs.artifacts["models"]
