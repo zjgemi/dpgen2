@@ -451,12 +451,33 @@ def workflow_concurrent_learning(
             fp_config["run"]["teacher_model_path"]
         )
 
-    init_data_prefix = config["inputs"]["init_data_prefix"]
-    init_data = config["inputs"]["init_data_sys"]
-    if init_data_prefix is not None:
-        init_data = [os.path.join(init_data_prefix, ii) for ii in init_data]
-    if isinstance(init_data, str):
-        init_data = expand_sys_str(init_data)
+    multitask = config["inputs"]["multitask"]
+    if multitask:
+        head = config["inputs"]["head"]
+        multi_init_data = config["inputs"]["multi_init_data"]
+        init_data = []
+        multi_init_data_idx = {}
+        for k, v in multi_init_data.items():
+            sys = v["sys"]
+            if isinstance(sys, str):
+                sys = expand_sys_str(sys)
+            if v["prefix"] is not None:
+                sys = [os.path.join(v["prefix"], ii) for ii in sys]
+            istart = len(init_data)
+            init_data += sys
+            iend = len(init_data)
+            multi_init_data_idx[k] = list(range(istart, iend))
+        train_config["multitask"] = True
+        train_config["head"] = head
+        train_config["multi_init_data_idx"] = multi_init_data_idx
+        lmp_config["head"] = head
+    else:
+        init_data_prefix = config["inputs"]["init_data_prefix"]
+        init_data = config["inputs"]["init_data_sys"]
+        if init_data_prefix is not None:
+            init_data = [os.path.join(init_data_prefix, ii) for ii in init_data]
+        if isinstance(init_data, str):
+            init_data = expand_sys_str(init_data)
     init_data = upload_artifact(init_data)
     iter_data = upload_artifact([])
     if init_models_paths is not None:

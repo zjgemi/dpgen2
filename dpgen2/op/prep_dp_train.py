@@ -107,18 +107,25 @@ class PrepDPTrain(OP):
         )
         return op
 
+    def _set_desc_seed(self, desc):
+        if desc["type"] == "hybrid":
+            for desc in desc["list"]:
+                desc["seed"] = random.randrange(sys.maxsize) % (2**32)
+        else:
+            desc["seed"] = random.randrange(sys.maxsize) % (2**32)
+
     def _script_rand_seed(
         self,
         input_dict,
     ):
         jtmp = input_dict.copy()
-        if jtmp["model"]["descriptor"]["type"] == "hybrid":
-            for desc in jtmp["model"]["descriptor"]["list"]:
-                desc["seed"] = random.randrange(sys.maxsize) % (2**32)
+        if "shared_dict" in jtmp["model"] and "model_dict" in jtmp["model"]:
+            if "dpa1_dpau_descriptor_1" in jtmp["model"]["shared_dict"]:
+                self._set_desc_seed(jtmp["model"]["shared_dict"]["dpa1_dpau_descriptor_1"])
+            for d in jtmp["model"]["model_dict"].values():
+                d["fitting_net"]["seed"] = random.randrange(sys.maxsize) % (2**32)
         else:
-            jtmp["model"]["descriptor"]["seed"] = random.randrange(sys.maxsize) % (
-                2**32
-            )
-        jtmp["model"]["fitting_net"]["seed"] = random.randrange(sys.maxsize) % (2**32)
+            self._set_desc_seed(jtmp["model"]["descriptor"])
+            jtmp["model"]["fitting_net"]["seed"] = random.randrange(sys.maxsize) % (2**32)
         jtmp["training"]["seed"] = random.randrange(sys.maxsize) % (2**32)
         return jtmp

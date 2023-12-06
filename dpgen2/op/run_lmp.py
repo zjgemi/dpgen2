@@ -145,7 +145,10 @@ class RunLmp(OP):
                     Path(mname).symlink_to(mm)
                 elif impl == "pytorch":
                     # freeze model
-                    freeze_cmd = "dp_pt freeze %s -o %s" % (mm, mname)
+                    freeze_args = "-o %s" % mname
+                    if config.get("head") is not None:
+                        freeze_args += " --head %s" % config["head"]
+                    freeze_cmd = "dp_pt freeze %s %s" % (mm, freeze_args)
                     ret, out, err = run_command(freeze_cmd, shell=True)
                     if ret != 0:
                         logging.error("".join((
@@ -208,6 +211,7 @@ class RunLmp(OP):
         doc_teacher_model = "The teacher model in `Knowledge Distillation`"
         doc_shuffle_models = "Randomly pick a model from the group of models to drive theexploration MD simulation"
         doc_impl = "The implementation of DP. It can be 'tensorflow' or 'pytorch'. 'tensorflow' for default."
+        doc_head = "Select a head from multitask"
         return [
             Argument("command", str, optional=True, default="lmp", doc=doc_lmp_cmd),
             Argument(
@@ -225,6 +229,7 @@ class RunLmp(OP):
                 doc=doc_shuffle_models,
             ),
             Argument("impl", str, optional=True, default="tensorflow", doc=doc_impl),
+            Argument("head", str, optional=True, default=None, doc=doc_head),
         ]
 
     @staticmethod

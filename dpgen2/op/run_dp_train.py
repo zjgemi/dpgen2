@@ -7,6 +7,7 @@ from pathlib import (
     Path,
 )
 from typing import (
+    Dict,
     List,
     Optional,
     Tuple,
@@ -166,16 +167,11 @@ class RunDPTrain(OP):
 
         # update the input dict
         train_dict = RunDPTrain.write_data_to_input_script(
-            train_dict, init_data, iter_data_exp, auto_prob_str, major_version, valid_data
+            train_dict, config, init_data, iter_data_exp, auto_prob_str, major_version, valid_data
         )
         train_dict = RunDPTrain.write_other_to_input_script(
             train_dict, config, do_init_model, major_version
         )
-        if impl == "pytorch":
-            train_dict["training"]["validation_data"] = {
-                "systems": train_dict["training"]["training_data"]["systems"],
-                "batch_size": 1,
-            }
 
         if RunDPTrain.skip_training(
             work_dir, train_dict, init_model, iter_data, finetune_mode
@@ -298,6 +294,7 @@ class RunDPTrain(OP):
     @staticmethod
     def write_data_to_input_script(
         idict: dict,
+        config,
         init_data: List[Path],
         iter_data: List[Path],
         auto_prob_str: str = "prob_sys_size",
@@ -305,6 +302,23 @@ class RunDPTrain(OP):
         valid_data: Optional[List[Path]] = None,
     ):
         odict = idict.copy()
+        if config["multitask"]:
+            head = config["head"]
+            multi_init_data_idx = config["multi_init_data_idx"]
+            for k, v in odict["training"]["data_dict"].items():
+                v["training_data"]["systems"] = []
+                if k in multi_init_data_idx:
+                    v["training_data"]["systems"] += [str(init_data[ii]) for ii in multi_init_data_idx[k]]
+                if k == head:
+                    v["training_data"]["systems"] += [str(ii) for ii in iter_data]
+                if config.get("impl", "tensorflow") == "pytorch":
+                    v["validation_data"] = {
+                        "systems": v["training_data"]["systems"],
+                        "batch_size": 1,
+                    }
+                else:
+                    v.pop("validation_data", None)
+            return odict
         data_list = [str(ii) for ii in init_data] + [str(ii) for ii in iter_data]
         if major_version == "1":
             # v1 behavior
@@ -322,6 +336,13 @@ class RunDPTrain(OP):
             odict["training"]["training_data"].setdefault("batch_size", "auto")
             odict["training"]["training_data"]["auto_prob"] = auto_prob_str
             if valid_data is None:
+                if config.get("impl", "tensorflow") == "pytorch":
+                    odict["training"]["validation_data"] = {
+                        "systems": odict["training"]["training_data"]["systems"],
+                        "batch_size": 1,
+                    }
+                else:
+                    v.pop("validation_data", None)
                 odict["training"].pop("validation_data", None)
             else:
                 odict["training"]["validation_data"] = {
@@ -433,6 +454,9 @@ class RunDPTrain(OP):
             "The start virial prefactor in loss when init-model"
         )
         doc_finetune_args = "Extra arguments for finetuning"
+        doc_multitask = "Do multitask training"
+        doc_head = "Head to use in the multitask training"
+        doc_multi_init_data_idx = "A dict mapping from task name to list of indices in the init data"
         return [
             Argument(
                 "impl",
@@ -498,6 +522,27 @@ class RunDPTrain(OP):
                 default="",
                 doc=doc_finetune_args,
             ),
+            Argument(
+                "multitask",
+                bool,
+                optional=True,
+                default=False,
+                doc=doc_multitask,
+            ),
+            Argument(
+                "head",
+                str,
+                optional=True,
+                default=None,
+                doc=doc_head,
+            ),
+            Argument(
+                "multi_init_data_idx",
+                dict,
+                optional=True,
+                default=None,
+                doc=doc_multi_init_data_idx,
+            )
         ]
 
     @staticmethod

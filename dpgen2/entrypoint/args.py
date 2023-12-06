@@ -267,6 +267,12 @@ def input_args():
     doc_do_finetune = textwrap.dedent(doc_do_finetune)
     doc_init_data_prefix = "The prefix of initial data systems"
     doc_init_sys = "The inital data systems"
+    doc_multitask = "Do multitask training"
+    doc_head = "Head to use in the multitask training"
+    doc_multi_init_data = (
+        "The inital data for multitask, it should be a dict, whose keys are task names and each value is a dict"
+        "containing fields `prefix` and `sys` for initial data of each task"
+    )
     doc_valid_data_prefix = "The prefix of validation data systems"
     doc_valid_sys = "The validation data systems"
 
@@ -287,9 +293,30 @@ def input_args():
         Argument(
             "init_data_sys",
             [List[str], str],
-            optional=False,
+            optional=True,
             default=None,
             doc=doc_init_sys,
+        ),
+        Argument(
+            "multitask",
+            bool,
+            optional=True,
+            default=False,
+            doc=doc_multitask,
+        ),
+        Argument(
+            "head",
+            str,
+            optional=True,
+            default=None,
+            doc=doc_head,
+        ),
+        Argument(
+            "multi_init_data",
+            dict,
+            optional=True,
+            default=None,
+            doc=doc_multi_init_data,
         ),
         Argument(
             "valid_data_prefix",
