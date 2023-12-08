@@ -343,7 +343,7 @@ class RunDPTrain(OP):
                         "batch_size": 1,
                     }
                 else:
-                    v.pop("validation_data", None)
+                    odict["training"].pop("validation_data", None)
                 odict["training"].pop("validation_data", None)
             else:
                 odict["training"]["validation_data"] = {
