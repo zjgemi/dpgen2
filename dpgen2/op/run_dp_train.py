@@ -344,7 +344,6 @@ class RunDPTrain(OP):
                     }
                 else:
                     odict["training"].pop("validation_data", None)
-                odict["training"].pop("validation_data", None)
             else:
                 odict["training"]["validation_data"] = {
                     "systems": [str(ii) for ii in valid_data],
