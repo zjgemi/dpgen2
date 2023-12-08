@@ -199,9 +199,10 @@ class RunDPTrain(OP):
             # train model
             if impl == "tensorflow" and os.path.isfile("checkpoint"):
                 command = [dp_command, "train", "--restart", "model.ckpt", train_script_name]
-            elif impl == "pytorch" and os.path.isfile("model.pt"):
-                command = [dp_command, "train", "--restart", "model.pt", train_script_name]
-            elif do_init_model or finetune_mode == "train-init":
+            elif impl == "pytorch" and len(glob.glob("model_[0-9]*.pt")) > 0:
+                checkpoint = "model_%s.pt" % max([int(f[6:-3]) for f in glob.glob("model_[0-9]*.pt")])
+                command = [dp_command, "train", "--restart", checkpoint, train_script_name]
+            elif (do_init_model or finetune_mode == "train-init") and not config["init_model_with_finetune"]:
                 if impl == "tensorflow":
                     command = [
                         dp_command,
@@ -218,7 +219,7 @@ class RunDPTrain(OP):
                         str(init_model),
                         train_script_name,
                     ]
-            elif finetune_mode == "finetune":
+            elif finetune_mode == "finetune" or ((do_init_model or finetune_mode == "train-init") and config["init_model_with_finetune"]):
                 command = [
                     dp_command,
                     "train",
@@ -457,6 +458,7 @@ class RunDPTrain(OP):
         doc_multitask = "Do multitask training"
         doc_head = "Head to use in the multitask training"
         doc_multi_init_data_idx = "A dict mapping from task name to list of indices in the init data"
+        doc_init_model_with_finetune = "Use finetune for init model"
         return [
             Argument(
                 "impl",
@@ -514,6 +516,13 @@ class RunDPTrain(OP):
                 optional=True,
                 default=0.0,
                 doc=doc_init_model_start_pref_v,
+            ),
+            Argument(
+                "init_model_with_finetune",
+                bool,
+                optional=True,
+                default=False,
+                doc=doc_init_model_with_finetune,
             ),
             Argument(
                 "finetune_args",
