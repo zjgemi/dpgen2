@@ -110,7 +110,10 @@ class LmpTemplateTaskGroup(ConfSamplingTaskGroup):
         plm_cont: Optional[str] = None,
     ) -> ExplorationTask:
         task = ExplorationTask()
-        task.add_file(lmp_conf_name, conf,).add_file(
+        task.add_file(
+            lmp_conf_name,
+            conf,
+        ).add_file(
             lmp_input_name,
             lmp_cont,
         )

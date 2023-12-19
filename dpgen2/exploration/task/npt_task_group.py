@@ -106,7 +106,10 @@ class NPTTaskGroup(ConfSamplingTaskGroup):
         pp: Optional[float],
     ) -> ExplorationTask:
         task = ExplorationTask()
-        task.add_file(lmp_conf_name, conf,).add_file(
+        task.add_file(
+            lmp_conf_name,
+            conf,
+        ).add_file(
             lmp_input_name,
             make_lmp_input(
                 lmp_conf_name,

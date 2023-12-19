@@ -12,6 +12,7 @@ import numpy as np
 
 class DeviManager(ABC):
     r"""A class for model deviation management."""
+
     MAX_DEVI_V = "max_devi_v"
     MIN_DEVI_V = "min_devi_v"
     AVG_DEVI_V = "avg_devi_v"

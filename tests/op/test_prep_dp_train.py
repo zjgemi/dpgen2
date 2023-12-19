@@ -111,7 +111,6 @@ class TestPrepDPTrain(unittest.TestCase):
                 self.assertEqual(jdata["training"]["seed"], 4 * ii + 3)
 
     def test_template_str_se_e2_a(self):
-
         ip = OPIO(
             {
                 "template_script": template_script_se_e2_a,
@@ -133,7 +132,6 @@ class TestPrepDPTrain(unittest.TestCase):
                 self.assertEqual(jdata["training"]["seed"], 3 * ii + 2)
 
     def test_template_list_hyb_sea(self):
-
         ip = OPIO(
             {
                 "template_script": [template_script_hybrid, template_script_se_e2_a],
@@ -166,7 +164,6 @@ class TestPrepDPTrain(unittest.TestCase):
             self.assertEqual(jdata["training"]["seed"], 4 * ii + 2)
 
     def test_template_raise_wrong_list_length(self):
-
         ip = OPIO(
             {
                 "template_script": [
