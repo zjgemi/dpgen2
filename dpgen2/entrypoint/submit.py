@@ -491,7 +491,6 @@ def workflow_concurrent_learning(
     )
 
     if config["inputs"].get("do_finetune", False):
-
         finetune_step = make_finetune_step(
             config,
             prep_train_config,
