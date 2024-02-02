@@ -86,11 +86,11 @@ class FooTask(ExplorationTask):
         }
 
 
-class FooTaskGroup(ExplorationTaskGroup):
+class FooTaskGroup(BaseExplorationTaskGroup):
     def __init__(self, numb_task):
         super().__init__()
         # TODO: confirm the following is correct
-        self.tlist = ExplorationTaskGroup()
+        self.tlist = BaseExplorationTaskGroup()
         for ii in range(numb_task):
             self.tlist.add_task(
                 FooTask(

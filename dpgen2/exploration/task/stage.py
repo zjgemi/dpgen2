@@ -55,13 +55,13 @@ class ExplorationStage:
 
     def make_task(
         self,
-    ) -> ExplorationTaskGroup:
+    ) -> BaseExplorationTaskGroup:
         """
         Make the LAMMPS task group.
 
         Returns
         -------
-        task_grp: ExplorationTaskGroup
+        task_grp: BaseExplorationTaskGroup
             The returned lammps task group. The number of tasks is equal to
             the summation of task groups defined by all the exploration groups
             added to the stage.
