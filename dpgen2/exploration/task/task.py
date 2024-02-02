@@ -54,18 +54,3 @@ class ExplorationTask:
             The dict storing all files for the task. The file name is a key of the dict, and the file content is the corresponding value.
         """
         return self._files
-
-
-class FooTask(ExplorationTask):
-    def __init__(
-        self,
-        conf_name="conf.lmp",
-        conf_cont="",
-        inpu_name="in.lammps",
-        inpu_cont="",
-    ):
-        super().__init__()
-        self._files = {
-            conf_name: conf_cont,
-            inpu_name: inpu_cont,
-        }

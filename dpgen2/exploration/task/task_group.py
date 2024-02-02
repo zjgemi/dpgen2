@@ -77,6 +77,21 @@ class ExplorationTaskGroupData(ExplorationTaskGroup):
         raise NotImplementedError("This class is not supposed to supply make_task")
 
 
+class FooTask(ExplorationTask):
+    def __init__(
+        self,
+        conf_name="conf.lmp",
+        conf_cont="",
+        inpu_name="in.lammps",
+        inpu_cont="",
+    ):
+        super().__init__()
+        self._files = {
+            conf_name: conf_cont,
+            inpu_name: inpu_cont,
+        }
+
+
 class FooTaskGroup(ExplorationTaskGroup):
     def __init__(self, numb_task):
         super().__init__()
