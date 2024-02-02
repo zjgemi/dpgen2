@@ -16,7 +16,7 @@ from .task import (
 )
 
 
-class ExplorationTaskGroup(Sequence):
+class BaseExplorationTaskGroup(Sequence):
     """A group of exploration tasks. Implemented as a `list` of `ExplorationTask`."""
 
     def __init__(self):
@@ -60,21 +60,15 @@ class ExplorationTaskGroup(Sequence):
         """Add another group to the group."""
         return self.add_group(group)
 
+
+class ExplorationTaskGroup(ABC, BaseExplorationTaskGroup):
+    def __init__(self):
+        super().__init__()
+
     @abstractmethod
     def make_task(self) -> "ExplorationTaskGroup":
         """Make the task group."""
         pass
-
-
-class ExplorationTaskGroupData(ExplorationTaskGroup):
-    """Data-only exploration task group."""
-
-    def __init__(self):
-        super().__init__()
-
-    def make_task(self):
-        """Make the task group."""
-        raise NotImplementedError("This class is not supposed to supply make_task")
 
 
 class FooTask(ExplorationTask):

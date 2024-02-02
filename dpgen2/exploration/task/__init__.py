@@ -25,6 +25,6 @@ from .task import (
     ExplorationTask,
 )
 from .task_group import (
+    BaseExplorationTaskGroup,
     ExplorationTaskGroup,
-    ExplorationTaskGroupData,
 )

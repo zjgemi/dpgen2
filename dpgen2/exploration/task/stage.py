@@ -16,8 +16,8 @@ from .task import (
     ExplorationTask,
 )
 from .task_group import (
+    BaseExplorationTaskGroup,
     ExplorationTaskGroup,
-    ExplorationTaskGroupData,
 )
 
 
@@ -68,7 +68,7 @@ class ExplorationStage:
 
         """
 
-        lmp_task_grp = ExplorationTaskGroupData()
+        lmp_task_grp = BaseExplorationTaskGroup()
         for ii in self.explor_groups:
             # lmp_task_grp.add_group(ii.make_task())
             lmp_task_grp += ii.make_task()
