@@ -14,7 +14,10 @@ from dpgen2.constants import (
 
 from .task import (
     ExplorationTask,
+)
+from .task_group import (
     ExplorationTaskGroup,
+    ExplorationTaskGroupData,
 )
 
 
@@ -65,7 +68,7 @@ class ExplorationStage:
 
         """
 
-        lmp_task_grp = ExplorationTaskGroup()
+        lmp_task_grp = ExplorationTaskGroupData()
         for ii in self.explor_groups:
             # lmp_task_grp.add_group(ii.make_task())
             lmp_task_grp += ii.make_task()
