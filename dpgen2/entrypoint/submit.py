@@ -77,8 +77,10 @@ from dpgen2.exploration.task import (
     ExplorationTask,
     LmpTemplateTaskGroup,
     NPTTaskGroup,
-    make_task_group_from_config,
-    normalize_task_group_config,
+    caly_normalize,
+    make_calypso_task_group_from_config,
+    make_lmp_task_group_from_config,
+    normalize_lmp_task_group_config,
 )
 from dpgen2.flow import (
     ConcurrentLearning,
@@ -88,14 +90,20 @@ from dpgen2.fp import (
 )
 from dpgen2.op import (
     CollectData,
+    CollRunCaly,
+    PrepCalyInput,
     PrepDPTrain,
     PrepLmp,
+    PrepRunDPOptim,
+    RunCalyModelDevi,
     RunDPTrain,
     RunLmp,
     SelectConfs,
 )
 from dpgen2.superop import (
+    CalyEvoStep,
     ConcurrentLearningBlock,
+    PrepRunCaly,
     PrepRunDPTrain,
     PrepRunFp,
     PrepRunLmp,
@@ -157,12 +165,30 @@ def make_concurrent_learning_op(
             run_config=run_explore_config,
             upload_python_packages=upload_python_packages,
         )
+    elif explore_style == "calypso":
+        caly_evo_step_op = CalyEvoStep(
+            "caly-evo-step",
+            collect_run_caly=CollRunCaly,
+            prep_run_dp_optim=PrepRunDPOptim,
+            prep_config=prep_explore_config,
+            run_config=run_explore_config,
+            upload_python_packages=upload_python_packages,
+        )
+        prep_run_explore_op = PrepRunCaly(
+            "prep-run-calypso",
+            prep_caly_input_op=PrepCalyInput,
+            caly_evo_step_op=caly_evo_step_op,
+            run_caly_model_devi_op=RunCalyModelDevi,
+            prep_config=prep_explore_config,
+            run_config=run_explore_config,
+            upload_python_packages=upload_python_packages,
+        )
     else:
         raise RuntimeError(f"unknown explore_style {explore_style}")
 
     if fp_style in fp_styles.keys():
         prep_run_fp_op = PrepRunFp(
-            f"prep-run-fp",
+            "prep-run-fp",
             fp_styles[fp_style]["prep"],
             fp_styles[fp_style]["run"],
             prep_config=prep_fp_config,
@@ -199,6 +225,61 @@ def make_naive_exploration_scheduler(
     config,
 ):
     # use npt task group
+    explore_style = config["explore"]["type"]
+
+    if explore_style == "lmp":
+        return make_lmp_naive_exploration_scheduler(config)
+    elif explore_style == "calypso":
+        return make_calypso_naive_exploration_scheduler(config)
+
+
+def make_calypso_naive_exploration_scheduler(config):
+    model_devi_jobs = config["explore"]["stages"]
+    fp_task_max = config["fp"]["task_max"]
+    max_numb_iter = config["explore"]["max_numb_iter"]
+    fatal_at_max = config["explore"]["fatal_at_max"]
+    convergence = config["explore"]["convergence"]
+    output_nopbc = config["explore"]["output_nopbc"]
+    scheduler = ExplorationScheduler()
+    # report
+    conv_style = convergence.pop("type")
+    report = conv_styles[conv_style](**convergence)
+    render = TrajRenderLammps(nopbc=output_nopbc)
+    # selector
+    selector = ConfSelectorFrames(
+        render,
+        report,
+        fp_task_max,
+    )
+
+    for job_ in model_devi_jobs:
+        if not isinstance(job_, list):
+            job = [job_]
+        else:
+            job = job_
+        # stage
+        stage = ExplorationStage()
+        for jj in job:
+            jconf = caly_normalize(jj)
+            # make task group
+            tgroup = make_calypso_task_group_from_config(jconf)
+            # add the list to task group
+            tasks = tgroup.make_task()
+            stage.add_task_group(tasks)
+        # stage_scheduler
+        stage_scheduler = ConvergenceCheckStageScheduler(
+            stage,
+            selector,
+            max_numb_iter=max_numb_iter,
+            fatal_at_max=fatal_at_max,
+        )
+        # scheduler
+        scheduler.add_stage_scheduler(stage_scheduler)
+
+    return scheduler
+
+
+def make_lmp_naive_exploration_scheduler(config):
     model_devi_jobs = config["explore"]["stages"]
     sys_configs = config["explore"]["configurations"]
     mass_map = config["inputs"]["mass_map"]
@@ -235,7 +316,7 @@ def make_naive_exploration_scheduler(
         # stage
         stage = ExplorationStage()
         for jj in job:
-            jconf = normalize_task_group_config(jj)
+            jconf = normalize_lmp_task_group_config(jj)
             n_sample = jconf.pop("n_sample")
             ##  ignore the expansion of sys_idx
             # get all file names of md initial configurations
@@ -244,7 +325,7 @@ def make_naive_exploration_scheduler(
             for ii in sys_idx:
                 conf_list += sys_configs_lmp[ii]
             # make task group
-            tgroup = make_task_group_from_config(numb_models, mass_map, jconf)
+            tgroup = make_lmp_task_group_from_config(numb_models, mass_map, jconf)
             # add the list to task group
             tgroup.set_conf(
                 conf_list,
@@ -409,16 +490,16 @@ def workflow_concurrent_learning(
     else:
         template_script = json.loads(Path(template_script_).read_text())
     train_config = config["train"]["config"]
-    lmp_config = config["explore"]["config"]
+    explore_config = config["explore"]["config"]
     if (
-        "teacher_model_path" in lmp_config
-        and lmp_config["teacher_model_path"] is not None
+        "teacher_model_path" in explore_config
+        and explore_config["teacher_model_path"] is not None
     ):
         assert os.path.exists(
-            lmp_config["teacher_model_path"]
-        ), f"No such file: {lmp_config['teacher_model_path']}"
-        lmp_config["teacher_model_path"] = BinaryFileInput(
-            lmp_config["teacher_model_path"], "pb"
+            explore_config["teacher_model_path"]
+        ), f"No such file: {explore_config['teacher_model_path']}"
+        explore_config["teacher_model_path"] = BinaryFileInput(
+            explore_config["teacher_model_path"], "pb"
         )
 
     fp_config = {}
@@ -487,7 +568,7 @@ def workflow_concurrent_learning(
             "numb_models": numb_models,
             "template_script": template_script,
             "train_config": train_config,
-            "lmp_config": lmp_config,
+            "explore_config": explore_config,
             "fp_config": fp_config,
             "exploration_scheduler": scheduler,
             "optional_parameter": optional_parameter,
@@ -601,7 +682,7 @@ def submit_concurrent_learning(
         )
         # plan next
         # hack! trajs is set to None...
-        conv, lmp_task_grp, selector = scheduler_new.plan_next_iteration(
+        conv, expl_task_grp, selector = scheduler_new.plan_next_iteration(
             exploration_report, trajs=None
         )
         # update output of the scheduler step
@@ -614,8 +695,8 @@ def submit_concurrent_learning(
             scheduler_new,
         )
         reuse_step[idx_old].modify_output_parameter(
-            "lmp_task_grp",
-            lmp_task_grp,
+            "expl_task_grp",
+            expl_task_grp,
         )
         reuse_step[idx_old].modify_output_parameter(
             "conf_selector",
@@ -670,6 +751,10 @@ def get_resubmit_keys(
             "prep-train",
             "run-train",
             "modify-train-script",
+            "prep-caly-input",
+            "collect-run-calypso",
+            "prep-run-dp-optim",
+            "run-caly-model-devi",
             "prep-lmp",
             "run-lmp",
             "select-confs",
