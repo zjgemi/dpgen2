@@ -7,19 +7,6 @@ from typing import (
 )
 
 import numpy as np
-from ase import (  # type: ignore
-    Atoms,
-)
-from ase.build import (  # type: ignore
-    make_supercell,
-)
-from ase.geometry import (  # type: ignore
-    cellpar_to_cell,
-)
-from ase.io import (  # type: ignore
-    read,
-    write,
-)
 from dflow.python import (
     OP,
     OPIO,
@@ -159,6 +146,13 @@ def atoms2lmpdump(atoms, struc_idx, type_map):
 
     ref: https://docs.lammps.org/Howto_triclinic.html
     """
+    from ase import (  # type: ignore
+        Atoms,
+    )
+    from ase.geometry import (  # type: ignore
+        cellpar_to_cell,
+    )
+
     dump_str = "ITEM: TIMESTEP\n"
     dump_str += f"{struc_idx}\n"
     dump_str += "ITEM: NUMBER OF ATOMS\n"
@@ -202,6 +196,16 @@ def atoms2lmpdump(atoms, struc_idx, type_map):
 
 
 def parse_traj(traj_file):
+    from ase import (  # type: ignore
+        Atoms,
+    )
+    from ase.build import (  # type: ignore
+        make_supercell,
+    )
+    from ase.io import (  # type: ignore
+        read,
+    )
+
     # optimization will at least return one structures in traj file
     trajs: List[Atoms] = read(traj_file, index=":", format="traj")  # type: ignore
 
