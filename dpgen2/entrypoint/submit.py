@@ -690,7 +690,8 @@ def successful_step_keys(wf):
     wf_info = wf.query()
     all_step_keys = []
     for ii in all_step_keys_:
-        if wf_info.get_step(key=ii)[0]["phase"] == "Succeeded":
+        step = wf_info.get_step(key=ii)
+        if len(step) > 0 and step[0]["phase"] == "Succeeded":
             all_step_keys.append(ii)
     return all_step_keys
 
