@@ -743,22 +743,24 @@ def successful_step_keys(wf):
 def get_superop(key):
     if "prep-train" in key:
         return key.replace("prep-train", "prep-run-train")
-    elif "run-train" in key:
+    elif "run-train-" in key:
         return re.sub("run-train-[0-9]*", "prep-run-train", key)
     elif "prep-lmp" in key:
         return key.replace("prep-lmp", "prep-run-explore")
-    elif "run-lmp" in key:
+    elif "run-lmp-" in key:
         return re.sub("run-lmp-[0-9]*", "prep-run-explore", key)
     elif "prep-fp" in key:
         return key.replace("prep-fp", "prep-run-fp")
-    elif "run-fp" in key:
+    elif "run-fp-" in key:
         return re.sub("run-fp-[0-9]*", "prep-run-fp", key)
     elif "prep-caly-input" in key:
         return key.replace("prep-caly-input", "prep-run-explore")
-    elif "collect-run-calypso" in key:
+    elif "collect-run-calypso-" in key:
         return re.sub("collect-run-calypso-[0-9]*-[0-9]*", "prep-run-explore", key)
-    elif "prep-run-dp-optim" in key:
+    elif "prep-run-dp-optim-" in key:
         return re.sub("prep-run-dp-optim-[0-9]*-[0-9]*", "prep-run-explore", key)
+    elif "run-caly-model-devi" in key:
+        return key.replace("run-caly-model-devi", "prep-run-explore")
     return None
 
 
