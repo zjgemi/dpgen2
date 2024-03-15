@@ -125,9 +125,9 @@ class RunDPTrain(OP):
         config = ip["config"] if ip["config"] is not None else {}
         impl = ip["config"].get("impl", "tensorflow")
         if impl == "tensorflow":
-            dp_command = "dp"
+            dp_command = ["dp"]
         elif impl == "pytorch":
-            dp_command = "dp_pt"
+            dp_command = ["dp", "--pt"]
         finetune_args = config.get("finetune_args", "")
         config = RunDPTrain.normalize_config(config)
         task_name = ip["task_name"]
@@ -198,37 +198,34 @@ class RunDPTrain(OP):
 
             # train model
             if impl == "tensorflow" and os.path.isfile("checkpoint"):
-                command = [dp_command, "train", "--restart", "model.ckpt", train_script_name]
+                command = dp_command + ["train", "--restart", "model.ckpt", train_script_name]
             elif impl == "pytorch" and len(glob.glob("model_[0-9]*.pt")) > 0:
                 checkpoint = "model_%s.pt" % max([int(f[6:-3]) for f in glob.glob("model_[0-9]*.pt")])
-                command = [dp_command, "train", "--restart", checkpoint, train_script_name]
+                command = dp_command + ["train", "--restart", checkpoint, train_script_name]
             elif (do_init_model or finetune_mode == "train-init") and not config["init_model_with_finetune"]:
                 if impl == "tensorflow":
-                    command = [
-                        dp_command,
+                    command = dp_command + [
                         "train",
                         "--init-frz-model",
                         str(init_model),
                         train_script_name,
                     ]
                 elif impl == "pytorch":
-                    command = [
-                        dp_command,
+                    command = dp_command + [
                         "train",
                         "--init-model",
                         str(init_model),
                         train_script_name,
                     ]
             elif finetune_mode == "finetune" or ((do_init_model or finetune_mode == "train-init") and config["init_model_with_finetune"]):
-                command = [
-                    dp_command,
+                command = dp_command + [
                     "train",
                     train_script_name,
                     "--finetune",
                     str(init_model),
                 ] + finetune_args.split()
             else:
-                command = [dp_command, "train", train_script_name]
+                command = dp_command + ["train", train_script_name]
             ret, out, err = run_command(command)
             if ret != 0:
                 clean_before_quit()
@@ -312,13 +309,7 @@ class RunDPTrain(OP):
                     v["training_data"]["systems"] += [str(init_data[ii]) for ii in multi_init_data_idx[k]]
                 if k == head:
                     v["training_data"]["systems"] += [str(ii) for ii in iter_data]
-                if config.get("impl", "tensorflow") == "pytorch":
-                    v["validation_data"] = {
-                        "systems": v["training_data"]["systems"],
-                        "batch_size": 1,
-                    }
-                else:
-                    v.pop("validation_data", None)
+                v.pop("validation_data", None)
             return odict
         data_list = [str(ii) for ii in init_data] + [str(ii) for ii in iter_data]
         if major_version == "1":
@@ -337,13 +328,7 @@ class RunDPTrain(OP):
             odict["training"]["training_data"].setdefault("batch_size", "auto")
             odict["training"]["training_data"]["auto_prob"] = auto_prob_str
             if valid_data is None:
-                if config.get("impl", "tensorflow") == "pytorch":
-                    odict["training"]["validation_data"] = {
-                        "systems": odict["training"]["training_data"]["systems"],
-                        "batch_size": 1,
-                    }
-                else:
-                    odict["training"].pop("validation_data", None)
+                odict["training"].pop("validation_data", None)
             else:
                 odict["training"]["validation_data"] = {
                     "systems": [str(ii) for ii in valid_data],

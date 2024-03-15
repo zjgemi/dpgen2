@@ -148,7 +148,7 @@ class RunLmp(OP):
                     freeze_args = "-o %s" % mname
                     if config.get("head") is not None:
                         freeze_args += " --head %s" % config["head"]
-                    freeze_cmd = "dp_pt freeze %s %s" % (mm, freeze_args)
+                    freeze_cmd = "dp --pt freeze %s %s" % (mm, freeze_args)
                     ret, out, err = run_command(freeze_cmd, shell=True)
                     if ret != 0:
                         logging.error("".join((

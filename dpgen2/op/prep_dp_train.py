@@ -111,7 +111,7 @@ class PrepDPTrain(OP):
         if desc["type"] == "hybrid":
             for desc in desc["list"]:
                 desc["seed"] = random.randrange(sys.maxsize) % (2**32)
-        else:
+        elif desc["type"] not in ["dpa1", "dpa2"]:
             desc["seed"] = random.randrange(sys.maxsize) % (2**32)
 
     def _script_rand_seed(
