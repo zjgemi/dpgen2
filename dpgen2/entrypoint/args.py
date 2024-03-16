@@ -199,12 +199,15 @@ def lmp_args():
 
 
 def variant_explore():
+    # TODO: add calypso_args
     doc = "The type of the exploration"
     doc_lmp = "The exploration by LAMMPS simulations"
+    doc_calypso = "The exploration by CALYPSO structure prediction"
     return Variant(
         "type",
         [
             Argument("lmp", dict, lmp_args(), doc=doc_lmp),
+            Argument("calypso", dict, lmp_args(), doc=doc_calypso),
         ],
         doc=doc,
     )

@@ -69,8 +69,8 @@ from dpgen2.constants import (
     train_task_pattern,
 )
 from dpgen2.exploration.task import (
+    BaseExplorationTaskGroup,
     ExplorationTask,
-    ExplorationTaskGroup,
 )
 from dpgen2.op.prep_lmp import (
     PrepLmp,
@@ -90,7 +90,7 @@ default_config = normalize_step_dict(
 
 
 def make_task_group_list(ngrp, ntask_per_grp):
-    tgrp = ExplorationTaskGroup()
+    tgrp = BaseExplorationTaskGroup()
     for ii in range(ngrp):
         for jj in range(ntask_per_grp):
             tt = ExplorationTask()
@@ -218,6 +218,7 @@ class TestMockedRunLmp(unittest.TestCase):
             self.check_run_lmp_output(self.task_list_str[ii], self.model_list)
 
 
+# @unittest.skip("temp")
 @unittest.skipIf(skip_ut_with_dflow, skip_ut_with_dflow_reason)
 class TestPrepRunLmp(unittest.TestCase):
     def setUp(self):
@@ -279,8 +280,8 @@ class TestPrepRunLmp(unittest.TestCase):
             "prep-run-step",
             template=steps,
             parameters={
-                "lmp_config": {},
-                "lmp_task_grp": self.task_group_list,
+                "explore_config": {},
+                "expl_task_grp": self.task_group_list,
             },
             artifacts={
                 "models": self.models,
