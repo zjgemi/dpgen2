@@ -1,0 +1,338 @@
+{
+    "bohrium_config": {
+        "username": "your@email",
+        "password": "your_passwd",
+        "project_id": 00000,
+        "_host": "https://workflow.dp.tech/",
+        "_k8s_api_server": "https://workflows.deepmodeling.com",
+        "_repo_key": "oss-bohrium",
+        "_comment": "all"
+    },
+    "default_step_config": {
+        "template_config": {
+            "image": "registry.dp.tech/dptech/prod-11265/dpgen2-calypso:v3",
+            "_comment": "all"
+        },
+        "executor": {
+            "type": "dispatcher",
+            "image_pull_policy": "IfNotPresent",
+            "machine_dict": {
+                "batch_type": "Bohrium",
+                "context_type": "Bohrium",
+                "remote_profile": {
+                    "input_data": {
+                        "job_type": "container",
+                        "platform": "ali",
+                        "scass_type": "c2_m4_cpu"
+                    }
+                }
+            }
+        },
+        "_comment": "all"
+    },
+    "step_configs": {
+        "run_train_config": {
+            "template_config": {
+                "image": "registry.dp.tech/dptech/prod-11265/dpgen2-calypso:v3",
+                "_comment": "all"
+            },
+            "executor": {
+                "type": "dispatcher",
+                "retry_on_submission_error": 10,
+                "image_pull_policy": "IfNotPresent",
+                "machine_dict": {
+                    "batch_type": "Bohrium",
+                    "context_type": "Bohrium",
+                    "remote_profile": {
+                        "input_data": {
+                            "job_type": "container",
+                            "platform": "ali",
+                            "_scass_type": "1 * NVIDIA V100_16g",
+                            "scass_type": "c16_m64_cpu"
+                        }
+                    }
+                }
+            },
+            "_template_slice_config": {
+                "group_size": 1,
+                "pool_size": 1
+            },
+            "_comment": "all"
+        },
+        "run_explore_config": {
+            "template_config": {
+                "image": "registry.dp.tech/dptech/prod-11265/dpgen2-calypso:v3",
+                "_comment": "all"
+            },
+            "executor": {
+                "type": "dispatcher",
+                "retry_on_submission_error": 10,
+                "image_pull_policy": "IfNotPresent",
+                "machine_dict": {
+                    "batch_type": "Bohrium",
+                    "context_type": "Bohrium",
+                    "remote_profile": {
+                        "input_data": {
+                            "job_type": "container",
+                            "platform": "ali",
+                            "scass_type": "c16_m64_cpu"
+                        }
+                    }
+                }
+            },
+            "_template_slice_config": {
+                "group_size": 50,
+                "pool_size": 1
+            },
+            "_comment": "all"
+        },
+        "run_fp_config": {
+            "continue_on_success_ratio": 0,
+            "template_config": {
+                "image": "registry.dp.tech/dptech/vasp:5.4.4-calypso",
+                "_comment": "all"
+            },
+            "executor": {
+                "type": "dispatcher",
+                "retry_on_submission_error": 10,
+                "image_pull_policy": "IfNotPresent",
+                "machine_dict": {
+                    "batch_type": "Bohrium",
+                    "context_type": "Bohrium",
+                    "remote_profile": {
+                        "input_data": {
+                            "job_type": "container",
+                            "platform": "ali",
+                            "scass_type": "c16_m64_cpu"
+                        }
+                    }
+                }
+            },
+            "_template_slice_config": {
+                "group_size": 1,
+                "pool_size": 1
+            },
+            "_comment": "all"
+        },
+        "_comment": "all"
+    },
+    "upload_python_packages": [
+        "/root/dpgen2/dpgen2"
+    ],
+    "inputs": {
+        "type_map": [
+            "Mg",
+            "Al"
+        ],
+        "mass_map": [
+            24,
+            27
+        ],
+        "init_data_prefix": null,
+        "init_data_sys": [
+            "/personal/workplace/DP/dpgen2/Mg12Al8/deepmd"
+        ],
+        "_comment": "all"
+    },
+    "train": {
+        "type": "dp",
+        "config": {
+            "init_model_policy": "yes",
+            "init_model_old_ratio": 0.5,
+            "init_model_numb_steps": 20000,
+            "init_model_start_lr": 1e-4,
+            "init_model_start_pref_e": 0.25,
+            "init_model_start_pref_f": 100,
+            "_comment": "all"
+        },
+        "template_script": "train.json",
+        "_comment": "all"
+    },
+    "fp": {
+        "type": "vasp",
+        "task_max": 300,
+        "run_config": {
+            "command": "ulimit -s unlimited && source /opt/intel/oneapi/setvars.sh && mpirun -n 16 vasp_std"
+        },
+        "inputs_config": {
+            "incar": "/personal/workplace/DP/dpgen2/vasp_input/INCAR",
+            "pp_files": {
+                "Mg": "/personal/workplace/DP/dpgen2/vasp_input/POTCAR.Mg",
+                "Al": "/personal/workplace/DP/dpgen2/vasp_input/POTCAR.Al"
+            },
+            "kspacing": 0.1,
+            "kgamma": false
+        },
+        "_comment": "all"
+    },
+    "explore": {
+        "_type": "lmp",
+        "type": "calypso",
+        "config": {
+            "_command": "lmp -var restart 0",
+            "run_calypso_command": "calypso.x",
+            "run_opt_command": "python -u calypso_run_opt.py"
+        },
+        "convergence": {
+            "type": "fixed-levels",
+            "conv_accuracy": 0.9,
+            "level_f_lo": 0.05,
+            "level_f_hi": 0.50,
+            "_comment": "all"
+        },
+        "max_numb_iter": 2,
+        "fatal_at_max": false,
+        "output_nopbc": false,
+        "configuration_prefix": null,
+        "configurations": [
+            {
+                "type": "file",
+                "_prefix": null,
+                "files": [
+                    "/personal/workplace/DP/dpgen2/Mg12Al8/deepmd"
+                ],
+                "fmt": "deepmd/npy"
+            }
+        ],
+        "stages": [
+            [
+                {
+                    "numb_of_species": 1,
+                    "numb_of_atoms": [
+                        1
+                    ],
+                    "name_of_atoms": [
+                        "Mg"
+                    ],
+                    "atomic_number": [
+                        3
+                    ],
+                    "pop_size": 5,
+                    "max_step": 2,
+                    "distance_of_ions": [
+                        [
+                            1.0
+                        ]
+                    ]
+                },
+                {
+                    "numb_of_species": 2,
+                    "numb_of_atoms": [
+                        1,
+                        3
+                    ],
+                    "name_of_atoms": [
+                        "Mg",
+                        "Al"
+                    ],
+                    "atomic_number": [
+                        3,
+                        37
+                    ],
+                    "pop_size": 5,
+                    "max_step": 2,
+                    "distance_of_ions": [
+                        [
+                            1.0,
+                            1.0
+                        ],
+                        [
+                            1.0,
+                            1.0
+                        ]
+                    ]
+                }
+            ],
+            [
+                {
+                    "numb_of_species": 1,
+                    "numb_of_atoms": [
+                        1
+                    ],
+                    "name_of_atoms": [
+                        "Mg"
+                    ],
+                    "atomic_number": [
+                        3
+                    ],
+                    "pop_size": 5,
+                    "max_step": 2,
+                    "distance_of_ions": [
+                        [
+                            1.0
+                        ]
+                    ]
+                },
+                {
+                    "numb_of_species": 2,
+                    "numb_of_atoms": [
+                        1,
+                        3
+                    ],
+                    "name_of_atoms": [
+                        "Mg",
+                        "Al"
+                    ],
+                    "atomic_number": [
+                        3,
+                        37
+                    ],
+                    "pop_size": 5,
+                    "max_step": 2,
+                    "distance_of_ions": [
+                        [
+                            1.0,
+                            1.0
+                        ],
+                        [
+                            1.0,
+                            1.0
+                        ]
+                    ]
+                }
+            ]
+        ],
+        "_lmp_stages": [
+            [
+                {
+                    "type": "lmp-md",
+                    "ensemble": "nvt",
+                    "nsteps": 50,
+                    "press": [
+                        1e0
+                    ],
+                    "temps": [
+                        50
+                    ],
+                    "trj_freq": 10,
+                    "conf_idx": [
+                        0
+                    ],
+                    "n_sample": 3
+                },
+                {
+                    "type": "lmp-template",
+                    "lmp": "template.lammps",
+                    "trj_freq": 10,
+                    "revisions": {
+                        "V_NSTEPS": [
+                            40
+                        ],
+                        "V_TEMP": [
+                            100,
+                            200
+                        ],
+                        "V_DUMPFREQ": [
+                            10
+                        ]
+                    },
+                    "conf_idx": [
+                        0
+                    ],
+                    "n_sample": 3
+                }
+            ]
+        ],
+        "_comment": "all"
+    }
+}

@@ -17,6 +17,15 @@ fp_index_pattern = "%06d"
 fp_task_pattern = "task." + fp_index_pattern
 fp_default_log_name = "fp.log"
 fp_default_out_data_name = "data"
+calypso_log_name = "caly.log"
+calypso_input_file = "input.dat"
+calypso_index_pattern = "%06d"
+calypso_task_pattern = "caly_task." + calypso_index_pattern
+calypso_opt_dir_name = "caly_pop." + calypso_index_pattern
+calypso_run_opt_file = "calypso_run_opt.py"
+calypso_check_opt_file = "calypso_check_opt.py"
+calypso_opt_log_name = "opt.log"
+calypso_traj_log_name = "traj.traj"
 
 default_image = "dptechnology/dpgen2:latest"
 default_host = "127.0.0.1:2746"
