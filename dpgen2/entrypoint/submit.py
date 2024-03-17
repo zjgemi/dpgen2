@@ -514,6 +514,7 @@ def workflow_concurrent_learning(
         ), f"No such file: {explore_config['teacher_model_path']}"
         explore_config["teacher_model_path"] = BinaryFileInput(
             explore_config["teacher_model_path"]
+        )
 
     fp_config = {}
     fp_inputs_config = config["fp"]["inputs_config"]
