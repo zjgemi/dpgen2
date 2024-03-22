@@ -272,7 +272,7 @@ class RunDPTrain(OP):
                     raise FatalError("dp freeze failed")
                 model_file = "frozen_model.pb"
             elif impl == "pytorch":
-                model_file = "model.pt"
+                model_file = "model.ckpt.pt"
             fplog.write("#=================== freeze std out ===================\n")
             fplog.write(out)
             fplog.write("#=================== freeze std err ===================\n")
