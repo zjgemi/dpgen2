@@ -116,7 +116,6 @@ class RunLmp(OP):
         command = config["command"]
         teacher_model: Optional[BinaryFileInput] = config["teacher_model_path"]
         shuffle_models: Optional[bool] = config["shuffle_models"]
-        impl = config.get("impl", "tensorflow")
         task_name = ip["task_name"]
         task_path = ip["task_path"]
         models = ip["models"]
@@ -130,8 +129,10 @@ class RunLmp(OP):
             assert (
                 len(model_files) == 1
             ), "One model is enough in knowledge distillation"
-            teacher_model.save_as_file("teacher_model.pb")
-            model_files = [Path("teacher_model.pb").resolve()] + model_files
+            ext = os.path.splitext(teacher_model.file_name)[-1]
+            teacher_model_file = "teacher_model" + ext
+            teacher_model.save_as_file(teacher_model_file)
+            model_files = [Path(teacher_model_file).resolve()] + model_files
 
         with set_directory(work_dir):
             # link input files
@@ -139,16 +140,19 @@ class RunLmp(OP):
                 iname = ii.name
                 Path(iname).symlink_to(ii)
             # link models
+            model_names = []
             for idx, mm in enumerate(model_files):
-                mname = model_name_pattern % (idx)
-                if impl == "tensorflow":
+                ext = os.path.splitext(mm)[-1]
+                mname = model_name_pattern % (idx) + ext
+                model_names.append(mname)
+                if ext == ".pb":
                     Path(mname).symlink_to(mm)
-                elif impl == "pytorch":
+                elif ext == ".pt":
                     # freeze model
                     freeze_args = "-o %s" % mname
                     if config.get("head") is not None:
                         freeze_args += " --head %s" % config["head"]
-                    freeze_cmd = "dp --pt freeze %s %s" % (mm, freeze_args)
+                    freeze_cmd = "dp --pt freeze -c %s %s" % (mm, freeze_args)
                     ret, out, err = run_command(freeze_cmd, shell=True)
                     if ret != 0:
                         logging.error("".join((
@@ -164,11 +168,10 @@ class RunLmp(OP):
                         )))
                         raise TransientError("freeze failed")
 
-            if teacher_model is not None:
-                add_teacher_model(lmp_input_name)
-
             if shuffle_models:
-                randomly_shuffle_models(lmp_input_name)
+                random.shuffle(model_names)
+
+            set_models(lmp_input_name, model_names)
 
             # run lmp
             command = " ".join([command, "-i", lmp_input_name, "-log", lmp_log_name])
@@ -210,7 +213,6 @@ class RunLmp(OP):
         doc_lmp_cmd = "The command of LAMMPS"
         doc_teacher_model = "The teacher model in `Knowledge Distillation`"
         doc_shuffle_models = "Randomly pick a model from the group of models to drive theexploration MD simulation"
-        doc_impl = "The implementation of DP. It can be 'tensorflow' or 'pytorch'. 'tensorflow' for default."
         doc_head = "Select a head from multitask"
         return [
             Argument("command", str, optional=True, default="lmp", doc=doc_lmp_cmd),
@@ -228,7 +230,6 @@ class RunLmp(OP):
                 default=False,
                 doc=doc_shuffle_models,
             ),
-            Argument("impl", str, optional=True, default="tensorflow", doc=doc_impl),
             Argument("head", str, optional=True, default=None, doc=doc_head),
         ]
 
@@ -244,26 +245,7 @@ class RunLmp(OP):
 config_args = RunLmp.lmp_args
 
 
-def add_teacher_model(lmp_input_name: str):
-    with open(lmp_input_name, encoding="utf8") as f:
-        lmp_input_lines = f.readlines()
-
-    idx = find_only_one_key(lmp_input_lines, ["pair_style", "deepmd"])
-
-    model0_pattern = model_name_pattern % 0
-    assert (
-        lmp_input_lines[idx].find(model0_pattern) != -1
-    ), f'Error: cannot find "{model0_pattern}" in lmp_input, {lmp_input_lines[idx]}'
-
-    lmp_input_lines[idx] = lmp_input_lines[idx].replace(
-        model0_pattern, " ".join([model_name_pattern % i for i in range(2)])
-    )
-
-    with open(lmp_input_name, "w", encoding="utf8") as f:
-        f.write("".join(lmp_input_lines))
-
-
-def randomly_shuffle_models(lmp_input_name: str):
+def set_models(lmp_input_name: str, model_names: List[str]):
     with open(lmp_input_name, encoding="utf8") as f:
         lmp_input_lines = f.readlines()
 
@@ -292,9 +274,7 @@ def randomly_shuffle_models(lmp_input_name: str):
                 f"unexpected matching of model pattern {pattern} "
                 f"in line {lmp_input_lines[idx]}"
             )
-    tmp = new_line_split[match_first:match_last]
-    random.shuffle(tmp)
-    new_line_split[match_first:match_last] = tmp
+    new_line_split[match_first:match_last] = model_names
     lmp_input_lines[idx] = " ".join(new_line_split)
 
     with open(lmp_input_name, "w", encoding="utf8") as f:

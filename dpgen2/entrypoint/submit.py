@@ -522,7 +522,7 @@ def workflow_concurrent_learning(
 
     fp_config["inputs"] = fp_inputs
     fp_config["run"] = config["fp"]["run_config"]
-    if fp_style in ["deepmd", "deepmd_pt"]:
+    if fp_style == "deepmd":
         assert (
             "teacher_model_path" in fp_config["run"]
         ), f"Cannot find 'teacher_model_path' in config['fp']['run_config'] when fp_style == 'deepmd'"

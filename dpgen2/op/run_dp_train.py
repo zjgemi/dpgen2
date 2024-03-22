@@ -179,7 +179,7 @@ class RunDPTrain(OP):
             return OPIO(
                 {
                     "script": work_dir / train_script_name,
-                    "model": work_dir / "frozen_model.pb",
+                    "model": init_model,
                     "lcurve": work_dir / "lcurve.out",
                     "log": work_dir / "train.log",
                 }
@@ -199,8 +199,8 @@ class RunDPTrain(OP):
             # train model
             if impl == "tensorflow" and os.path.isfile("checkpoint"):
                 command = dp_command + ["train", "--restart", "model.ckpt", train_script_name]
-            elif impl == "pytorch" and len(glob.glob("model_[0-9]*.pt")) > 0:
-                checkpoint = "model_%s.pt" % max([int(f[6:-3]) for f in glob.glob("model_[0-9]*.pt")])
+            elif impl == "pytorch" and len(glob.glob("model.ckpt-[0-9]*.pt")) > 0:
+                checkpoint = "model.ckpt-%s.pt" % max([int(f[11:-3]) for f in glob.glob("model.ckpt-[0-9]*.pt")])
                 command = dp_command + ["train", "--restart", checkpoint, train_script_name]
             elif (do_init_model or finetune_mode == "train-init") and not config["init_model_with_finetune"]:
                 if impl == "tensorflow":
@@ -384,7 +384,6 @@ class RunDPTrain(OP):
                     f"The training is skipped.\n"
                 )
                 Path("lcurve.out").touch()
-                shutil.copy(init_model, "frozen_model.pb")
             return True
         else:
             return False
