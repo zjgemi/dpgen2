@@ -871,6 +871,8 @@ def resubmit_concurrent_learning(
                 reused_folded_keys[k] = [k]
         reused_keys = sum(reused_folded_keys.values(), [])
     reuse_step = old_wf.query_step(key=reused_keys)
+    # For reused steps whose startedAt are identical, sort them by key
+    reuse_step.sort(key=lambda x: "%s-%s" % (x.startedAt, x.key))
 
     wf = submit_concurrent_learning(
         wf_config,
