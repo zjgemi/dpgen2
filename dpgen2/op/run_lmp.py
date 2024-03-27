@@ -143,12 +143,12 @@ class RunLmp(OP):
             model_names = []
             for idx, mm in enumerate(model_files):
                 ext = os.path.splitext(mm)[-1]
-                mname = model_name_pattern % (idx) + ext
-                model_names.append(mname)
                 if ext == ".pb":
+                    mname = model_name_pattern % (idx) + ".pb"
                     Path(mname).symlink_to(mm)
                 elif ext == ".pt":
                     # freeze model
+                    mname = model_name_pattern % (idx) + ".pth"
                     freeze_args = "-o %s" % mname
                     if config.get("head") is not None:
                         freeze_args += " --head %s" % config["head"]
@@ -167,6 +167,7 @@ class RunLmp(OP):
                             "\n",
                         )))
                         raise TransientError("freeze failed")
+                model_names.append(mname)
 
             if shuffle_models:
                 random.shuffle(model_names)
@@ -275,7 +276,7 @@ def set_models(lmp_input_name: str, model_names: List[str]):
                 f"in line {lmp_input_lines[idx]}"
             )
     new_line_split[match_first:match_last] = model_names
-    lmp_input_lines[idx] = " ".join(new_line_split)
+    lmp_input_lines[idx] = " ".join(new_line_split) + "\n"
 
     with open(lmp_input_name, "w", encoding="utf8") as f:
         f.write("".join(lmp_input_lines))

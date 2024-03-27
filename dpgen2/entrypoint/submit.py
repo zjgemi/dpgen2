@@ -552,7 +552,7 @@ def workflow_concurrent_learning(
         train_config["multitask"] = True
         train_config["head"] = head
         train_config["multi_init_data_idx"] = multi_init_data_idx
-        lmp_config["head"] = head
+        explore_config["head"] = head
     else:
         init_data_prefix = config["inputs"]["init_data_prefix"]
         init_data = config["inputs"]["init_data_sys"]

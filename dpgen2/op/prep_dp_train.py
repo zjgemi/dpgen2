@@ -110,7 +110,7 @@ class PrepDPTrain(OP):
     def _set_desc_seed(self, desc):
         if desc["type"] == "hybrid":
             for desc in desc["list"]:
-                desc["seed"] = random.randrange(sys.maxsize) % (2**32)
+                self._set_desc_seed(desc)
         elif desc["type"] not in ["dpa1", "dpa2"]:
             desc["seed"] = random.randrange(sys.maxsize) % (2**32)
 
@@ -119,10 +119,10 @@ class PrepDPTrain(OP):
         input_dict,
     ):
         jtmp = input_dict.copy()
-        if "shared_dict" in jtmp["model"] and "model_dict" in jtmp["model"]:
-            if "dpa1_dpau_descriptor_1" in jtmp["model"]["shared_dict"]:
-                self._set_desc_seed(jtmp["model"]["shared_dict"]["dpa1_dpau_descriptor_1"])
+        if "model_dict" in jtmp["model"]:
             for d in jtmp["model"]["model_dict"].values():
+                if isinstance(d["descriptor"], str):
+                    self._set_desc_seed(jtmp["model"]["shared_dict"][d["descriptor"]])
                 d["fitting_net"]["seed"] = random.randrange(sys.maxsize) % (2**32)
         else:
             self._set_desc_seed(jtmp["model"]["descriptor"])

@@ -309,7 +309,6 @@ class RunDPTrain(OP):
                     v["training_data"]["systems"] += [str(init_data[ii]) for ii in multi_init_data_idx[k]]
                 if k == head:
                     v["training_data"]["systems"] += [str(ii) for ii in iter_data]
-                v.pop("validation_data", None)
             return odict
         data_list = [str(ii) for ii in init_data] + [str(ii) for ii in iter_data]
         if major_version == "1":
@@ -420,7 +419,7 @@ class RunDPTrain(OP):
 
     @staticmethod
     def training_args():
-        doc_impl = "The implementation of DP. It can be 'tensorflow' or 'pytorch'. 'tensorflow' for default."
+        doc_impl = "The implementation/backend of DP. It can be 'tensorflow' or 'pytorch'. 'tensorflow' for default."
         doc_init_model_policy = "The policy of init-model training. It can be\n\n\
     - 'no': No init-model training. Traing from scratch.\n\n\
     - 'yes': Do init-model training.\n\n\
@@ -449,6 +448,7 @@ class RunDPTrain(OP):
                 optional=True,
                 default="tensorflow",
                 doc=doc_impl,
+                alias=["backend"],
             ),
             Argument(
                 "init_model_policy",
