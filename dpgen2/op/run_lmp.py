@@ -38,6 +38,7 @@ from dpgen2.constants import (
     model_name_match_pattern,
     model_name_pattern,
     plm_output_name,
+    pytorch_model_name_pattern,
 )
 from dpgen2.utils import (
     BinaryFileInput,
@@ -144,11 +145,11 @@ class RunLmp(OP):
             for idx, mm in enumerate(model_files):
                 ext = os.path.splitext(mm)[-1]
                 if ext == ".pb":
-                    mname = model_name_pattern % (idx) + ".pb"
+                    mname = model_name_pattern % (idx)
                     Path(mname).symlink_to(mm)
                 elif ext == ".pt":
                     # freeze model
-                    mname = model_name_pattern % (idx) + ".pth"
+                    mname = pytorch_model_name_pattern % (idx)
                     freeze_args = "-o %s" % mname
                     if config.get("head") is not None:
                         freeze_args += " --head %s" % config["head"]
