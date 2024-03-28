@@ -259,7 +259,9 @@ def set_models(lmp_input_name: str, model_names: List[str]):
     with open(lmp_input_name, encoding="utf8") as f:
         lmp_input_lines = f.readlines()
 
-    idx = find_only_one_key(lmp_input_lines, ["pair_style", "deepmd"])
+    idx = find_only_one_key(lmp_input_lines, ["pair_style", "deepmd"], raise_not_found=False)
+    if idx is None:
+        return
     new_line_split = lmp_input_lines[idx].split()
     match_first = -1
     match_last = -1
@@ -291,7 +293,7 @@ def set_models(lmp_input_name: str, model_names: List[str]):
         f.write("".join(lmp_input_lines))
 
 
-def find_only_one_key(lmp_lines, key):
+def find_only_one_key(lmp_lines, key, raise_not_found=True):
     found = []
     for idx in range(len(lmp_lines)):
         words = lmp_lines[idx].split()
@@ -301,5 +303,8 @@ def find_only_one_key(lmp_lines, key):
     if len(found) > 1:
         raise RuntimeError("found %d keywords %s" % (len(found), key))
     if len(found) == 0:
-        raise RuntimeError("failed to find keyword %s" % (key))
+        if raise_not_found:
+            raise RuntimeError("failed to find keyword %s" % (key))
+        else:
+            return None
     return found[0]
