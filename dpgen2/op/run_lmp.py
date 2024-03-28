@@ -155,17 +155,21 @@ class RunLmp(OP):
                     freeze_cmd = "dp --pt freeze -c %s %s" % (mm, freeze_args)
                     ret, out, err = run_command(freeze_cmd, shell=True)
                     if ret != 0:
-                        logging.error("".join((
-                            "freeze failed\n",
-                            "command was",
-                            freeze_cmd,
-                            "out msg",
-                            out,
-                            "\n",
-                            "err msg",
-                            err,
-                            "\n",
-                        )))
+                        logging.error(
+                            "".join(
+                                (
+                                    "freeze failed\n",
+                                    "command was",
+                                    freeze_cmd,
+                                    "out msg",
+                                    out,
+                                    "\n",
+                                    "err msg",
+                                    err,
+                                    "\n",
+                                )
+                            )
+                        )
                         raise TransientError("freeze failed")
                 model_names.append(mname)
 

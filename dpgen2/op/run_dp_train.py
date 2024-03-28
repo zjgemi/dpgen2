@@ -167,7 +167,13 @@ class RunDPTrain(OP):
 
         # update the input dict
         train_dict = RunDPTrain.write_data_to_input_script(
-            train_dict, config, init_data, iter_data_exp, auto_prob_str, major_version, valid_data
+            train_dict,
+            config,
+            init_data,
+            iter_data_exp,
+            auto_prob_str,
+            major_version,
+            valid_data,
         )
         train_dict = RunDPTrain.write_other_to_input_script(
             train_dict, config, do_init_model, major_version
@@ -198,11 +204,25 @@ class RunDPTrain(OP):
 
             # train model
             if impl == "tensorflow" and os.path.isfile("checkpoint"):
-                command = dp_command + ["train", "--restart", "model.ckpt", train_script_name]
+                command = dp_command + [
+                    "train",
+                    "--restart",
+                    "model.ckpt",
+                    train_script_name,
+                ]
             elif impl == "pytorch" and len(glob.glob("model.ckpt-[0-9]*.pt")) > 0:
-                checkpoint = "model.ckpt-%s.pt" % max([int(f[11:-3]) for f in glob.glob("model.ckpt-[0-9]*.pt")])
-                command = dp_command + ["train", "--restart", checkpoint, train_script_name]
-            elif (do_init_model or finetune_mode == "train-init") and not config["init_model_with_finetune"]:
+                checkpoint = "model.ckpt-%s.pt" % max(
+                    [int(f[11:-3]) for f in glob.glob("model.ckpt-[0-9]*.pt")]
+                )
+                command = dp_command + [
+                    "train",
+                    "--restart",
+                    checkpoint,
+                    train_script_name,
+                ]
+            elif (do_init_model or finetune_mode == "train-init") and not config[
+                "init_model_with_finetune"
+            ]:
                 if impl == "tensorflow":
                     command = dp_command + [
                         "train",
@@ -217,13 +237,20 @@ class RunDPTrain(OP):
                         str(init_model),
                         train_script_name,
                     ]
-            elif finetune_mode == "finetune" or ((do_init_model or finetune_mode == "train-init") and config["init_model_with_finetune"]):
-                command = dp_command + [
-                    "train",
-                    train_script_name,
-                    "--finetune",
-                    str(init_model),
-                ] + finetune_args.split()
+            elif finetune_mode == "finetune" or (
+                (do_init_model or finetune_mode == "train-init")
+                and config["init_model_with_finetune"]
+            ):
+                command = (
+                    dp_command
+                    + [
+                        "train",
+                        train_script_name,
+                        "--finetune",
+                        str(init_model),
+                    ]
+                    + finetune_args.split()
+                )
             else:
                 command = dp_command + ["train", train_script_name]
             ret, out, err = run_command(command)
@@ -306,7 +333,9 @@ class RunDPTrain(OP):
             for k, v in odict["training"]["data_dict"].items():
                 v["training_data"]["systems"] = []
                 if k in multi_init_data_idx:
-                    v["training_data"]["systems"] += [str(init_data[ii]) for ii in multi_init_data_idx[k]]
+                    v["training_data"]["systems"] += [
+                        str(init_data[ii]) for ii in multi_init_data_idx[k]
+                    ]
                 if k == head:
                     v["training_data"]["systems"] += [str(ii) for ii in iter_data]
             return odict
@@ -446,7 +475,9 @@ class RunDPTrain(OP):
         doc_finetune_args = "Extra arguments for finetuning"
         doc_multitask = "Do multitask training"
         doc_head = "Head to use in the multitask training"
-        doc_multi_init_data_idx = "A dict mapping from task name to list of indices in the init data"
+        doc_multi_init_data_idx = (
+            "A dict mapping from task name to list of indices in the init data"
+        )
         doc_init_model_with_finetune = "Use finetune for init model"
         return [
             Argument(
@@ -541,7 +572,7 @@ class RunDPTrain(OP):
                 optional=True,
                 default=None,
                 doc=doc_multi_init_data_idx,
-            )
+            ),
         ]
 
     @staticmethod

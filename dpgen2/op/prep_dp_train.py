@@ -126,6 +126,8 @@ class PrepDPTrain(OP):
                 d["fitting_net"]["seed"] = random.randrange(sys.maxsize) % (2**32)
         else:
             self._set_desc_seed(jtmp["model"]["descriptor"])
-            jtmp["model"]["fitting_net"]["seed"] = random.randrange(sys.maxsize) % (2**32)
+            jtmp["model"]["fitting_net"]["seed"] = random.randrange(sys.maxsize) % (
+                2**32
+            )
         jtmp["training"]["seed"] = random.randrange(sys.maxsize) % (2**32)
         return jtmp
