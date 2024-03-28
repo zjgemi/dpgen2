@@ -180,7 +180,6 @@ def _prep_run_caly(
         name="caly-evo-step",
         template=caly_evo_step_op,
         slices=Slices(
-            "int('{{item}}')",
             input_parameter=[
                 "task_name",
             ],
@@ -215,10 +214,6 @@ def _prep_run_caly(
             "qhull_input": temp_value,
         },
         key=step_keys["caly-evo-step-{{item}}"],
-        with_sequence=argo_sequence(
-            argo_len(prep_caly_input.outputs.parameters["task_names"]),
-            format=calypso_index_pattern,
-        ),
         executor=prep_executor,
         **prep_config,
     )

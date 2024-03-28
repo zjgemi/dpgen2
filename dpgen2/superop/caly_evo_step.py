@@ -163,7 +163,6 @@ def _caly_evo_step(
     run_config: dict = normalize_step_dict({}),
     upload_python_packages: Optional[List[os.PathLike]] = None,
 ):
-    print(run_config)
     prep_config = deepcopy(prep_config)
     run_config = deepcopy(run_config)
     prep_template_config = prep_config.pop("template_config")
@@ -243,7 +242,6 @@ def _caly_evo_step(
         template=PythonOPTemplate(
             run_dp_optim_op,
             slices=Slices(
-                "int('{{item}}')",
                 input_parameter=["task_name"],
                 input_artifact=["task_path"],
                 output_artifact=["traj_results", "optim_results_dir"],

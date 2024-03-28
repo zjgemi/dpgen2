@@ -338,7 +338,6 @@ class TestCalyEvoStep(unittest.TestCase):
             "caly-evo-step",
             template=steps,
             slices=Slices(
-                "int('{{item}}')",
                 input_parameter=[
                     "task_name",
                 ],
