@@ -866,7 +866,7 @@ class TestRunDPTrainNullIterData(unittest.TestCase):
             )
         )
         self.assertEqual(out["script"], work_dir / train_script_name)
-        self.assertEqual(out["model"], work_dir / "frozen_model.pb")
+        self.assertEqual(out["model"], self.init_model)
         self.assertEqual(out["lcurve"], work_dir / "lcurve.out")
         self.assertEqual(out["log"], work_dir / "train.log")
 
