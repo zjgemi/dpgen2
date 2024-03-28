@@ -259,7 +259,9 @@ def set_models(lmp_input_name: str, model_names: List[str]):
     with open(lmp_input_name, encoding="utf8") as f:
         lmp_input_lines = f.readlines()
 
-    idx = find_only_one_key(lmp_input_lines, ["pair_style", "deepmd"], raise_not_found=False)
+    idx = find_only_one_key(
+        lmp_input_lines, ["pair_style", "deepmd"], raise_not_found=False
+    )
     if idx is None:
         return
     new_line_split = lmp_input_lines[idx].split()
