@@ -124,10 +124,11 @@ class RunDPTrain(OP):
         finetune_mode = ip["optional_parameter"]["finetune_mode"]
         config = ip["config"] if ip["config"] is not None else {}
         impl = ip["config"].get("impl", "tensorflow")
-        if impl == "tensorflow":
-            dp_command = ["dp"]
-        elif impl == "pytorch":
+        assert impl in ["tensorflow", "pytorch"]
+        if impl == "pytorch":
             dp_command = ["dp", "--pt"]
+        else:
+            dp_command = ["dp"]
         finetune_args = config.get("finetune_args", "")
         config = RunDPTrain.normalize_config(config)
         task_name = ip["task_name"]
@@ -223,17 +224,17 @@ class RunDPTrain(OP):
             elif (do_init_model or finetune_mode == "train-init") and not config[
                 "init_model_with_finetune"
             ]:
-                if impl == "tensorflow":
-                    command = dp_command + [
-                        "train",
-                        "--init-frz-model",
-                        str(init_model),
-                        train_script_name,
-                    ]
-                elif impl == "pytorch":
+                if impl == "pytorch":
                     command = dp_command + [
                         "train",
                         "--init-model",
+                        str(init_model),
+                        train_script_name,
+                    ]
+                else:
+                    command = dp_command + [
+                        "train",
+                        "--init-frz-model",
                         str(init_model),
                         train_script_name,
                     ]
@@ -279,7 +280,9 @@ class RunDPTrain(OP):
                 shutil.copy2("input_v2_compat.json", train_script_name)
 
             # freeze model
-            if impl == "tensorflow":
+            if impl == "pytorch":
+                model_file = "model.ckpt.pt"
+            else:
                 ret, out, err = run_command(["dp", "freeze", "-o", "frozen_model.pb"])
                 if ret != 0:
                     clean_before_quit()
@@ -298,8 +301,6 @@ class RunDPTrain(OP):
                     )
                     raise FatalError("dp freeze failed")
                 model_file = "frozen_model.pb"
-            elif impl == "pytorch":
-                model_file = "model.ckpt.pt"
             fplog.write("#=================== freeze std out ===================\n")
             fplog.write(out)
             fplog.write("#=================== freeze std err ===================\n")
