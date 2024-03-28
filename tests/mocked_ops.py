@@ -30,6 +30,8 @@ except ModuleNotFoundError:
     # case of upload everything to argo, no context needed
     pass
 from dpgen2.constants import (
+    calypso_check_opt_file,
+    calypso_run_opt_file,
     fp_task_pattern,
     lmp_conf_name,
     lmp_input_name,
@@ -71,17 +73,20 @@ from dpgen2.op.collect_data import (
 from dpgen2.op.collect_run_caly import (
     CollRunCaly,
 )
+from dpgen2.op.prep_dp_optim import (
+    PrepDPOptim,
+)
 from dpgen2.op.prep_dp_train import (
     PrepDPTrain,
 )
 from dpgen2.op.prep_lmp import (
     PrepExplorationTaskGroup,
 )
-from dpgen2.op.prep_run_dp_optim import (
-    PrepRunDPOptim,
-)
 from dpgen2.op.run_caly_model_devi import (
     RunCalyModelDevi,
+)
+from dpgen2.op.run_dp_optim import (
+    RunDPOptim,
 )
 from dpgen2.op.run_dp_train import (
     RunDPTrain,
@@ -1044,7 +1049,68 @@ class MockedCollRunCaly(CollRunCaly):
         return OPIO(ret_dict)
 
 
-class MockedPrepRunDPOptim(PrepRunDPOptim):
+class MockedPrepDPOptim(PrepDPOptim):
+    @OP.exec_sign_check
+    def execute(
+        self,
+        ip: OPIO,
+    ) -> OPIO:
+        cwd = os.getcwd()
+
+        finished = ip["finished"]
+        work_dir = Path(ip["task_name"])
+        # print(f"--------=---------task_name: {work_dir}")
+        work_dir.mkdir(parents=True, exist_ok=True)
+
+        poscar_dir = ip["poscar_dir"]
+        models_dir = ip["models_dir"]
+        caly_run_opt_file = ip["caly_run_opt_file"].resolve()
+        caly_check_opt_file = ip["caly_check_opt_file"].resolve()
+        poscar_list = [poscar.resolve() for poscar in poscar_dir.rglob("POSCAR_*")]
+        model_list = [model.resolve() for model in models_dir.rglob("*model*pb")]
+        model_list = sorted(model_list, key=lambda x: str(x).split(".")[1])
+        model_file = model_list[0]
+
+        os.chdir(work_dir)
+
+        group_size = 2
+
+        if finished == "false":
+            grouped_poscar_list = [
+                poscar_list[i : i + group_size]
+                for i in range(0, len(poscar_list), group_size)
+            ]
+            task_dirs = []
+            for idx, poscar_list in enumerate(grouped_poscar_list):
+                opt_path = Path(f"opt_path_{idx}")
+                task_dirs.append(work_dir / opt_path)
+
+                cwd = os.getcwd()
+                os.chdir(opt_path)
+                for poscar in poscar_list:
+                    Path(poscar.name).symlink_to(poscar)
+                Path(model_file.name).symlink_to(model_file)
+                Path(caly_run_opt_file.name).symlink_to(caly_run_opt_file)
+                Path(caly_check_opt_file.name).symlink_to(caly_check_opt_file)
+                os.chdir(cwd)
+
+            task_names = [str(task_dir) for task_dir in task_dirs]
+        else:
+            temp_dir = work_dir / "opt_path"
+            temp_dir.mkdir(parents=True, exist_ok=True)
+            task_dirs = [temp_dir]
+            task_names = [str(task_dir) for task_dir in task_dirs]
+
+        os.chdir(cwd)
+        return OPIO(
+            {
+                "task_name": task_names,
+                "task_dirs": task_dirs,
+            }
+        )
+
+
+class MockedRunDPOptim(RunDPOptim):
     @OP.exec_sign_check
     def execute(
         self,
@@ -1058,25 +1124,10 @@ class MockedPrepRunDPOptim(PrepRunDPOptim):
         # print(f"--------=---------task_name: {work_dir}")
         work_dir.mkdir(parents=True, exist_ok=True)
 
-        poscar_dir = ip["poscar_dir"]
-        models_dir = ip["models_dir"]
-        caly_run_opt_file = ip["caly_run_opt_file"].resolve()
-        caly_check_opt_file = ip["caly_check_opt_file"].resolve()
-        poscar_list = [poscar.resolve() for poscar in poscar_dir.rglob("POSCAR_*")]
-        model_list = [model.resolve() for model in models_dir.rglob("*model*pb")]
-        model_list = sorted(model_list, key=lambda x: str(x).split(".")[1])
-        model_file = model_list[0]
-
         config = ip["config"] if ip["config"] is not None else {}
         command = config.get("run_opt_command", "python -u calypso_run_opt.py")
 
         os.chdir(work_dir)
-
-        for idx, poscar in enumerate(poscar_list):
-            Path(poscar.name).symlink_to(poscar)
-        Path("frozen_model.pb").symlink_to(model_file)
-        Path(caly_run_opt_file.name).symlink_to(caly_run_opt_file)
-        Path(caly_check_opt_file.name).symlink_to(caly_check_opt_file)
 
         for i in range(1, 6):
             Path().joinpath(f"CONTCAR_{str(i)}").write_text(f"CONTCAR_{str(i)}")
@@ -1114,8 +1165,8 @@ class MockedPrepRunDPOptim(PrepRunDPOptim):
                 "task_name": str(work_dir),
                 "optim_results_dir": work_dir / optim_results_dir,
                 "traj_results": work_dir / traj_results_dir,
-                "caly_run_opt_file": work_dir / caly_run_opt_file.name,
-                "caly_check_opt_file": work_dir / caly_check_opt_file.name,
+                "caly_run_opt_file": work_dir / calypso_run_opt_file,
+                "caly_check_opt_file": work_dir / calypso_check_opt_file,
             }
         )
 

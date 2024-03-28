@@ -92,7 +92,7 @@ change_box      all triclinic
 mass            1 27.000000
 mass            2 24.000000
 
-pair_style      deepmd model.000.pb model.001.pb model.002.pb model.003.pb out_freq 20 out_file model_devi.out
+pair_style      deepmd model.000 model.001 model.002 model.003 out_freq 20 out_file model_devi.out
 pair_coeff      * *
 
 thermo_style    custom step temp pe ke etotal press vol lx ly lz xy xz yz
@@ -169,7 +169,7 @@ change_box      all triclinic
 mass            1 27.000000
 mass            2 24.000000
 
-pair_style      deepmd model.000.pb model.001.pb model.002.pb model.003.pb out_freq 20 out_file model_devi.out
+pair_style      deepmd model.000 model.001 model.002 model.003 out_freq 20 out_file model_devi.out
 pair_coeff      * *
 
 fix             dpgen_plm all plumed plumedfile input.plumed outfile output.plumed

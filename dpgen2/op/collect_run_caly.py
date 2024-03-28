@@ -230,8 +230,10 @@ def prep_last_calypso_file(step, results, opt_results_dir, qhull_input, vsc):
     if step is not None and results is not None or opt_results_dir is not None:
         Path(step.name).symlink_to(step)
         Path(results.name).symlink_to(results)
-        for file_name in opt_results_dir.iterdir():
-            Path(file_name.name).symlink_to(file_name)
+        assert isinstance(opt_results_dir, list), "opt_results_dir should be a list."
+        for opt_results_name in opt_results_dir:
+            for file_name in opt_results_name.iterdir():
+                Path(file_name.name).symlink_to(file_name)
 
     if vsc and qhull_input is not None:
         Path(qhull_input.name).symlink_to(qhull_input)

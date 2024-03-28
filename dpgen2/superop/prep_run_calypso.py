@@ -193,7 +193,6 @@ def _prep_run_caly(
                 "caly_check_opt_file",
             ],
             output_artifact=["traj_results"],
-            **template_slice_config,
         ),
         parameters={
             "block_id": prep_run_caly_steps.inputs.parameters["block_id"],

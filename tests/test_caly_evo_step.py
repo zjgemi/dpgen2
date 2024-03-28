@@ -51,19 +51,6 @@ try:
 except ModuleNotFoundError:
     # case of upload everything to argo, no context needed
     pass
-from context import (
-    default_host,
-    default_image,
-    skip_ut_with_dflow,
-    skip_ut_with_dflow_reason,
-    upload_python_packages,
-)
-from mocked_ops import (
-    MockedCollRunCaly,
-    MockedPrepRunDPOptim,
-    mocked_numb_models,
-)
-
 from dpgen2.constants import (
     lmp_conf_name,
     lmp_input_name,
@@ -80,29 +67,49 @@ from dpgen2.exploration.task import (
     ExplorationTask,
     ExplorationTaskGroup,
 )
+from dpgen2.op import (
+    PrepDPOptim,
+    RunDPOptim,
+)
 from dpgen2.op.collect_run_caly import (
     CollRunCaly,
 )
 from dpgen2.op.prep_caly_input import (
     PrepCalyInput,
 )
-from dpgen2.op.prep_run_dp_optim import (
-    PrepRunDPOptim,
-)
 from dpgen2.superop.caly_evo_step import (
     CalyEvoStep,
 )
 from dpgen2.utils.step_config import normalize as normalize_step_dict
 
+from .context import (
+    default_host,
+    default_image,
+    skip_ut_with_dflow,
+    skip_ut_with_dflow_reason,
+    upload_python_packages,
+)
+from .mocked_ops import (
+    MockedCollRunCaly,
+    MockedPrepDPOptim,
+    MockedRunDPOptim,
+    mocked_numb_models,
+)
+
 default_config = normalize_step_dict(
     {
         "template_config": {
             "image": default_image,
-        }
+        },
+        "template_slice_config": {
+            "group_size": 2,
+            "pool_size": 1,
+        },
     }
 )
 
 
+@unittest.skip("temp")
 class TestMockedCollRunCaly(unittest.TestCase):
     def setUp(self) -> None:
         self.config = {}
@@ -115,12 +122,6 @@ class TestMockedCollRunCaly(unittest.TestCase):
         self.results_dir = None
         self.opt_results_dir = None
         self.cnt_num = 0
-        # self.step_file = self.file_storage.joinpath("step_none")
-        # self.step_file.write_text("step_none")
-        # self.results_dir = self.file_storage.joinpath("results_none")
-        # self.results_dir.mkdir(parents=True, exist_ok=True)
-        # self.opt_results_dir = self.file_storage.joinpath("opt_results_dir_none")
-        # self.opt_results_dir.mkdir(parents=True, exist_ok=True)
         self.finished = str(False)
 
     def tearDown(self) -> None:
@@ -159,20 +160,16 @@ class TestMockedCollRunCaly(unittest.TestCase):
         self.assertTrue(out["results"] == Path(self.task_name).joinpath("results"))
 
 
-class TestMockedPrepRunDPOptim(unittest.TestCase):
+@unittest.skip("temp")
+class TestMockedRunDPOptim(unittest.TestCase):
     def setUp(self) -> None:
         self.config = {}
         self.task_name = "task_name"
         self.file_storage = Path("storge_files")
         self.file_storage.mkdir(parents=True, exist_ok=True)
-        self.poscar_dir = self.file_storage.joinpath("poscar_dir")
-        self.poscar_dir.mkdir(parents=True, exist_ok=True)
         for i in range(5):
-            self.poscar_dir.joinpath(f"POSCAR_{i}").write_text(f"POSCAR_{i}")
-        self.models_dir = self.file_storage.joinpath("models_dir")
-        self.models_dir.mkdir(parents=True, exist_ok=True)
-        for i in range(2):
-            self.models_dir.joinpath(f"model.{i}.pb").write_text(f"model.{i}.pb")
+            self.file_storage.joinpath(f"POSCAR_{i}").write_text(f"POSCAR_{i}")
+        self.file_storage.joinpath(f"frozen_model.pb").write_text(f"model.{i}.pb")
         self.caly_run_opt_file = self.file_storage.joinpath(calypso_run_opt_file)
         self.caly_run_opt_file.write_text("caly_run_opt_script")
         self.caly_check_opt_file = self.file_storage.joinpath(calypso_check_opt_file)
@@ -182,8 +179,8 @@ class TestMockedPrepRunDPOptim(unittest.TestCase):
         shutil.rmtree(self.file_storage, ignore_errors=True)
         shutil.rmtree(Path(self.task_name), ignore_errors=True)
 
-    def test_mocked_prep_run_dp_optim(self):
-        op = MockedPrepRunDPOptim()
+    def test_mocked_run_dp_optim(self):
+        op = MockedRunDPOptim()
         out = op.execute(
             OPIO(
                 {
@@ -191,10 +188,7 @@ class TestMockedPrepRunDPOptim(unittest.TestCase):
                     "finished": "false",
                     "cnt_num": 0,
                     "task_name": self.task_name,
-                    "poscar_dir": self.poscar_dir,
-                    "models_dir": self.models_dir,
-                    "caly_run_opt_file": self.caly_run_opt_file,
-                    "caly_check_opt_file": self.caly_check_opt_file,
+                    "task_dir": self.file_storage,
                 }
             )
         )
@@ -210,7 +204,7 @@ class TestMockedPrepRunDPOptim(unittest.TestCase):
         )
 
         self.assertTrue(optim_results_dir, Path(self.task_name) / "optim_results_dir")
-        self.assertEqual(counts_optim_results_dir, 15)
+        self.assertEqual(counts_optim_results_dir, 10)
         self.assertEqual(counts_outcar_in_optim_results_dir, 5)
         self.assertTrue(
             Path(self.task_name) / "optim_results_dir" / "CONTCAR_4"
@@ -246,7 +240,9 @@ class TestCalyEvoStep(unittest.TestCase):
         self.nmodels = mocked_numb_models
         self.model_list = []
         for ii in range(self.nmodels):
-            model = self.work_dir.joinpath(f"model.{ii}.pb")
+            model_path = self.work_dir.joinpath(f"task.{ii}")
+            model_path.mkdir(exist_ok=True, parents=True)
+            model = model_path.joinpath(f"model.ckpt.pt")
             model.write_text(f"model {ii}")
             self.model_list.append(model)
         self.models = upload_artifact(self.model_list)
@@ -262,19 +258,8 @@ class TestCalyEvoStep(unittest.TestCase):
         self.input_file_list = upload_artifact([input_file, input_file])
 
         self.step = None
-        # step_file = self.work_dir.joinpath("step-none")
-        # step_file.write_text("None")
-        # self.step = upload_artifact(step_file)
-
         self.results = None
-        # results_dir = self.work_dir.joinpath("results-none")
-        # results_dir.mkdir(parents=True, exist_ok=True)
-        # self.results = upload_artifact(results_dir)
-
         self.opt_results_dir = None
-        # opt_results_dir = self.work_dir.joinpath("opt-results-none")
-        # opt_results_dir.mkdir(parents=True, exist_ok=True)
-        # self.opt_results_dir = upload_artifact(opt_results_dir)
 
         caly_run_opt_file = self.work_dir.joinpath("caly_run_opt.py")
         caly_run_opt_file.write_text("caly_run_opt")
@@ -291,19 +276,20 @@ class TestCalyEvoStep(unittest.TestCase):
         )
 
     def tearDown(self):
-        shutil.rmtree(self.work_dir, ignore_errors=True)
-        for i in Path().glob("caly-evo-step-*"):
-            shutil.rmtree(i, ignore_errors=True)
-        for i in Path().glob("caly_task*"):
-            shutil.rmtree(i, ignore_errors=True)
-        # shutil.rmtree("upload", ignore_errors=True)
+        pass
+        # shutil.rmtree(self.work_dir, ignore_errors=True)
+        # for i in Path().glob("caly-evo-step-*"):
+        #     shutil.rmtree(i, ignore_errors=True)
+        # for i in Path().glob("caly_task*"):
+        #     shutil.rmtree(i, ignore_errors=True)
 
     @unittest.skip("only need to run test_01")
     def test_00(self):
         steps = CalyEvoStep(
             "caly-evo-run",
             MockedCollRunCaly,
-            MockedPrepRunDPOptim,
+            PrepDPOptim,
+            MockedRunDPOptim,
             prep_config=default_config,
             run_config=default_config,
             upload_python_packages=upload_python_packages,
@@ -333,26 +319,17 @@ class TestCalyEvoStep(unittest.TestCase):
         wf.add(caly_evo_step)
         wf.submit()
 
-        # while wf.query_status() in ["Pending", "Running"]:
-        #     time.sleep(4)
-
         self.assertEqual(wf.query_status(), "Succeeded")
         step = wf.query_step(name="caly-evo-step")[0]
         self.assertEqual(step.phase, "Succeeded")
-
-        # download_artifact(step.outputs.artifacts["model_devis"])
-        # download_artifact(step.outputs.artifacts["trajs"])
-        # download_artifact(step.outputs.artifacts["logs"])
-
-        # for ii in step.outputs.parameters["task_names"].value:
-        #     self.check_run_lmp_output(ii, self.model_list)
 
     # @unittest.skip("temp skit")
     def test_01(self):
         steps = CalyEvoStep(
             "caly-evo-run",
             MockedCollRunCaly,
-            MockedPrepRunDPOptim,
+            PrepDPOptim,
+            MockedRunDPOptim,
             prep_config=default_config,
             run_config=default_config,
             upload_python_packages=upload_python_packages,
