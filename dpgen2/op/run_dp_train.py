@@ -348,9 +348,16 @@ class RunDPTrain(OP):
         odict["training"]["disp_file"] = "lcurve.out"
         if do_init_model:
             odict["learning_rate"]["start_lr"] = config["init_model_start_lr"]
-            odict["loss"]["start_pref_e"] = config["init_model_start_pref_e"]
-            odict["loss"]["start_pref_f"] = config["init_model_start_pref_f"]
-            odict["loss"]["start_pref_v"] = config["init_model_start_pref_v"]
+            if "loss_dict" in odict:
+                for v in odict["loss_dict"].values():
+                    if isinstance(v, dict):
+                        v["start_pref_e"] = config["init_model_start_pref_e"]
+                        v["start_pref_f"] = config["init_model_start_pref_f"]
+                        v["start_pref_v"] = config["init_model_start_pref_v"]
+            else:
+                odict["loss"]["start_pref_e"] = config["init_model_start_pref_e"]
+                odict["loss"]["start_pref_f"] = config["init_model_start_pref_f"]
+                odict["loss"]["start_pref_v"] = config["init_model_start_pref_v"]
             if major_version == "1":
                 odict["training"]["stop_batch"] = config["init_model_numb_steps"]
             elif major_version == "2":
