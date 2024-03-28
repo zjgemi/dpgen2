@@ -173,7 +173,9 @@ class RunLmp(OP):
                         )
                         raise TransientError("freeze failed")
                 else:
-                    raise RuntimeError("Model file with extension '%s' is not supported" % ext)
+                    raise RuntimeError(
+                        "Model file with extension '%s' is not supported" % ext
+                    )
                 model_names.append(mname)
 
             if shuffle_models:

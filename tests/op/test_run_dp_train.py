@@ -824,7 +824,12 @@ class TestRunDPTrainNullIterData(unittest.TestCase):
     def test_update_input_dict_v2_empty_list(self):
         idict = self.idict_v2
         odict = RunDPTrain.write_data_to_input_script(
-            idict, self.config, self.init_data, [], auto_prob_str="prob_sys_size", major_version="2"
+            idict,
+            self.config,
+            self.init_data,
+            [],
+            auto_prob_str="prob_sys_size",
+            major_version="2",
         )
         config = self.config.copy()
         config["init_model_policy"] = "no"
