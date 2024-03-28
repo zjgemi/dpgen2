@@ -206,7 +206,8 @@ run             3000 upto
         self.assertEqual((work_dir / lmp_conf_name).read_text(), "foo")
 
         lmp_config = TestRunLmpDist.lmp_config.replace(
-            "pair_style      deepmd model.000.pb", "pair_style deepmd model.000.pb model.001.pb"
+            "pair_style      deepmd model.000.pb",
+            "pair_style deepmd model.000.pb model.001.pb",
         )
         self.assertEqual((work_dir / lmp_input_name).read_text(), lmp_config)
 
