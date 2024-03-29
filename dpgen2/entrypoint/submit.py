@@ -473,10 +473,11 @@ def workflow_concurrent_learning(
     valid_data = config["inputs"]["valid_data_sys"]
     if valid_data is not None:
         valid_data_prefix = config["inputs"]["valid_data_prefix"]
+        valid_data = [valid_data] if isinstance(valid_data, str) else valid_data
+        assert isinstance(valid_data, list)
         if valid_data_prefix is not None:
             valid_data = [os.path.join(valid_data_prefix, ii) for ii in valid_data]
-        if isinstance(valid_data, str):
-            valid_data = expand_sys_str(valid_data)
+        valid_data = [expand_sys_str(ii) for ii in valid_data]
         valid_data = upload_artifact(valid_data)
     concurrent_learning_op = make_concurrent_learning_op(
         train_style,
@@ -541,10 +542,11 @@ def workflow_concurrent_learning(
         multi_init_data_idx = {}
         for k, v in multi_init_data.items():
             sys = v["sys"]
-            if isinstance(sys, str):
-                sys = expand_sys_str(sys)
+            sys = [sys] if isinstance(sys, str) else sys
+            assert isinstance(sys, list)
             if v["prefix"] is not None:
                 sys = [os.path.join(v["prefix"], ii) for ii in sys]
+            sys = [expand_sys_str(ii) for ii in sys]
             istart = len(init_data)
             init_data += sys
             iend = len(init_data)
