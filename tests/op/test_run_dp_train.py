@@ -314,6 +314,7 @@ class TestRunDPTrain(unittest.TestCase):
     def test_update_input_dict_v1_init_model(self):
         odict = RunDPTrain.write_data_to_input_script(
             self.idict_v1,
+            self.config,
             self.init_data,
             self.iter_data_exp,
             auto_prob_str="prob_sys_size; 0:4:0.9; 4:7:0.1",
@@ -329,6 +330,7 @@ class TestRunDPTrain(unittest.TestCase):
     def test_update_input_dict_v1(self):
         odict = RunDPTrain.write_data_to_input_script(
             self.idict_v1,
+            self.config,
             self.init_data,
             self.iter_data_exp,
             auto_prob_str="prob_sys_size",
@@ -345,6 +347,7 @@ class TestRunDPTrain(unittest.TestCase):
         idict = self.idict_v2
         odict = RunDPTrain.write_data_to_input_script(
             idict,
+            self.config,
             self.init_data,
             self.iter_data_exp,
             auto_prob_str="prob_sys_size; 0:4:0.9; 4:7:0.1",
@@ -361,6 +364,7 @@ class TestRunDPTrain(unittest.TestCase):
         idict = self.idict_v2
         odict = RunDPTrain.write_data_to_input_script(
             idict,
+            self.config,
             self.init_data,
             self.iter_data_exp,
             auto_prob_str="prob_sys_size",
@@ -820,7 +824,12 @@ class TestRunDPTrainNullIterData(unittest.TestCase):
     def test_update_input_dict_v2_empty_list(self):
         idict = self.idict_v2
         odict = RunDPTrain.write_data_to_input_script(
-            idict, self.init_data, [], auto_prob_str="prob_sys_size", major_version="2"
+            idict,
+            self.config,
+            self.init_data,
+            [],
+            auto_prob_str="prob_sys_size",
+            major_version="2",
         )
         config = self.config.copy()
         config["init_model_policy"] = "no"
@@ -857,7 +866,7 @@ class TestRunDPTrainNullIterData(unittest.TestCase):
             )
         )
         self.assertEqual(out["script"], work_dir / train_script_name)
-        self.assertEqual(out["model"], work_dir / "frozen_model.pb")
+        self.assertEqual(out["model"], self.init_model)
         self.assertEqual(out["lcurve"], work_dir / "lcurve.out")
         self.assertEqual(out["log"], work_dir / "train.log")
 
