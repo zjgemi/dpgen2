@@ -180,7 +180,6 @@ def _prep_run_caly(
         name="caly-evo-step",
         template=caly_evo_step_op,
         slices=Slices(
-            "int('{{item}}')",
             input_parameter=[
                 "task_name",
             ],
@@ -193,7 +192,6 @@ def _prep_run_caly(
                 "caly_check_opt_file",
             ],
             output_artifact=["traj_results"],
-            **template_slice_config,
         ),
         parameters={
             "block_id": prep_run_caly_steps.inputs.parameters["block_id"],
@@ -216,10 +214,6 @@ def _prep_run_caly(
             "qhull_input": temp_value,
         },
         key=step_keys["caly-evo-step-{{item}}"],
-        with_sequence=argo_sequence(
-            argo_len(prep_caly_input.outputs.parameters["task_names"]),
-            format=calypso_index_pattern,
-        ),
         executor=prep_executor,
         **prep_config,
     )
@@ -242,7 +236,7 @@ def _prep_run_caly(
             "models": prep_run_caly_steps.inputs.artifacts["models"],
         },
         key=step_keys["run-caly-model-devi"],
-        executor=prep_executor,
+        executor=run_executor,
         **prep_config,
     )
     prep_run_caly_steps.add(run_caly_model_devi)

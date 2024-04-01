@@ -67,7 +67,7 @@ class CollRunCaly(OP):
                     type=Path, optional=True
                 ),  # dir named results for evo
                 "opt_results_dir": Artifact(
-                    type=Path, optional=True
+                    type=List[Path], optional=True
                 ),  # dir contains POSCAR* CONTCAR* OUTCAR*
                 "qhull_input": Artifact(type=Path, optional=True),  # for vsc
             }
@@ -141,11 +141,16 @@ class CollRunCaly(OP):
         results = (
             ip["results"].resolve() if ip["results"] is not None else ip["results"]
         )
-        opt_results_dir = (
-            ip["opt_results_dir"].resolve()
-            if ip["opt_results_dir"] is not None
-            else ip["opt_results_dir"]
-        )
+        # opt_results_dir = (
+        #     ip["opt_results_dir"].resolve()
+        #     if ip["opt_results_dir"] is not None
+        #     else ip["opt_results_dir"]
+        # )
+        opt_results_dir = []
+        if ip["opt_results_dir"] is not None:
+            for temp in ip["opt_results_dir"]:
+                opt_results_dir.append(Path(temp).resolve())
+
         qhull_input = (
             ip["qhull_input"].resolve()
             if ip["qhull_input"] is not None
@@ -227,11 +232,13 @@ config_args = CollRunCaly.calypso_args
 
 
 def prep_last_calypso_file(step, results, opt_results_dir, qhull_input, vsc):
-    if step is not None and results is not None or opt_results_dir is not None:
+    if step is not None and results is not None and opt_results_dir is not None:
         Path(step.name).symlink_to(step)
         Path(results.name).symlink_to(results)
-        for file_name in opt_results_dir.iterdir():
-            Path(file_name.name).symlink_to(file_name)
+        assert isinstance(opt_results_dir, list), "opt_results_dir should be a list."
+        for opt_results_name in opt_results_dir:
+            for file_name in opt_results_name.iterdir():
+                Path(file_name.name).symlink_to(file_name)
 
     if vsc and qhull_input is not None:
         Path(qhull_input.name).symlink_to(qhull_input)
