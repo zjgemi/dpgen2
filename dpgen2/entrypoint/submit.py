@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import pickle
+import re
 from pathlib import (
     Path,
 )
@@ -687,13 +688,66 @@ def print_list_steps(
 
 
 def successful_step_keys(wf):
-    all_step_keys_ = wf.query_keys_of_steps()
-    wf_info = wf.query()
     all_step_keys = []
-    for ii in all_step_keys_:
-        if wf_info.get_step(key=ii)[0]["phase"] == "Succeeded":
-            all_step_keys.append(ii)
+    steps = wf.query_step()
+    # For reused steps whose startedAt are identical, sort them by key
+    steps.sort(key=lambda x: "%s-%s" % (x.startedAt, x.key))
+    for step in steps:
+        if step.key is not None and step.phase == "Succeeded":
+            all_step_keys.append(step.key)
     return all_step_keys
+
+
+def fold_keys(all_step_keys):
+    folded_keys = {}
+    for key in all_step_keys:
+        if re.fullmatch("iter-[0-9]*--block", key):
+            if key not in folded_keys:
+                folded_keys[key] = []
+        elif key.startswith("iter-"):
+            i = key.find("--")
+            if key[i+2:] in ["id", "scheduler"]:
+                folded_keys[key] = [key]
+            else:
+                # if its block is succeeded, fold it into its block
+                block_key = key[:i+2] + "block"
+                if block_key in all_step_keys:
+                    if block_key not in folded_keys:
+                        folded_keys[block_key] = []
+                    folded_keys[block_key].append(key)
+                else:
+                    folded_keys[key] = [key]
+        else:
+            folded_keys[key] = [key]
+
+    for k, v in folded_keys.items():
+        if v == []:
+            folded_keys[k] = [k]
+    return folded_keys
+
+
+def fold_reused_keys(reused_keys, folded_keys):
+    folded_reused_keys = {}
+    for key in reused_keys:
+        if re.fullmatch("iter-[0-9]*--block", key):
+            folded_reused_keys[key] = [key]
+        elif key.startswith("iter-"):
+            i = key.find("--")
+            if key[i+2:] in ["id", "scheduler"]:
+                folded_reused_keys[key] = [key]
+            else:
+                block_key = key[:i+2] + "block"
+                if block_key not in folded_reused_keys:
+                    folded_reused_keys[block_key] = []
+                folded_reused_keys[block_key].append(key)
+        else:
+            folded_reused_keys[key] = [key]
+    for k, v in folded_reused_keys.items():
+        # reuse the block iif all steps within it are reused
+        if v != [k] and k in folded_keys and set(v) == set(folded_keys[k]):
+            folded_reused_keys[k] = [k]
+    reused_keys = sum(folded_reused_keys.values(), [])
+    return reused_keys
 
 
 def get_resubmit_keys(
@@ -703,6 +757,7 @@ def get_resubmit_keys(
     all_step_keys = matched_step_key(
         all_step_keys,
         [
+            "block",
             "prep-train",
             "run-train",
             "modify-train-script",
@@ -720,7 +775,8 @@ def get_resubmit_keys(
         all_step_keys,
         ["run-train", "run-lmp", "run-fp"],
     )
-    return all_step_keys
+    folded_keys = fold_keys(all_step_keys)
+    return folded_keys
 
 
 def resubmit_concurrent_learning(
@@ -729,13 +785,15 @@ def resubmit_concurrent_learning(
     list_steps=False,
     reuse=None,
     replace_scheduler=False,
+    fold=False,
 ):
     wf_config = normalize_args(wf_config)
 
     global_config_workflow(wf_config)
 
     old_wf = Workflow(id=wfid)
-    all_step_keys = get_resubmit_keys(old_wf)
+    folded_keys = get_resubmit_keys(old_wf)
+    all_step_keys = sum(folded_keys.values(), [])
 
     if list_steps:
         prt_str = print_keys_in_nice_format(
@@ -747,10 +805,12 @@ def resubmit_concurrent_learning(
     if reuse is None:
         return None
     reuse_idx = expand_idx(reuse)
-    reuse_step = []
-    old_wf_info = old_wf.query()
-    for ii in reuse_idx:
-        reuse_step += old_wf_info.get_step(key=all_step_keys[ii])
+    reused_keys = [all_step_keys[ii] for ii in reuse_idx]
+    if fold:
+        reused_keys = fold_reused_keys(reused_keys, folded_keys)
+    reuse_step = old_wf.query_step(key=reused_keys)
+    # For reused steps whose startedAt are identical, sort them by key
+    reuse_step.sort(key=lambda x: "%s-%s" % (x.startedAt, x.key))
 
     wf = submit_concurrent_learning(
         wf_config,
