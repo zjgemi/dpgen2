@@ -38,7 +38,7 @@ class PrepDPTrain(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "template_script": Union[dict, List[dict]],
+                "template_script": BigParameter(Union[dict, List[dict]]),
                 "numb_models": int,
             }
         )
