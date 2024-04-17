@@ -34,6 +34,7 @@ from dflow.python import (
     OP,
     OPIO,
     Artifact,
+    BigParameter,
     OPIOSign,
     PythonOPTemplate,
     Slices,
@@ -76,7 +77,7 @@ class ModifyTrainScript(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "template_script": List[dict],
+                "template_script": BigParameter(List[dict]),
             }
         )
 
