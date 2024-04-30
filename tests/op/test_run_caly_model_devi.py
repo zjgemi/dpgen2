@@ -1,6 +1,9 @@
 import os
 import shutil
 import unittest
+from ast import (
+    Slice,
+)
 from pathlib import (
     Path,
 )
@@ -17,11 +20,15 @@ from ase import (
 from ase.io import (
     write,
 )
+from dflow import (
+    Step,
+)
 from dflow.python import (
     OP,
     OPIO,
     Artifact,
     OPIOSign,
+    PythonOPTemplate,
     TransientError,
 )
 
@@ -131,8 +138,6 @@ ITEM: ATOMS id type x y z fx fy fz
         dump_str = atoms2lmpdump(self.atoms_normal_2, 1, self.type_map)
         self.assertEqual(dump_str, self.ref_dump_str)
 
-    # @patch("dpgen2.op.run_caly_model_devi.RunCalyModelDevi.import_deepmd_package.calc_model_devi")
-    # @patch("dpgen2.op.run_caly_model_devi.RunCalyModelDevi.import_deepmd_package.DP")
     @unittest.skipIf(x == 1, "deepmd package not exists.")
     @patch("deepmd.infer.calc_model_devi")
     @patch("deepmd.infer.DeepPot")

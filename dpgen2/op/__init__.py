@@ -10,6 +10,9 @@ from .prep_caly_dp_optim import (
 from .prep_caly_input import (
     PrepCalyInput,
 )
+from .prep_caly_model_devi import (
+    PrepCalyModelDevi,
+)
 from .prep_dp_train import (
     PrepDPTrain,
 )

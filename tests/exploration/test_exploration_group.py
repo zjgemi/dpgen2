@@ -623,8 +623,32 @@ class TestCalyStage(unittest.TestCase):
                 "fmax": 1,
             }
         )
+        self.config_random = caly_normalize(
+            {
+                "name_of_atoms": [
+                    ["Li", "La", "Mg", "Al"],
+                    ["La", "Be", "Mg", "Ca"],
+                    ["H"],
+                ],
+                "numb_of_atoms": [10, 10, 10],
+                "numb_of_species": 3,
+                "distance_of_ions": [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]],
+            }
+        )
+        self.config_random_dict = caly_normalize(
+            {
+                "name_of_atoms": [
+                    ["Li", "La", "Mg", "Al"],
+                    ["La", "Be", "Mg", "Ca"],
+                    ["H"],
+                ],
+                "numb_of_atoms": [10, 10, 10],
+                "numb_of_species": 3,
+                "distance_of_ions": {"Li": 1.0, "La": 1.1, "H": 0.5},
+            }
+        )
 
-    def test(self):
+    def test_00_make_calypso_task(self):
         tgroup_1 = make_calypso_task_group_from_config(self.config_1)
         tgroup_2 = make_calypso_task_group_from_config(self.config_2)
 
@@ -639,13 +663,21 @@ class TestCalyStage(unittest.TestCase):
         self.maxDiff = None
         ii = 0
         self.assertEqual(task_group[ii].files()[calypso_input_file], ref_input)
-        # self.assertEqual(
-        #     task_group[ii].files()[calypso_run_opt_file],
-        #     ref_run_opt,
-        # )
-        # ii += 1
-        # self.assertEqual(task_group[ii].files()[lmp_conf_name], "foo")
-        # self.assertEqual(
-        #     task_group[ii].files()[lmp_input_name],
-        #     in_template_npt % (100.0, 10.0),
-        # )
+
+    def test_01_make_random_calypso_task(self):
+        tgroup_1 = make_calypso_task_group_from_config(self.config_random)
+
+        stage = ExplorationStage()
+        stage.add_task_group(tgroup_1)
+
+        task_group = stage.make_task()
+        self.assertEqual(len(task_group), 1)
+
+    def test_02_make_random_dict_calypso_task(self):
+        tgroup_1 = make_calypso_task_group_from_config(self.config_random_dict)
+
+        stage = ExplorationStage()
+        stage.add_task_group(tgroup_1)
+
+        task_group = stage.make_task()
+        self.assertEqual(len(task_group), 1)

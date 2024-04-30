@@ -58,6 +58,7 @@ class PrepRunCaly(Steps):
         name: str,
         prep_caly_input_op: Type[OP],
         caly_evo_step_op: OPTemplate,
+        prep_caly_model_devi_op: Type[OP],
         run_caly_model_devi_op: Type[OP],
         prep_config: dict = normalize_step_dict({}),
         run_config: dict = normalize_step_dict({}),
@@ -96,12 +97,15 @@ class PrepRunCaly(Steps):
         self._keys = [
             "prep-caly-input",
             "caly-evo-step-{{item}}",
+            "prep-caly-model-devi",
             "run-caly-model-devi",
         ]
         self.step_keys = {}
         ii = "prep-caly-input"
         self.step_keys[ii] = "--".join(["%s" % self.inputs.parameters["block_id"], ii])
         ii = "caly-evo-step-{{item}}"
+        self.step_keys[ii] = "--".join(["%s" % self.inputs.parameters["block_id"], ii])
+        ii = "prep-caly-model-devi"
         self.step_keys[ii] = "--".join(["%s" % self.inputs.parameters["block_id"], ii])
         ii = "run-caly-model-devi"
         self.step_keys[ii] = "--".join(["%s" % self.inputs.parameters["block_id"], ii])
@@ -111,6 +115,7 @@ class PrepRunCaly(Steps):
             self.step_keys,
             prep_caly_input_op,
             caly_evo_step_op,
+            prep_caly_model_devi_op,
             run_caly_model_devi_op,
             prep_config=prep_config,
             run_config=run_config,
@@ -143,6 +148,7 @@ def _prep_run_caly(
     step_keys: Dict[str, Any],
     prep_caly_input_op: Type[OP],
     caly_evo_step_op: OPTemplate,
+    prep_caly_model_devi_op: Type[OP],
     run_caly_model_devi_op: Type[OP],
     prep_config: dict = normalize_step_dict({}),
     run_config: dict = normalize_step_dict({}),
@@ -219,32 +225,55 @@ def _prep_run_caly(
     )
     prep_run_caly_steps.add(caly_evo_step)
 
+    # prep_caly_model_devi
+    prep_caly_model_devi = Step(
+        "prep-caly-model-devi",
+        template=PythonOPTemplate(
+            prep_caly_model_devi_op,
+            python_packages=upload_python_packages,
+            **run_template_config,
+        ),
+        parameters={
+            "task_name": "prep-calypso-model-deviation",
+            "template_slice_config": template_slice_config,
+        },
+        artifacts={
+            "traj_results": caly_evo_step.outputs.artifacts["traj_results"],
+        },
+        key="%s--prep-caly-model-devi"
+        % (prep_run_caly_steps.inputs.parameters["block_id"],),
+        executor=prep_executor,
+    )
+    prep_run_caly_steps.add(prep_caly_model_devi)
+
     # run model devi
     run_caly_model_devi = Step(
         "run-caly-model-devi",
         template=PythonOPTemplate(
             run_caly_model_devi_op,
+            slices=Slices(
+                input_parameter=["task_name"],
+                input_artifact=["traj_dirs"],
+                output_artifact=["traj", "model_devi"],
+            ),
             python_packages=upload_python_packages,
-            **prep_template_config,
+            **run_template_config,
         ),
         parameters={
             "type_map": prep_run_caly_steps.inputs.parameters["type_map"],
-            "task_name": "run-calypso-model-devi",
+            "task_name": prep_caly_model_devi.outputs.parameters["task_name_list"],
         },
         artifacts={
-            "traj_dirs": caly_evo_step.outputs.artifacts["traj_results"],
+            "traj_dirs": prep_caly_model_devi.outputs.artifacts["grouped_traj_list"],
             "models": prep_run_caly_steps.inputs.artifacts["models"],
         },
-        key=step_keys["run-caly-model-devi"],
+        key="%s--run-caly-model-devi-{{item}}"
+        % (prep_run_caly_steps.inputs.parameters["block_id"],),
         executor=run_executor,
         **prep_config,
     )
     prep_run_caly_steps.add(run_caly_model_devi)
 
-    # prep_run_caly_steps.outputs.parameters[
-    #     "task_names"
-    # ].value_from_parameter = prep_caly_input.outputs.parameters["task_names"],
-    # run_caly_model_devi.outputs.parameters["task_name"]
     prep_run_caly_steps.outputs.artifacts[
         "trajs"
     ]._from = run_caly_model_devi.outputs.artifacts["traj"]

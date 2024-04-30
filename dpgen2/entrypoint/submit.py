@@ -94,6 +94,7 @@ from dpgen2.op import (
     CollRunCaly,
     PrepCalyDPOptim,
     PrepCalyInput,
+    PrepCalyModelDevi,
     PrepDPTrain,
     PrepLmp,
     RunCalyDPOptim,
@@ -183,6 +184,7 @@ def make_concurrent_learning_op(
             "prep-run-calypso",
             prep_caly_input_op=PrepCalyInput,
             caly_evo_step_op=caly_evo_step_op,
+            prep_caly_model_devi_op=PrepCalyModelDevi,
             run_caly_model_devi_op=RunCalyModelDevi,
             prep_config=prep_explore_config,
             run_config=run_explore_config,
@@ -803,8 +805,10 @@ def get_superop(key):
         return re.sub("prep-dp-optim-[0-9]*-[0-9]*", "prep-run-explore", key)
     elif "run-dp-optim-" in key:
         return re.sub("run-dp-optim-[0-9]*-[0-9]*-[0-9]*", "prep-run-explore", key)
+    elif "prep-caly-model-devi" in key:
+        return key.replace("prep-caly-model-devi", "prep-run-explore")
     elif "run-caly-model-devi" in key:
-        return key.replace("run-caly-model-devi", "prep-run-explore")
+        return re.sub("run-caly-model-devi-[0-9]*", "prep-run-explore", key)
     return None
 
 
@@ -849,6 +853,7 @@ def get_resubmit_keys(
             "collect-run-calypso",
             "prep-dp-optim",
             "run-dp-optim",
+            "prep-caly-model-devi",
             "run-caly-model-devi",
             "prep-run-explore",
             "prep-lmp",

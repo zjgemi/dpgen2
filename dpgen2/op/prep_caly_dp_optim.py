@@ -106,8 +106,6 @@ class PrepCalyDPOptim(OP):
             - `caly_check_opt_file` : (`Path`)
 
         """
-        group_size = ip["template_slice_config"]["group_size"]
-
         finished = ip["finished"]
 
         work_dir = Path(ip["task_name"])
@@ -119,6 +117,9 @@ class PrepCalyDPOptim(OP):
         caly_check_opt_file = _caly_check_opt_file.resolve()
         poscar_list = [poscar.resolve() for poscar in poscar_dir.rglob("POSCAR_*")]
         poscar_list = sorted(poscar_list, key=lambda x: int(x.name.strip("POSCAR_")))
+
+        group_size = ip["template_slice_config"].get("group_size", len(poscar_list))
+
         model_name = "frozen_model.pb"
         model_list = [model.resolve() for model in models_dir.rglob(model_name)]
         if len(model_list) == 0:

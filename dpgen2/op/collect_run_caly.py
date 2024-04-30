@@ -141,11 +141,6 @@ class CollRunCaly(OP):
         results = (
             ip["results"].resolve() if ip["results"] is not None else ip["results"]
         )
-        # opt_results_dir = (
-        #     ip["opt_results_dir"].resolve()
-        #     if ip["opt_results_dir"] is not None
-        #     else ip["opt_results_dir"]
-        # )
         opt_results_dir = []
         if ip["opt_results_dir"] is not None:
             for temp in ip["opt_results_dir"]:
@@ -162,26 +157,30 @@ class CollRunCaly(OP):
             prep_last_calypso_file(step, results, opt_results_dir, qhull_input, vsc)
             # copy input.dat
             Path(input_file.name).symlink_to(input_file)
-            # run calypso
-            command = " ".join([command, ">", calypso_log_name])
-            ret, out, err = run_command(command, shell=True)
-            if ret != 0:
-                logging.error(
-                    "".join(
-                        (
-                            "calypso failed\n",
-                            "command was: ",
-                            command,
-                            "out msg: ",
-                            out,
-                            "\n",
-                            "err msg: ",
-                            err,
-                            "\n",
+
+            finished = "true" if int(cnt_num) == int(max_step) else "false"
+
+            if finished == "false":
+                # run calypso
+                command = " ".join([command, ">", calypso_log_name])
+                ret, out, err = run_command(command, shell=True)
+                if ret != 0:
+                    logging.error(
+                        "".join(
+                            (
+                                "calypso failed\n",
+                                "command was: ",
+                                command,
+                                "out msg: ",
+                                out,
+                                "\n",
+                                "err msg: ",
+                                err,
+                                "\n",
+                            )
                         )
                     )
-                )
-                raise TransientError("calypso failed")
+                    raise TransientError("calypso failed")
 
             poscar_dir = Path("poscar_dir")
             poscar_dir.mkdir(parents=True, exist_ok=True)
@@ -190,7 +189,7 @@ class CollRunCaly(OP):
                 shutil.copyfile(poscar, target)
 
             step = Path("step").read_text().strip()
-            finished = "true" if int(cnt_num) == int(max_step) else "false"
+            # finished = "true" if int(cnt_num) == int(max_step) else "false"
 
             if not Path("test_qconvex.in").exists():
                 Path("test_qconvex.in").write_text("")

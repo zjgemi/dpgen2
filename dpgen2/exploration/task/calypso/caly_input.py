@@ -241,7 +241,7 @@ if __name__ == "__main__":
 def make_calypso_input(
     numb_of_species: int,
     name_of_atoms: List[str],
-    atomic_number: List[int],
+    atomic_number,
     numb_of_atoms: List[int],
     distance_of_ions,
     pop_size: int = 30,

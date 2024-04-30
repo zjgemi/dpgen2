@@ -983,11 +983,7 @@ class MockedCollRunCaly(CollRunCaly):
         results = (
             ip["results"].resolve() if ip["results"] is not None else ip["results"]
         )
-        # opt_results_dir = (
-        #     ip["opt_results_dir"].resolve()
-        #     if ip["opt_results_dir"] is not None
-        #     else ip["opt_results_dir"]
-        # )
+
         opt_results_dir = []
         if ip["opt_results_dir"] is not None:
             for temp in ip["opt_results_dir"]:
@@ -1008,38 +1004,40 @@ class MockedCollRunCaly(CollRunCaly):
             Path(results.name).symlink_to(results)
             # Path(opt_results_dir.name).symlink_to(opt_results_dir)
 
-        for i in range(5):
-            Path(f"POSCAR_{str(i)}").write_text(f"POSCAR_{str(i)}")
+        finished = "true" if int(cnt_num) == int(max_step) else "false"
+        if finished == "false":
+            for i in range(5):
+                Path(f"POSCAR_{str(i)}").write_text(f"POSCAR_{str(i)}")
 
-        if step is None:
-            Path("step").write_text("2")
-        else:
-            step_num = Path("step").read_text().strip()
-            Path("step").write_text(f"{int(step_num)+1}")
+            if step is None:
+                Path("step").write_text("2")
+            else:
+                step_num = Path("step").read_text().strip()
+                Path("step").write_text(f"{int(step_num)+1}")
 
-        if qhull_input is None:
-            Path("test_qconvex.in").write_text("")
+            if qhull_input is None:
+                Path("test_qconvex.in").write_text("")
 
-        step_num = int(Path("step").read_text().strip())
+            step_num = int(Path("step").read_text().strip())
 
-        if results is None:
-            Path("results").mkdir(parents=True, exist_ok=True)
-            for i in range(1, step_num):
+            if results is None:
+                Path("results").mkdir(parents=True, exist_ok=True)
+                for i in range(1, step_num):
+                    Path(f"results/pso_ini_{i}").write_text(f"pso_ini_{i}")
+                    Path(f"results/pso_opt_{i}").write_text(f"pso_opt_{i}")
+                    Path(f"results/pso_sor_{i}").write_text(f"pso_sor_{i}")
+            else:
+                i = step_num
                 Path(f"results/pso_ini_{i}").write_text(f"pso_ini_{i}")
                 Path(f"results/pso_opt_{i}").write_text(f"pso_opt_{i}")
                 Path(f"results/pso_sor_{i}").write_text(f"pso_sor_{i}")
-        else:
-            i = step_num
-            Path(f"results/pso_ini_{i}").write_text(f"pso_ini_{i}")
-            Path(f"results/pso_opt_{i}").write_text(f"pso_opt_{i}")
-            Path(f"results/pso_sor_{i}").write_text(f"pso_sor_{i}")
 
         poscar_dir = Path("poscar_dir")
         poscar_dir.mkdir(parents=True, exist_ok=True)
         for poscar in Path().glob("POSCAR_*"):
             target = poscar_dir.joinpath(poscar.name)
             shutil.copyfile(poscar, target)
-        finished = "true" if int(cnt_num) == int(max_step) else "false"
+        # finished = "true" if int(cnt_num) == int(max_step) else "false"
 
         os.chdir(cwd)
         ret_dict = {

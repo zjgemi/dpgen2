@@ -75,6 +75,9 @@ from dpgen2.op.prep_caly_dp_optim import (
 from dpgen2.op.prep_caly_input import (
     PrepCalyInput,
 )
+from dpgen2.op.prep_caly_model_devi import (
+    PrepCalyModelDevi,
+)
 from dpgen2.op.run_caly_model_devi import (
     RunCalyModelDevi,
 )
@@ -101,6 +104,7 @@ run_default_config = normalize_step_dict(
         "template_slice_config": {
             "group_size": 2,
             "pool_size": 1,
+            "model_devi_group_size": 30,
         },
     }
 )
@@ -143,7 +147,6 @@ class TestPrepRunCaly(unittest.TestCase):
         shutil.rmtree(self.work_dir, ignore_errors=True)
         for i in Path().glob("prep-run-caly-step*"):
             shutil.rmtree(i, ignore_errors=True)
-        # shutil.rmtree("upload", ignore_errors=True)
 
     def test(self):
         caly_evo_step_op = CalyEvoStep(
@@ -159,6 +162,7 @@ class TestPrepRunCaly(unittest.TestCase):
             "prep-run-calypso",
             PrepCalyInput,
             caly_evo_step_op,
+            PrepCalyModelDevi,
             MockedRunCalyModelDevi,
             prep_config=prep_default_config,
             run_config=run_default_config,

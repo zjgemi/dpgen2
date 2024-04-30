@@ -294,7 +294,7 @@ def caly_task_grp_args():
         Argument(
             "atomic_number",
             list,
-            optional=False,
+            optional=True,
             doc="atomic number of each element.",
         ),
         Argument(
@@ -305,8 +305,8 @@ def caly_task_grp_args():
         ),
         Argument(
             "distance_of_ions",
-            list,
-            optional=False,
+            [list, dict],
+            optional=True,
             doc="the distance matrix between different elements.",
         ),
         Argument(
