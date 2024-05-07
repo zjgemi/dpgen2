@@ -132,7 +132,7 @@ class PrepFpOpAbacus(OP):
         return op.execute(op_in)  # type: ignore in the case of not importing fpop
 
 
-def get_suffix_calculation(INPUT):
+def get_suffix_calculation(INPUT: List[str]) -> Tuple[str, str]:
     suffix = "ABACUS"
     calculation = "scf"
     for iline in INPUT:
