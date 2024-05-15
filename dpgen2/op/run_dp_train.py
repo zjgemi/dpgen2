@@ -418,6 +418,7 @@ class RunDPTrain(OP):
                     ]
                 if k == head:
                     v["training_data"]["systems"] += [str(ii) for ii in iter_data]
+                    v["training_data"]["auto_prob"] = auto_prob_str
             return odict
         data_list = [str(ii) for ii in init_data] + [str(ii) for ii in iter_data]
         if major_version == "1":
