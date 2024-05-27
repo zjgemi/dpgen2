@@ -47,10 +47,6 @@ from dpgen2.utils.step_config import (
 )
 from dpgen2.utils.step_config import normalize as normalize_step_dict
 
-from .caly_evo_step import (
-    CalyEvoStep,
-)
-
 
 class PrepRunCaly(Steps):
     def __init__(
@@ -181,10 +177,13 @@ def _prep_run_caly(
     prep_run_caly_steps.add(prep_caly_input)
 
     temp_value = None
-
-    caly_evo_step = Step(
-        name="caly-evo-step",
-        template=caly_evo_step_op,
+    caly_evo_step_merge = Step(
+        "caly-evo-step",
+        template=PythonOPTemplate(
+            caly_evo_step_op,
+            python_packages=upload_python_packages,
+            **run_template_config,
+        ),
         slices=Slices(
             input_parameter=[
                 "task_name",
@@ -223,7 +222,7 @@ def _prep_run_caly(
         executor=prep_executor,
         **prep_config,
     )
-    prep_run_caly_steps.add(caly_evo_step)
+    prep_run_caly_steps.add(caly_evo_step_merge)
 
     # prep_caly_model_devi
     prep_caly_model_devi = Step(
@@ -238,7 +237,7 @@ def _prep_run_caly(
             "template_slice_config": template_slice_config,
         },
         artifacts={
-            "traj_results": caly_evo_step.outputs.artifacts["traj_results"],
+            "traj_results": caly_evo_step_merge.outputs.artifacts["traj_results"],
         },
         key="%s--prep-caly-model-devi"
         % (prep_run_caly_steps.inputs.parameters["block_id"],),

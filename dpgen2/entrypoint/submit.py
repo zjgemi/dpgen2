@@ -103,8 +103,10 @@ from dpgen2.op import (
     RunLmp,
     SelectConfs,
 )
+from dpgen2.op.caly_evo_step_merge import (
+    CalyEvoStepMerge,
+)
 from dpgen2.superop import (
-    CalyEvoStep,
     ConcurrentLearningBlock,
     PrepRunCaly,
     PrepRunDPTrain,
@@ -171,7 +173,7 @@ def make_concurrent_learning_op(
             upload_python_packages=upload_python_packages,
         )
     elif explore_style == "calypso":
-        caly_evo_step_op = CalyEvoStep(
+        caly_evo_step_op = CalyEvoStepMerge(
             "caly-evo-step",
             collect_run_caly=CollRunCaly,
             prep_dp_optim=PrepCalyDPOptim,
