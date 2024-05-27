@@ -151,6 +151,7 @@ def make_concurrent_learning_op(
     upload_python_packages: Optional[List[os.PathLike]] = None,
     valid_data: Optional[S3Artifact] = None,
 ):
+    expl_mode = run_explore_config.pop("mode", "default")
     if train_style in ("dp", "dp-dist"):
         prep_run_train_op = PrepRunDPTrain(
             "prep-run-dp-train",
@@ -174,7 +175,8 @@ def make_concurrent_learning_op(
         )
     elif explore_style == "calypso":
         caly_evo_step_op = CalyEvoStepMerge(
-            "caly-evo-step",
+            mode=expl_mode,
+            name="caly-evo-step",
             collect_run_caly=CollRunCaly,
             prep_dp_optim=PrepCalyDPOptim,
             run_dp_optim=RunCalyDPOptim,

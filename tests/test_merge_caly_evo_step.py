@@ -279,10 +279,11 @@ class TestCalyEvoStepMerge(unittest.TestCase):
 
     def test_caly_evo_step(self):
         steps = CalyEvoStepMerge(
-            "caly-evo-run",
-            MockedCollRunCaly,
-            PrepCalyDPOptim,
-            MockedRunCalyDPOptim,
+            mode="debug",
+            name="caly-evo-step",
+            collect_run_caly=MockedCollRunCaly,
+            prep_dp_optim=PrepCalyDPOptim,
+            run_dp_optim=MockedRunCalyDPOptim,
             prep_config=default_config,
             run_config=default_config,
             upload_python_packages=upload_python_packages,

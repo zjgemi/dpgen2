@@ -272,7 +272,6 @@ class TestCalyEvoStep(unittest.TestCase):
             shutil.rmtree(i, ignore_errors=True)
         for i in Path().glob("caly_task*"):
             shutil.rmtree(i, ignore_errors=True)
-        # shutil.rmtree("upload", ignore_errors=True)
 
     @unittest.skip("only need to run test_01")
     def test_00(self):
