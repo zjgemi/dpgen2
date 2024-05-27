@@ -553,7 +553,9 @@ def submit_args(default_step_config=normalize_step_dict({})):
             ),
             Argument("fp", dict, [], [variant_fp()], optional=False, doc=doc_fp),
             Argument("name", str, optional=True, default="dpgen", doc=doc_name),
-            Argument("parallelism", int, optional=True, default=None, doc=doc_parallelism),
+            Argument(
+                "parallelism", int, optional=True, default=None, doc=doc_parallelism
+            ),
         ]
     )
 
