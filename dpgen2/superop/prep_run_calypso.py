@@ -230,7 +230,7 @@ def _prep_run_caly(
                 "qhull_input": temp_value,
             },
             key=step_keys["caly-evo-step-{{item}}"],
-            with_param=argo_range(prep_caly_input.outputs.parameters["ntasks"]),
+            with_param=argo_range(prep_caly_input.outputs.parameters["ntasks"]),  # type: ignore
             # executor=caly_evo_step_executor,
             **caly_evo_step_config,
         )
@@ -274,7 +274,7 @@ def _prep_run_caly(
                 "qhull_input": temp_value,
             },
             key=step_keys["caly-evo-step-{{item}}"],
-            with_param=argo_range(prep_caly_input.outputs.parameters["ntasks"]),
+            with_param=argo_range(prep_caly_input.outputs.parameters["ntasks"]),  # type: ignore
             # executor=caly_evo_step_executor,
             **caly_evo_step_config,
         )
