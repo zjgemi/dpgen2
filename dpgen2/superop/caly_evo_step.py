@@ -137,18 +137,19 @@ def _caly_evo_step(
     run_config: dict = normalize_step_dict({}),
     upload_python_packages: Optional[List[os.PathLike]] = None,
 ):
+    print("run_config. = == = = =", run_config)
     prep_config = deepcopy(prep_config)
     run_config = deepcopy(run_config)
     prep_template_config = prep_config.pop("template_config")
     run_template_config = run_config.pop("template_config")
-    prep_executor = init_executor(prep_config.pop("executor"))
-    run_executor = init_executor(run_config.pop("executor"))
+    prep_executor = prep_config.pop("executor")
+    run_executor = run_config.pop("executor")
     template_slice_config = run_config.pop("template_slice_config", {})
     expl_mode = run_config.pop("mode", "default")
 
     def wise_executor(expl_mode, origin_executor):
         if expl_mode == "default":
-            return origin_executor
+            return init_executor(origin_executor)
         elif expl_mode == "debug":
             return None
         else:
@@ -216,9 +217,7 @@ def _caly_evo_step(
             caly_evo_step_steps.inputs.parameters["iter_num"],
             caly_evo_step_steps.inputs.parameters["cnt_num"],
         ),
-        executor=wise_executor(
-            expl_mode, prep_executor
-        ),  # cpu is enough to run calypso.x, default step config is c2m4
+        executor=wise_executor(expl_mode, prep_executor),
         **run_config,
     )
     caly_evo_step_steps.add(prep_dp_optim)

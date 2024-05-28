@@ -151,7 +151,7 @@ def make_concurrent_learning_op(
     upload_python_packages: Optional[List[os.PathLike]] = None,
     valid_data: Optional[S3Artifact] = None,
 ):
-    expl_mode = run_explore_config.pop("mode", "default")
+    expl_mode = run_explore_config.get("mode", "default")
     if train_style in ("dp", "dp-dist"):
         prep_run_train_op = PrepRunDPTrain(
             "prep-run-dp-train",
