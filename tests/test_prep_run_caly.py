@@ -84,6 +84,9 @@ from dpgen2.op.prep_caly_model_devi import (
 from dpgen2.op.run_caly_model_devi import (
     RunCalyModelDevi,
 )
+from dpgen2.superop.caly_evo_step import (
+    CalyEvoStep,
+)
 from dpgen2.superop.prep_run_calypso import (
     PrepRunCaly,
 )
@@ -93,18 +96,6 @@ prep_default_config = normalize_step_dict(
     {
         "template_config": {
             "image": default_image,
-        },
-    }
-)
-run_default_config = normalize_step_dict(
-    {
-        "template_config": {
-            "image": default_image,
-        },
-        "template_slice_config": {
-            "group_size": 2,
-            "pool_size": 1,
-            "model_devi_group_size": 30,
         },
     }
 )
@@ -148,9 +139,21 @@ class TestPrepRunCaly(unittest.TestCase):
         for i in Path().glob("prep-run-caly-step*"):
             shutil.rmtree(i, ignore_errors=True)
 
-    def test_caly_evo_step_merge_debug_mode(self):
+    def test_caly_evo_step_merge_merge_mode(self):
+        run_default_config = normalize_step_dict(
+            {
+                "mode": "merge",
+                "template_config": {
+                    "image": default_image,
+                },
+                "template_slice_config": {
+                    "group_size": 2,
+                    "pool_size": 1,
+                    "model_devi_group_size": 30,
+                },
+            }
+        )
         caly_evo_step_op = CalyEvoStepMerge(
-            mode="debug",
             name="caly-evo-step",
             collect_run_caly=MockedCollRunCaly,
             prep_dp_optim=PrepCalyDPOptim,
@@ -194,9 +197,60 @@ class TestPrepRunCaly(unittest.TestCase):
         step = wf.query_step(name="prep-run-caly-step")[0]
         self.assertEqual(step.phase, "Succeeded")
 
-        # download_artifact(step.outputs.artifacts["model_devis"])
-        # download_artifact(step.outputs.artifacts["trajs"])
-        # download_artifact(step.outputs.artifacts["logs"])
+    def test_caly_evo_step_merge_default_mode(self):
+        run_default_config = normalize_step_dict(
+            {
+                "mode": "default",
+                "template_config": {
+                    "image": default_image,
+                },
+                "template_slice_config": {
+                    "group_size": 2,
+                    "pool_size": 1,
+                    "model_devi_group_size": 30,
+                },
+            }
+        )
+        caly_evo_step_op = CalyEvoStep(
+            "caly-evo-run",
+            MockedCollRunCaly,
+            PrepCalyDPOptim,
+            MockedRunCalyDPOptim,
+            prep_config=prep_default_config,
+            run_config=run_default_config,
+            upload_python_packages=upload_python_packages,
+        )
+        prep_run_caly_op = PrepRunCaly(
+            "prep-run-calypso",
+            PrepCalyInput,
+            caly_evo_step_op,
+            PrepCalyModelDevi,
+            MockedRunCalyModelDevi,
+            prep_config=prep_default_config,
+            run_config=run_default_config,
+            upload_python_packages=upload_python_packages,
+        )
+        prep_run_caly_step = Step(
+            "prep-run-caly-step",
+            template=prep_run_caly_op,
+            parameters={
+                "block_id": self.block_id,
+                "expl_task_grp": self.expl_task_grp,
+                "explore_config": self.expl_config,
+                "type_map": self.type_map,
+            },
+            artifacts={
+                "models": self.models,
+            },
+        )
 
-        # for ii in step.outputs.parameters["task_names"].value:
-        #     self.check_run_lmp_output(ii, self.model_list)
+        wf = Workflow(name="prep-run-caly-step", host=default_host)
+        wf.add(prep_run_caly_step)
+        wf.submit()
+
+        while wf.query_status() in ["Pending", "Running"]:
+            time.sleep(4)
+
+        self.assertEqual(wf.query_status(), "Succeeded")
+        step = wf.query_step(name="prep-run-caly-step")[0]
+        self.assertEqual(step.phase, "Succeeded")

@@ -26,6 +26,9 @@ from dflow.python import (
     Slices,
     TransientError,
 )
+from dflow.utils import (
+    flatten,
+)
 
 from dpgen2.constants import (
     calypso_check_opt_file,
@@ -47,7 +50,7 @@ from dpgen2.utils.run_command import (
 
 
 class CalyEvoStepMerge(OP):
-    def __init__(self, mode="default", *args, **kwargs):
+    def __init__(self, mode="debug", *args, **kwargs):
         self.mode = mode
         self.args = args
         self.kwargs = kwargs
@@ -115,10 +118,6 @@ class CalyEvoStepMerge(OP):
         for k in step.outputs.artifacts:
             path_list = download_artifact(step.outputs.artifacts[k])
             if output_sign[k].type == List[Path]:
-                from dflow.utils import (
-                    flatten,
-                )
-
                 if not isinstance(path_list, list) or any(
                     [p is not None and not isinstance(p, str) for p in path_list]
                 ):

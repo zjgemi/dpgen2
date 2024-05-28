@@ -137,7 +137,6 @@ def _caly_evo_step(
     run_config: dict = normalize_step_dict({}),
     upload_python_packages: Optional[List[os.PathLike]] = None,
 ):
-    print("run_config. = == = = =", run_config)
     prep_config = deepcopy(prep_config)
     run_config = deepcopy(run_config)
     prep_template_config = prep_config.pop("template_config")
@@ -150,11 +149,11 @@ def _caly_evo_step(
     def wise_executor(expl_mode, origin_executor):
         if expl_mode == "default":
             return init_executor(origin_executor)
-        elif expl_mode == "debug":
+        elif expl_mode == "merge":
             return None
         else:
             raise NotImplementedError(
-                f"Unknown expl_mode {expl_mode}, only support `default` and `debug`."
+                f"Unknown expl_mode {expl_mode}, only support `default` and `merge`."
             )
 
     # collect the last step files and run calypso.x to generate structures

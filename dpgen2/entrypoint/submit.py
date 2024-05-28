@@ -113,6 +113,9 @@ from dpgen2.superop import (
     PrepRunFp,
     PrepRunLmp,
 )
+from dpgen2.superop.caly_evo_step import (
+    CalyEvoStep,
+)
 from dpgen2.utils import (
     BinaryFileInput,
     bohrium_config_from_dict,
@@ -174,16 +177,28 @@ def make_concurrent_learning_op(
             upload_python_packages=upload_python_packages,
         )
     elif explore_style == "calypso":
-        caly_evo_step_op = CalyEvoStepMerge(
-            mode=expl_mode,
-            name="caly-evo-step",
-            collect_run_caly=CollRunCaly,
-            prep_dp_optim=PrepCalyDPOptim,
-            run_dp_optim=RunCalyDPOptim,
-            prep_config=prep_explore_config,
-            run_config=run_explore_config,
-            upload_python_packages=upload_python_packages,
-        )
+        if expl_mode == "merge":
+            caly_evo_step_op = CalyEvoStepMerge(
+                name="caly-evo-step",
+                collect_run_caly=CollRunCaly,
+                prep_dp_optim=PrepCalyDPOptim,
+                run_dp_optim=RunCalyDPOptim,
+                prep_config=prep_explore_config,
+                run_config=run_explore_config,
+                upload_python_packages=None,
+            )
+        elif expl_mode == "default":
+            caly_evo_step_op = CalyEvoStep(
+                name="caly-evo-step",
+                collect_run_caly=CollRunCaly,
+                prep_dp_optim=PrepCalyDPOptim,
+                run_dp_optim=RunCalyDPOptim,
+                prep_config=prep_explore_config,
+                run_config=run_explore_config,
+                upload_python_packages=upload_python_packages,
+            )
+        else:
+            raise KeyError(f"Unknown key: {expl_mode}, support `default` and `merge`.")
         prep_run_explore_op = PrepRunCaly(
             "prep-run-calypso",
             prep_caly_input_op=PrepCalyInput,
