@@ -69,6 +69,9 @@ from dpgen2.exploration.task import (
     BaseExplorationTaskGroup,
     ExplorationTask,
 )
+from dpgen2.op.caly_evo_step_merge import (
+    CalyEvoStepMerge,
+)
 from dpgen2.op.prep_caly_dp_optim import (
     PrepCalyDPOptim,
 )
@@ -80,9 +83,6 @@ from dpgen2.op.prep_caly_model_devi import (
 )
 from dpgen2.op.run_caly_model_devi import (
     RunCalyModelDevi,
-)
-from dpgen2.superop.caly_evo_step import (
-    CalyEvoStep,
 )
 from dpgen2.superop.prep_run_calypso import (
     PrepRunCaly,
@@ -149,11 +149,12 @@ class TestPrepRunCaly(unittest.TestCase):
             shutil.rmtree(i, ignore_errors=True)
 
     def test(self):
-        caly_evo_step_op = CalyEvoStep(
-            "caly-evo-run",
-            MockedCollRunCaly,
-            PrepCalyDPOptim,
-            MockedRunCalyDPOptim,
+        caly_evo_step_op = CalyEvoStepMerge(
+            mode="debug",
+            name="caly-evo-step",
+            collect_run_caly=MockedCollRunCaly,
+            prep_dp_optim=PrepCalyDPOptim,
+            run_dp_optim=MockedRunCalyDPOptim,
             prep_config=prep_default_config,
             run_config=run_default_config,
             upload_python_packages=upload_python_packages,

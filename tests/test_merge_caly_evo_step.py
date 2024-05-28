@@ -270,12 +270,11 @@ class TestCalyEvoStepMerge(unittest.TestCase):
         )
 
     def tearDown(self):
-        pass
-        # shutil.rmtree(self.work_dir, ignore_errors=True)
-        # for i in Path().glob("caly-evo-step-*"):
-        #     shutil.rmtree(i, ignore_errors=True)
-        # for i in Path().glob("caly_task*"):
-        #     shutil.rmtree(i, ignore_errors=True)
+        shutil.rmtree(self.work_dir, ignore_errors=True)
+        for i in Path().glob("caly-evo-step-*"):
+            shutil.rmtree(i, ignore_errors=True)
+        for i in Path().glob("caly_task*"):
+            shutil.rmtree(i, ignore_errors=True)
 
     def test_caly_evo_step(self):
         steps = CalyEvoStepMerge(
