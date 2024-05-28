@@ -749,7 +749,7 @@ def submit_concurrent_learning(
         # wf_config["inputs"]["do_finetune"] = False
         # finetune will not be done again if the old process is reused.
 
-    wf = Workflow(name=wf_config["name"])
+    wf = Workflow(name=wf_config["name"], parallelism=wf_config["parallelism"])
 
     if wf_config["inputs"].get("do_finetune", False):
         assert finetune_step is not None
