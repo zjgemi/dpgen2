@@ -148,7 +148,7 @@ class TestPrepRunCaly(unittest.TestCase):
         for i in Path().glob("prep-run-caly-step*"):
             shutil.rmtree(i, ignore_errors=True)
 
-    def test(self):
+    def test_caly_evo_step_merge_debug_mode(self):
         caly_evo_step_op = CalyEvoStepMerge(
             mode="debug",
             name="caly-evo-step",

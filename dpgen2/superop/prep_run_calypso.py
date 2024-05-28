@@ -157,6 +157,7 @@ def _prep_run_caly(
     prep_executor = init_executor(prep_config.pop("executor"))
     run_executor = init_executor(run_config.pop("executor"))
     template_slice_config = run_config.pop("template_slice_config", {})
+    expl_mode = run_config.pop("mode", "default")
 
     # prep caly input files
     prep_caly_input = Step(
@@ -177,6 +178,15 @@ def _prep_run_caly(
     prep_run_caly_steps.add(prep_caly_input)
 
     temp_value = None
+    if expl_mode == "default":
+        caly_evo_step_merge_executor = prep_executor
+        caly_evo_step_merge_config = prep_config
+    elif expl_mode == "debug":
+        caly_evo_step_merge_executor = run_executor
+        caly_evo_step_merge_config = run_config
+    else:
+        raise NotImplementedError(f"Unknown expl mode {expl_mode}")
+
     caly_evo_step_merge = Step(
         "caly-evo-step",
         template=PythonOPTemplate(
@@ -219,8 +229,8 @@ def _prep_run_caly(
             "qhull_input": temp_value,
         },
         key=step_keys["caly-evo-step-{{item}}"],
-        executor=prep_executor,
-        **prep_config,
+        executor=caly_evo_step_merge_executor,
+        **caly_evo_step_merge_config,
     )
     prep_run_caly_steps.add(caly_evo_step_merge)
 
