@@ -104,7 +104,7 @@ class CalyEvoStepMerge(OP):
                 k: upload_artifact(ip[k]) if ip[k] is not None else None
                 for k in steps.inputs.artifacts
             },
-            with_param=range(1),
+            with_param=[0],
         )
         wf.add(step)
         wf.submit()
