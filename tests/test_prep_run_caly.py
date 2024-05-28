@@ -160,7 +160,7 @@ class TestPrepRunCaly(unittest.TestCase):
             run_dp_optim=MockedRunCalyDPOptim,
             prep_config=prep_default_config,
             run_config=run_default_config,
-            upload_python_packages=upload_python_packages,
+            upload_python_packages=None,
         )
         prep_run_caly_op = PrepRunCaly(
             "prep-run-calypso",
