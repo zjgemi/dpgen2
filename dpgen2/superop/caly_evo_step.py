@@ -148,7 +148,7 @@ def _caly_evo_step(
 
     def wise_executor(expl_mode, origin_executor):
         if expl_mode == "default":
-            return init_executor(origin_executor)
+            return init_executor(deepcopy(origin_executor))
         elif expl_mode == "merge":
             return None
         else:
