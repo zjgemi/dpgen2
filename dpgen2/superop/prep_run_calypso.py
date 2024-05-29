@@ -180,107 +180,64 @@ def _prep_run_caly(
     temp_value = None
     if expl_mode == "default":
         caly_evo_step_config = prep_config
-        caly_evo_step_executor = prep_executor
     elif expl_mode == "merge":
         caly_evo_step_config = run_config
-        caly_evo_step_executor = run_executor
     else:
         raise NotImplementedError(f"Unknown expl mode `{expl_mode}`")
 
     if expl_mode == "merge":
-        caly_evo_step = Step(
-            "caly-evo-step",
-            template=PythonOPTemplate(
-                caly_evo_step_op,
-                python_packages=upload_python_packages,
-                **run_template_config,
-            ),
-            slices=Slices(
-                input_parameter=[
-                    "task_name",
-                ],
-                input_artifact=[
-                    "input_file",
-                    "results",
-                    "step",
-                    "opt_results_dir",
-                    "caly_run_opt_file",
-                    "caly_check_opt_file",
-                ],
-                output_artifact=["traj_results"],
-            ),
-            parameters={
-                "block_id": prep_run_caly_steps.inputs.parameters["block_id"],
-                "expl_config": prep_run_caly_steps.inputs.parameters["explore_config"],
-                "task_name": prep_caly_input.outputs.parameters["task_names"],
-                "iter_num": "{{item}}",
-            },
-            artifacts={
-                "models": prep_run_caly_steps.inputs.artifacts["models"],
-                "input_file": prep_caly_input.outputs.artifacts["input_dat_files"],
-                "caly_run_opt_file": prep_caly_input.outputs.artifacts[
-                    "caly_run_opt_files"
-                ],
-                "caly_check_opt_file": prep_caly_input.outputs.artifacts[
-                    "caly_check_opt_files"
-                ],
-                "results": temp_value,
-                "step": temp_value,
-                "opt_results_dir": temp_value,
-                "qhull_input": temp_value,
-            },
-            key=step_keys["caly-evo-step-{{item}}"],
-            with_param=argo_range(prep_caly_input.outputs.parameters["ntasks"]),  # type: ignore
-            # executor=caly_evo_step_executor,
-            **caly_evo_step_config,
+        template = PythonOPTemplate(
+            caly_evo_step_op,
+            python_packages=upload_python_packages,
+            **run_template_config,
         )
-        prep_run_caly_steps.add(caly_evo_step)
     elif expl_mode == "default":
-        caly_evo_step = Step(
-            name="caly-evo-step",
-            template=caly_evo_step_op,
-            slices=Slices(
-                input_parameter=[
-                    "task_name",
-                ],
-                input_artifact=[
-                    "input_file",
-                    "results",
-                    "step",
-                    "opt_results_dir",
-                    "caly_run_opt_file",
-                    "caly_check_opt_file",
-                ],
-                output_artifact=["traj_results"],
-            ),
-            parameters={
-                "block_id": prep_run_caly_steps.inputs.parameters["block_id"],
-                "expl_config": prep_run_caly_steps.inputs.parameters["explore_config"],
-                "task_name": prep_caly_input.outputs.parameters["task_names"],
-                "iter_num": "{{item}}",
-            },
-            artifacts={
-                "models": prep_run_caly_steps.inputs.artifacts["models"],
-                "input_file": prep_caly_input.outputs.artifacts["input_dat_files"],
-                "caly_run_opt_file": prep_caly_input.outputs.artifacts[
-                    "caly_run_opt_files"
-                ],
-                "caly_check_opt_file": prep_caly_input.outputs.artifacts[
-                    "caly_check_opt_files"
-                ],
-                "results": temp_value,
-                "step": temp_value,
-                "opt_results_dir": temp_value,
-                "qhull_input": temp_value,
-            },
-            key=step_keys["caly-evo-step-{{item}}"],
-            with_param=argo_range(prep_caly_input.outputs.parameters["ntasks"]),  # type: ignore
-            # executor=caly_evo_step_executor,
-            **caly_evo_step_config,
-        )
-        prep_run_caly_steps.add(caly_evo_step)
+        template = caly_evo_step_op
     else:
         raise KeyError(f"Unknown key: `{expl_mode}`, support `default` and `merge`.")
+
+    caly_evo_step = Step(
+        "caly-evo-step",
+        template=template,
+        slices=Slices(
+            input_parameter=[
+                "task_name",
+            ],
+            input_artifact=[
+                "input_file",
+                "results",
+                "step",
+                "opt_results_dir",
+                "caly_run_opt_file",
+                "caly_check_opt_file",
+            ],
+            output_artifact=["traj_results"],
+        ),
+        parameters={
+            "block_id": prep_run_caly_steps.inputs.parameters["block_id"],
+            "expl_config": prep_run_caly_steps.inputs.parameters["explore_config"],
+            "task_name": prep_caly_input.outputs.parameters["task_names"],
+            "iter_num": "{{item}}",
+        },
+        artifacts={
+            "models": prep_run_caly_steps.inputs.artifacts["models"],
+            "input_file": prep_caly_input.outputs.artifacts["input_dat_files"],
+            "caly_run_opt_file": prep_caly_input.outputs.artifacts[
+                "caly_run_opt_files"
+            ],
+            "caly_check_opt_file": prep_caly_input.outputs.artifacts[
+                "caly_check_opt_files"
+            ],
+            "results": temp_value,
+            "step": temp_value,
+            "opt_results_dir": temp_value,
+            "qhull_input": temp_value,
+        },
+        key=step_keys["caly-evo-step-{{item}}"],
+        with_param=argo_range(prep_caly_input.outputs.parameters["ntasks"]),  # type: ignore
+        **caly_evo_step_config,
+    )
+    prep_run_caly_steps.add(caly_evo_step)
 
     # prep_caly_model_devi
     prep_caly_model_devi = Step(
