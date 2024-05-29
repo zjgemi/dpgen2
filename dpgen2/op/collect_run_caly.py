@@ -59,7 +59,7 @@ class CollRunCaly(OP):
         return OPIOSign(
             {
                 "config": BigParameter(dict),  # for command
-                "task_name": Parameter(str),  # calypso_task.idx
+                "task_name": BigParameter(str),  # calypso_task.idx
                 "cnt_num": Parameter(int),
                 "input_file": Artifact(Path),  # input.dat, !!! must be provided
                 "step": Artifact(type=Path, optional=True),  # step file
