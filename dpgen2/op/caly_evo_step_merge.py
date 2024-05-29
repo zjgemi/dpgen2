@@ -62,7 +62,7 @@ class CalyEvoStepMerge(OP):
                 "iter_num": int,
                 "cnt_num": Parameter(int, default=0),
                 "block_id": Parameter(str, default=""),
-                "task_name": str,
+                "task_name": BigParameter(str),
                 "expl_config": BigParameter(dict),
                 "models": Artifact(Path),
                 "input_file": Artifact(Path),

@@ -77,7 +77,7 @@ class CollRunCaly(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "task_name": Parameter(str),  # calypso_task.idx
+                "task_name": BigParameter(str),  # calypso_task.idx
                 "finished": Parameter(str),  # True if cnt_num == maxstep
                 "poscar_dir": Artifact(Path),  # dir contains POSCAR* of next step
                 "input_file": Artifact(Path),  # input.dat

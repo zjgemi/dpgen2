@@ -53,7 +53,7 @@ class PrepCalyDPOptim(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "task_name": Parameter(str),  # calypso_task.idx
+                "task_name": BigParameter(str),  # calypso_task.idx
                 "finished": Parameter(str),
                 "template_slice_config": Parameter(dict),
                 "poscar_dir": Artifact(
