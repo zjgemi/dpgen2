@@ -11,6 +11,7 @@ from typing import (
     List,
     Optional,
     Type,
+    Union,
 )
 
 from dflow import (
@@ -53,7 +54,7 @@ class PrepRunCaly(Steps):
         self,
         name: str,
         prep_caly_input_op: Type[OP],
-        caly_evo_step_op,
+        caly_evo_step_op: Union[OPTemplate, OP],
         prep_caly_model_devi_op: Type[OP],
         run_caly_model_devi_op: Type[OP],
         prep_config: dict = normalize_step_dict({}),
@@ -143,7 +144,7 @@ def _prep_run_caly(
     prep_run_caly_steps: Steps,
     step_keys: Dict[str, Any],
     prep_caly_input_op: Type[OP],
-    caly_evo_step_op,
+    caly_evo_step_op: Union[OPTemplate, OP],
     prep_caly_model_devi_op: Type[OP],
     run_caly_model_devi_op: Type[OP],
     prep_config: dict = normalize_step_dict({}),
@@ -187,10 +188,10 @@ def _prep_run_caly(
 
     if expl_mode == "merge":
         template = PythonOPTemplate(
-            caly_evo_step_op,
+            caly_evo_step_op,  # type: ignore
             python_packages=upload_python_packages,
             **run_template_config,
-        )
+        )  # type: ignore
     elif expl_mode == "default":
         template = caly_evo_step_op
     else:
@@ -198,7 +199,7 @@ def _prep_run_caly(
 
     caly_evo_step = Step(
         "caly-evo-step",
-        template=template,
+        template=template,  # type: ignore
         slices=Slices(
             input_parameter=[
                 "task_name",
