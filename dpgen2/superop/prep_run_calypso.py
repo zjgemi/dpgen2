@@ -181,21 +181,18 @@ def _prep_run_caly(
     temp_value = None
     if expl_mode == "default":
         caly_evo_step_config = prep_config
+        caly_evo_step_executor = None
+        template = caly_evo_step_op
     elif expl_mode == "merge":
         caly_evo_step_config = run_config
-    else:
-        raise NotImplementedError(f"Unknown expl mode `{expl_mode}`")
-
-    if expl_mode == "merge":
+        caly_evo_step_executor = run_executor
         template = PythonOPTemplate(
             caly_evo_step_op,  # type: ignore
             python_packages=upload_python_packages,
             **run_template_config,
         )  # type: ignore
-    elif expl_mode == "default":
-        template = caly_evo_step_op
     else:
-        raise KeyError(f"Unknown key: `{expl_mode}`, support `default` and `merge`.")
+        raise KeyError(f"Unknown expl mode `{expl_mode}`")
 
     caly_evo_step = Step(
         "caly-evo-step",
@@ -236,6 +233,7 @@ def _prep_run_caly(
         },
         key=step_keys["caly-evo-step-{{item}}"],
         with_param=argo_range(prep_caly_input.outputs.parameters["ntasks"]),  # type: ignore
+        executor=caly_evo_step_executor,
         **caly_evo_step_config,
     )
     prep_run_caly_steps.add(caly_evo_step)
