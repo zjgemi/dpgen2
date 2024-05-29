@@ -53,7 +53,7 @@ class PrepCalyDPOptim(OP):
     def get_input_sign(cls):
         return OPIOSign(
             {
-                "task_name": Parameter(str),  # calypso_task.idx
+                "task_name": BigParameter(str),  # calypso_task.idx
                 "finished": Parameter(str),
                 "template_slice_config": Parameter(dict),
                 "poscar_dir": Artifact(
@@ -149,7 +149,7 @@ class PrepCalyDPOptim(OP):
                         Path(caly_check_opt_file.name).symlink_to(caly_check_opt_file)
                 task_names = [str(task_dir) for task_dir in task_dirs]
             else:
-                temp_dir = work_dir / "opt_path"
+                temp_dir = work_dir / "opt_path_0"
                 temp_dir.mkdir(parents=True, exist_ok=True)
                 task_dirs = [temp_dir]
                 task_names = [str(task_dir) for task_dir in task_dirs]

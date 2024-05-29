@@ -85,6 +85,9 @@ from dpgen2.op import (
     PrepCalyDPOptim,
     RunCalyDPOptim,
 )
+from dpgen2.op.caly_evo_step_merge import (
+    CalyEvoStepMerge,
+)
 from dpgen2.op.collect_run_caly import (
     CollRunCaly,
 )
@@ -221,7 +224,7 @@ class TestMockedRunDPOptim(unittest.TestCase):
 
 # @unittest.skip("temporary pass")
 @unittest.skipIf(skip_ut_with_dflow, skip_ut_with_dflow_reason)
-class TestCalyEvoStep(unittest.TestCase):
+class TestCalyEvoStepMerge(unittest.TestCase):
     def setUp(self):
         self.expl_config = {}
         self.work_dir = Path("storge_files")
@@ -273,60 +276,23 @@ class TestCalyEvoStep(unittest.TestCase):
         for i in Path().glob("caly_task*"):
             shutil.rmtree(i, ignore_errors=True)
 
-    @unittest.skip("only need to run test_01")
-    def test_00(self):
-        steps = CalyEvoStep(
-            "caly-evo-run",
-            MockedCollRunCaly,
-            PrepCalyDPOptim,
-            MockedRunCalyDPOptim,
-            prep_config=default_config,
-            run_config=default_config,
-            upload_python_packages=upload_python_packages,
-        )
-        caly_evo_step = Step(
-            "caly-evo-step",
-            template=steps,
-            parameters={
-                "expl_config": self.expl_config,
-                "block_id": self.block_id,
-                "task_name": self.task_name,
-                "iter_num": 0,
-            },
-            artifacts={
-                "models": self.models,
-                "input_file": self.input_file,
-                "caly_run_opt_file": self.caly_run_opt_file,
-                "caly_check_opt_file": self.caly_check_opt_file,
-                "results": None,
-                "step": None,
-                "opt_results_dir": None,
-                "qhull_input": None,
-            },
-        )
-
-        wf = Workflow(name="caly-evo-step", host=default_host)
-        wf.add(caly_evo_step)
-        wf.submit()
-
-        self.assertEqual(wf.query_status(), "Succeeded")
-        step = wf.query_step(name="caly-evo-step")[0]
-        self.assertEqual(step.phase, "Succeeded")
-
-    # @unittest.skip("temp skit")
     def test_caly_evo_step(self):
-        steps = CalyEvoStep(
-            "caly-evo-run",
-            MockedCollRunCaly,
-            PrepCalyDPOptim,
-            MockedRunCalyDPOptim,
+        steps = CalyEvoStepMerge(
+            name="caly-evo-step",
+            collect_run_caly=MockedCollRunCaly,
+            prep_dp_optim=PrepCalyDPOptim,
+            run_dp_optim=MockedRunCalyDPOptim,
             prep_config=default_config,
             run_config=default_config,
-            upload_python_packages=upload_python_packages,
+            upload_python_packages=None,
         )
         caly_evo_step = Step(
             "caly-evo-step",
-            template=steps,
+            template=PythonOPTemplate(
+                steps,
+                python_packages=upload_python_packages,
+                **default_config["template_config"],
+            ),
             slices=Slices(
                 input_parameter=[
                     "task_name",
@@ -358,6 +324,7 @@ class TestCalyEvoStep(unittest.TestCase):
                 "qhull_input": None,
             },
         )
+
         wf = Workflow(name="caly-evo-step", host=default_host)
         wf.add(caly_evo_step)
         wf.submit()

@@ -11,6 +11,7 @@ from typing import (
     List,
     Optional,
     Type,
+    Union,
 )
 
 from dflow import (
@@ -47,17 +48,13 @@ from dpgen2.utils.step_config import (
 )
 from dpgen2.utils.step_config import normalize as normalize_step_dict
 
-from .caly_evo_step import (
-    CalyEvoStep,
-)
-
 
 class PrepRunCaly(Steps):
     def __init__(
         self,
         name: str,
         prep_caly_input_op: Type[OP],
-        caly_evo_step_op: OPTemplate,
+        caly_evo_step_op: Union[OPTemplate, OP],
         prep_caly_model_devi_op: Type[OP],
         run_caly_model_devi_op: Type[OP],
         prep_config: dict = normalize_step_dict({}),
@@ -147,7 +144,7 @@ def _prep_run_caly(
     prep_run_caly_steps: Steps,
     step_keys: Dict[str, Any],
     prep_caly_input_op: Type[OP],
-    caly_evo_step_op: OPTemplate,
+    caly_evo_step_op: Union[OPTemplate, OP],
     prep_caly_model_devi_op: Type[OP],
     run_caly_model_devi_op: Type[OP],
     prep_config: dict = normalize_step_dict({}),
@@ -161,6 +158,7 @@ def _prep_run_caly(
     prep_executor = init_executor(prep_config.pop("executor"))
     run_executor = init_executor(run_config.pop("executor"))
     template_slice_config = run_config.pop("template_slice_config", {})
+    expl_mode = run_config.pop("mode", "default")
 
     # prep caly input files
     prep_caly_input = Step(
@@ -181,10 +179,24 @@ def _prep_run_caly(
     prep_run_caly_steps.add(prep_caly_input)
 
     temp_value = None
+    if expl_mode == "default":
+        caly_evo_step_config = prep_config
+        caly_evo_step_executor = None
+        template = caly_evo_step_op
+    elif expl_mode == "merge":
+        caly_evo_step_config = run_config
+        caly_evo_step_executor = run_executor
+        template = PythonOPTemplate(
+            caly_evo_step_op,  # type: ignore
+            python_packages=upload_python_packages,
+            **run_template_config,
+        )  # type: ignore
+    else:
+        raise KeyError(f"Unknown expl mode `{expl_mode}`")
 
     caly_evo_step = Step(
-        name="caly-evo-step",
-        template=caly_evo_step_op,
+        "caly-evo-step",
+        template=template,  # type: ignore
         slices=Slices(
             input_parameter=[
                 "task_name",
@@ -220,8 +232,9 @@ def _prep_run_caly(
             "qhull_input": temp_value,
         },
         key=step_keys["caly-evo-step-{{item}}"],
-        executor=prep_executor,
-        **prep_config,
+        with_param=argo_range(prep_caly_input.outputs.parameters["ntasks"]),  # type: ignore
+        executor=caly_evo_step_executor,
+        **caly_evo_step_config,
     )
     prep_run_caly_steps.add(caly_evo_step)
 

@@ -141,9 +141,20 @@ def _caly_evo_step(
     run_config = deepcopy(run_config)
     prep_template_config = prep_config.pop("template_config")
     run_template_config = run_config.pop("template_config")
-    prep_executor = init_executor(prep_config.pop("executor"))
-    run_executor = init_executor(run_config.pop("executor"))
+    prep_executor_config = prep_config.pop("executor")
+    run_executor_config = run_config.pop("executor")
     template_slice_config = run_config.pop("template_slice_config", {})
+    expl_mode = run_config.pop("mode", "default")
+
+    def wise_executor(expl_mode, origin_executor_config):
+        if expl_mode == "default":
+            return init_executor(deepcopy(origin_executor_config))
+        elif expl_mode == "merge":
+            return None
+        else:
+            raise NotImplementedError(
+                f"Unknown expl_mode {expl_mode}, only support `default` and `merge`."
+            )
 
     # collect the last step files and run calypso.x to generate structures
     collect_run_calypso = Step(
@@ -171,7 +182,7 @@ def _caly_evo_step(
             caly_evo_step_steps.inputs.parameters["iter_num"],
             caly_evo_step_steps.inputs.parameters["cnt_num"],
         ),
-        executor=prep_executor,
+        executor=wise_executor(expl_mode, prep_executor_config),
         **run_config,
     )
     caly_evo_step_steps.add(collect_run_calypso)
@@ -205,7 +216,7 @@ def _caly_evo_step(
             caly_evo_step_steps.inputs.parameters["iter_num"],
             caly_evo_step_steps.inputs.parameters["cnt_num"],
         ),
-        executor=prep_executor,  # cpu is enough to run calypso.x, default step config is c2m4
+        executor=wise_executor(expl_mode, prep_executor_config),
         **run_config,
     )
     caly_evo_step_steps.add(prep_dp_optim)
@@ -238,7 +249,7 @@ def _caly_evo_step(
             caly_evo_step_steps.inputs.parameters["iter_num"],
             caly_evo_step_steps.inputs.parameters["cnt_num"],
         ),
-        executor=run_executor,
+        executor=wise_executor(expl_mode, run_executor_config),
         **run_config,
     )
     caly_evo_step_steps.add(run_dp_optim)

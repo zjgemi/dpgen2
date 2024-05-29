@@ -149,5 +149,5 @@ class TestPrepDPOptim(unittest.TestCase):
         self.assertEqual(len(out["task_names"]), 1)
         self.assertEqual(len(out["task_dirs"]), 1)
         self.assertEqual(
-            out["task_names"], [str(Path(self.task_name) / Path("opt_path"))]
+            out["task_names"], [str(Path(self.task_name) / Path("opt_path_0"))]
         )

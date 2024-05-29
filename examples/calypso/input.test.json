@@ -1,8 +1,8 @@
 {
     "bohrium_config": {
-        "username": "x@x.cn",
+        "username": "wzy@calypso.cn",
         "password": "xxx",
-        "project_id": 111111,
+        "project_id": 1,
         "_host": "https://workflow.dp.tech/",
         "_k8s_api_server": "https://workflows.deepmodeling.com",
         "_repo_key": "oss-bohrium",
@@ -10,7 +10,7 @@
     },
     "default_step_config": {
         "template_config": {
-            "image": "registry.dp.tech/dptech/prod-11265/deepmdv3-dpgen2-calypso:v0.2",
+            "image": "registry.dp.tech/dptech/prod-11265/deepmdv3-dgpen2-calypso:v0.4",
             "_comment": "all"
         },
         "executor": {
@@ -33,7 +33,7 @@
     "step_configs": {
         "run_train_config": {
             "template_config": {
-                "image": "registry.dp.tech/dptech/prod-11265/deepmdv3-dpgen2-calypso:v0.2",
+                "image": "registry.dp.tech/dptech/prod-11265/deepmdv3-dgpen2-calypso:v0.4",
                 "_comment": "all"
             },
             "executor": {
@@ -47,7 +47,8 @@
                         "input_data": {
                             "job_type": "container",
                             "platform": "ali",
-                            "scass_type": "1 * NVIDIA V100_32g"
+                            "_scass_type": "1 * NVIDIA V100_16g",
+                            "scass_type": "c16_m64_cpu"
                         }
                     }
                 }
@@ -59,8 +60,10 @@
             "_comment": "all"
         },
         "run_explore_config": {
+	    "mode": "default",
+	    "_mode": "merge",
             "template_config": {
-                "image": "registry.dp.tech/dptech/prod-11265/deepmdv3-dpgen2-calypso:v0.2",
+                "image": "registry.dp.tech/dptech/prod-11265/deepmdv3-dgpen2-calypso:v0.4",
                 "_comment": "all"
             },
             "_continue_on_success_ratio": 0.8,
@@ -75,14 +78,15 @@
                         "input_data": {
                             "job_type": "container",
                             "platform": "ali",
-                            "scass_type": "1 * NVIDIA T4_16g"
+                            "scass_type": "c16_m64_cpu"
                         }
                     }
                 }
             },
             "template_slice_config": {
-                "group_size": 2,
-                "pool_size": 1
+                "group_size": 1,
+                "pool_size": 1,
+                "model_devi_group_size": 1
             },
             "_comment": "all"
         },
@@ -116,10 +120,8 @@
         },
         "_comment": "all"
     },
-    "_upload_python_packages": [
-        "/root/dpgen2/dpgen2",
-        "/opt/re_e_bias_new/deepmd-kit/deepmd",
-	"/root/dflow/src/dflow"
+    "upload_python_packages": [
+        "/root/dpgen2/dpgen2"
     ],
     "inputs": {
         "mixed_type": true,
@@ -442,23 +444,16 @@
         "stages": [
             [
                 {
-                    "numb_of_species": 1,
+                    "numb_of_species": 3,
                     "numb_of_atoms": [
-                        1
+                        3, 2, 1
                     ],
                     "name_of_atoms": [
-                        "Mg"
+			    ["Mg", "Si", "O"], ["La", "Li"], ["H"]
                     ],
-                    "atomic_number": [
-                        3
-                    ],
-                    "pop_size": 50,
-                    "max_step": 3,
-                    "distance_of_ions": [
-                        [
-                            1.0
-                        ]
-                    ]
+                    "pop_size": 5,
+                    "max_step": 2,
+                    "distance_of_ions": {"Mg": 0.7, "Si": 0.7, "O": 0.7, "La": 0.7, "Li": 0.7, "H": 0.7}
                 },
                 {
                     "numb_of_species": 2,
@@ -474,8 +469,8 @@
                         3,
                         37
                     ],
-                    "pop_size": 50,
-                    "max_step": 3,
+                    "pop_size": 5,
+                    "max_step": 2,
                     "distance_of_ions": [
                         [
                             1.0,
@@ -500,8 +495,8 @@
                     "atomic_number": [
                         3
                     ],
-                    "pop_size": 50,
-                    "max_step": 3,
+                    "pop_size": 5,
+                    "max_step": 2,
                     "distance_of_ions": [
                         [
                             1.0
@@ -522,8 +517,8 @@
                         3,
                         37
                     ],
-                    "pop_size": 50,
-                    "max_step": 3,
+                    "pop_size": 5,
+                    "max_step": 2,
                     "distance_of_ions": [
                         [
                             1.0,

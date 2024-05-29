@@ -318,7 +318,8 @@ class PrepCalyInput(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "task_names": Parameter(List[str]),  # task dir names
+                "ntasks": Parameter(int),
+                "task_names": BigParameter(List[str]),  # task dir names
                 "input_dat_files": Artifact(List[Path]),  # `input.dat`s
                 "caly_run_opt_files": Artifact(List[Path]),
                 "caly_check_opt_files": Artifact(List[Path]),
@@ -367,6 +368,7 @@ class PrepCalyInput(OP):
 
         return OPIO(
             {
+                "ntasks": len(task_names),
                 "task_names": task_names,
                 "input_dat_files": input_dat_files,
                 "caly_run_opt_files": caly_run_opt_files,
