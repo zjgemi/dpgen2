@@ -352,6 +352,13 @@ def caly_task_grp_args():
             doc="the converge criterion. The force on all individual atoms should be less than `fmax`.",
         ),
         Argument(
+            "opt_step",
+            float,
+            optional=True,
+            default=1000,
+            doc="the converge criterion. The force on all individual atoms should be less than `fmax`.",
+        ),
+        Argument(
             "volume",
             float,
             optional=True,
@@ -490,18 +497,6 @@ def config_strip_confidx(
     cc.pop("conf_idx") if "conf_idx" in cc else None
     cc.pop("n_sample") if "n_sample" in cc else None
     return cc
-
-
-def make_task_group_from_config(
-    numb_models,
-    mass_map,
-    config,
-):
-    explore_type = config["explore"]["type"]
-    if explore_type == "lmp":
-        return make_lmp_task_group_from_config(numb_models, mass_map, config)
-    elif explore_type == "calypso":
-        return make_calypso_task_group_from_config(config)
 
 
 def make_calypso_task_group_from_config(config):

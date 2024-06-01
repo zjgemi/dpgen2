@@ -48,7 +48,7 @@ class PrepCalyModelDevi(OP):
         return OPIOSign(
             {
                 "task_name": Parameter(str),
-                "template_slice_config": Parameter(dict),
+                "config": BigParameter(dict),
                 "traj_results": Artifact(List[Path]),
             }
         )
@@ -74,7 +74,7 @@ class PrepCalyModelDevi(OP):
         ip : dict
             Input dict with components:
             - `task_name` : (`str`)
-            - `template_slice_config` : (`dict`)
+            - `config` : (`BigParameter(dict)`)
             - `traj_results` : (`Path`)
 
         Returns
@@ -93,9 +93,8 @@ class PrepCalyModelDevi(OP):
             for traj_dir in traj_results_dir
             for traj in Path(traj_dir).rglob("*.traj")
         ]
-        group_size = ip["template_slice_config"].get(
-            "model_devi_group_size", len(trajs)
-        )
+        expl_config = ip["config"]
+        group_size = expl_config.get("model_devi_group_size", len(trajs))
 
         with set_directory(work_dir):
             grouped_trajs_list = [

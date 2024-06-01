@@ -107,6 +107,7 @@ class CalyTaskGroup(ExplorationTaskGroup):
         vsc: bool = True,
         ctrl_range: List[List[int]] = [[1, 10]],
         max_numb_atoms: int = 100,
+        opt_step: int = 1000,
     ):
         """
         Set calypso parameters
@@ -185,6 +186,7 @@ class CalyTaskGroup(ExplorationTaskGroup):
         self.vsc = vsc
         self.ctrl_range = ctrl_range
         self.max_numb_atoms = max_numb_atoms
+        self.opt_step = opt_step
 
         self.caly_set = True
 
@@ -234,6 +236,7 @@ class CalyTaskGroup(ExplorationTaskGroup):
             self.vsc,
             self.ctrl_range,
             self.max_numb_atoms,
+            opt_step=self.opt_step,
         )
         task = ExplorationTask()
         task.add_file(calypso_input_file, input_file_str)

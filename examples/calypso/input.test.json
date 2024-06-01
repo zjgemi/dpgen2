@@ -60,8 +60,6 @@
             "_comment": "all"
         },
         "run_explore_config": {
-	    "mode": "default",
-	    "_mode": "merge",
             "template_config": {
                 "image": "registry.dp.tech/dptech/prod-11265/deepmdv3-dgpen2-calypso:v0.4",
                 "_comment": "all"
@@ -85,8 +83,7 @@
             },
             "template_slice_config": {
                 "group_size": 1,
-                "pool_size": 1,
-                "model_devi_group_size": 1
+                "pool_size": 1
             },
             "_comment": "all"
         },
@@ -413,10 +410,12 @@
         "_comment": "all"
     },
     "explore": {
-        "_type": "lmp",
-        "type": "calypso",
+        "type": "calypso:merge",
+        "_type": "calypso:default",
+        "_type": "calypso",
         "config": {
             "_command": "lmp -var restart 0",
+            "model_devi_group_size": 5,
             "run_calypso_command": "calypso.x",
             "run_opt_command": "python -u calypso_run_opt.py model.ckpt.pt"
         },
@@ -453,7 +452,10 @@
                     ],
                     "pop_size": 5,
                     "max_step": 2,
-                    "distance_of_ions": {"Mg": 0.7, "Si": 0.7, "O": 0.7, "La": 0.7, "Li": 0.7, "H": 0.7}
+                    "distance_of_ions": {"Mg": 0.7, "Si": 0.7, "O": 0.7, "La": 0.7, "Li": 0.7, "H": 0.7},
+		    "opt_step": 1,
+		    "fmax": 1,
+		    "pressure": 10
                 },
                 {
                     "numb_of_species": 2,

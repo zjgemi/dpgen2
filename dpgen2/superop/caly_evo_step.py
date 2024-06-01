@@ -54,10 +54,12 @@ class CalyEvoStep(Steps):
         collect_run_caly: Type[OP],
         prep_dp_optim: Type[OP],
         run_dp_optim: Type[OP],
+        expl_mode: str = "default",
         prep_config: dict = normalize_step_dict({}),
         run_config: dict = normalize_step_dict({}),
         upload_python_packages: Optional[List[os.PathLike]] = None,
     ):
+        self.expl_mode = expl_mode
         self._input_parameters = {
             "iter_num": InputParameter(type=int, value=0),
             "cnt_num": InputParameter(type=int, value=0),
@@ -144,7 +146,7 @@ def _caly_evo_step(
     prep_executor_config = prep_config.pop("executor")
     run_executor_config = run_config.pop("executor")
     template_slice_config = run_config.pop("template_slice_config", {})
-    expl_mode = run_config.pop("mode", "default")
+    expl_mode = caly_evo_step_steps.expl_mode
 
     def wise_executor(expl_mode, origin_executor_config):
         if expl_mode == "default":

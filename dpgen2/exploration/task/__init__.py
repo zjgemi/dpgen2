@@ -21,7 +21,6 @@ from .make_task_group_from_config import (
     lmp_task_group_args,
     make_calypso_task_group_from_config,
     make_lmp_task_group_from_config,
-    make_task_group_from_config,
     variant_task_group,
 )
 from .npt_task_group import (

@@ -154,7 +154,6 @@ def make_concurrent_learning_op(
     upload_python_packages: Optional[List[os.PathLike]] = None,
     valid_data: Optional[S3Artifact] = None,
 ):
-    expl_mode = run_explore_config.get("mode", "default")
     if train_style in ("dp", "dp-dist"):
         prep_run_train_op = PrepRunDPTrain(
             "prep-run-dp-train",
@@ -176,13 +175,15 @@ def make_concurrent_learning_op(
             run_config=run_explore_config,
             upload_python_packages=upload_python_packages,
         )
-    elif explore_style == "calypso":
+    elif "calypso" in explore_style:
+        expl_mode = explore_style.split(":")[-1] if ":" in explore_style else "default"
         if expl_mode == "merge":
             caly_evo_step_op = CalyEvoStepMerge(
                 name="caly-evo-step",
                 collect_run_caly=CollRunCaly,
                 prep_dp_optim=PrepCalyDPOptim,
                 run_dp_optim=RunCalyDPOptim,
+                expl_mode=expl_mode,
                 prep_config=prep_explore_config,
                 run_config=run_explore_config,
                 upload_python_packages=None,
@@ -193,18 +194,22 @@ def make_concurrent_learning_op(
                 collect_run_caly=CollRunCaly,
                 prep_dp_optim=PrepCalyDPOptim,
                 run_dp_optim=RunCalyDPOptim,
+                expl_mode=expl_mode,
                 prep_config=prep_explore_config,
                 run_config=run_explore_config,
                 upload_python_packages=upload_python_packages,
             )
         else:
-            raise KeyError(f"Unknown key: {expl_mode}, support `default` and `merge`.")
+            raise KeyError(
+                f"Unknown key: {explore_style}, support `calypso:default` and `calypso:merge`."
+            )
         prep_run_explore_op = PrepRunCaly(
             "prep-run-calypso",
             prep_caly_input_op=PrepCalyInput,
             caly_evo_step_op=caly_evo_step_op,
             prep_caly_model_devi_op=PrepCalyModelDevi,
             run_caly_model_devi_op=RunCalyModelDevi,
+            expl_mode=expl_mode,
             prep_config=prep_explore_config,
             run_config=run_explore_config,
             upload_python_packages=upload_python_packages,
@@ -255,8 +260,12 @@ def make_naive_exploration_scheduler(
 
     if explore_style == "lmp":
         return make_lmp_naive_exploration_scheduler(config)
-    elif explore_style == "calypso":
+    elif "calypso" in explore_style:
         return make_calypso_naive_exploration_scheduler(config)
+    else:
+        raise KeyError(
+            f"Unknown key `{explore_style}`, Only support `lmp`, `calypso`, `calypso:merge` and `calypso:default`."
+        )
 
 
 def make_calypso_naive_exploration_scheduler(config):
@@ -453,6 +462,8 @@ def workflow_concurrent_learning(
 ) -> Tuple[Step, Optional[Step]]:
     default_config = config["default_step_config"]
 
+    train_config = config["train"]["config"]
+    explore_config = config["explore"]["config"]
     train_style = config["train"]["type"]
     explore_style = config["explore"]["type"]
     fp_style = config["fp"]["type"]
@@ -527,8 +538,7 @@ def workflow_concurrent_learning(
         template_script = [json.loads(Path(ii).read_text()) for ii in template_script_]
     else:
         template_script = json.loads(Path(template_script_).read_text())
-    train_config = config["train"]["config"]
-    explore_config = config["explore"]["config"]
+
     if (
         "teacher_model_path" in explore_config
         and explore_config["teacher_model_path"] is not None

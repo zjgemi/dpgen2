@@ -59,20 +59,20 @@ class TestPrepCalyModelDevi(unittest.TestCase):
 
         self.group_size = 5
         self.ngroup = ntrajs_dir * ntrajs_per_dir / self.group_size
-        self.template_slice_config_1 = {"model_devi_group_size": self.group_size}
-        self.template_slice_config_2 = {}
+        self.model_devi_group_size_2 = 0
 
     def tearDown(self):
         shutil.rmtree(self.ref_dir)
         shutil.rmtree(self.run_dir_name)
 
     def test_00_success(self):
+        explore_config = {"model_devi_group_size": self.group_size}
         op = PrepCalyModelDevi()
         out = op.execute(
             OPIO(
                 {
                     "task_name": self.run_dir_name,
-                    "template_slice_config": self.template_slice_config_1,
+                    "config": explore_config,
                     "traj_results": self.ref_traj_results,
                 }
             )
@@ -94,12 +94,13 @@ class TestPrepCalyModelDevi(unittest.TestCase):
         # self.assertTrue(Path("run_dir/trajs_part_0/0.0.0.traj") in traj_list)
 
     def test_01_success(self):
+        explore_config = {}
         op = PrepCalyModelDevi()
         out = op.execute(
             OPIO(
                 {
                     "task_name": self.run_dir_name,
-                    "template_slice_config": self.template_slice_config_2,
+                    "config": explore_config,
                     "traj_results": self.ref_traj_results,
                 }
             )
