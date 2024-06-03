@@ -120,14 +120,14 @@ from dpgen2.utils import (
     BinaryFileInput,
     bohrium_config_from_dict,
     dump_object_to_file,
+    get_artifact_from_uri,
     get_subkey,
     load_object_from_file,
     matched_step_key,
     print_keys_in_nice_format,
     sort_slice_ops,
-    workflow_config_from_dict,
-    get_artifact_from_uri,
     upload_artifact_and_print_uri,
+    workflow_config_from_dict,
 )
 from dpgen2.utils.step_config import normalize as normalize_step_dict
 
