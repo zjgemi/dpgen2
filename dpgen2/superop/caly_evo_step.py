@@ -147,6 +147,9 @@ def _caly_evo_step(
     run_executor_config = run_config.pop("executor")
     template_slice_config = run_config.pop("template_slice_config", {})
     expl_mode = caly_evo_step_steps.expl_mode
+    no_slice_run_config = deepcopy(run_config)
+    no_slice_run_config.pop("continue_on_num_success", None)
+    no_slice_run_config.pop("continue_on_success_ratio", None)
 
     def wise_executor(expl_mode, origin_executor_config):
         if expl_mode == "default":
@@ -185,7 +188,7 @@ def _caly_evo_step(
             caly_evo_step_steps.inputs.parameters["cnt_num"],
         ),
         executor=wise_executor(expl_mode, prep_executor_config),
-        **run_config,
+        **no_slice_run_config,
     )
     caly_evo_step_steps.add(collect_run_calypso)
 
@@ -219,7 +222,7 @@ def _caly_evo_step(
             caly_evo_step_steps.inputs.parameters["cnt_num"],
         ),
         executor=wise_executor(expl_mode, prep_executor_config),
-        **run_config,
+        **no_slice_run_config,
     )
     caly_evo_step_steps.add(prep_dp_optim)
 
