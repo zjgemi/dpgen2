@@ -1,3 +1,7 @@
+from .artifact_uri import (
+    get_artifact_from_uri,
+    upload_artifact_and_print_uri,
+)
 from .binary_file_input import (
     BinaryFileInput,
 )

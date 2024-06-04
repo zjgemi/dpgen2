@@ -120,11 +120,13 @@ from dpgen2.utils import (
     BinaryFileInput,
     bohrium_config_from_dict,
     dump_object_to_file,
+    get_artifact_from_uri,
     get_subkey,
     load_object_from_file,
     matched_step_key,
     print_keys_in_nice_format,
     sort_slice_ops,
+    upload_artifact_and_print_uri,
     workflow_config_from_dict,
 )
 from dpgen2.utils.step_config import normalize as normalize_step_dict
@@ -457,6 +459,15 @@ def make_finetune_step(
     return finetune_step
 
 
+def get_systems_from_data(data, data_prefix=None):
+    data = [data] if isinstance(data, str) else data
+    assert isinstance(data, list)
+    if data_prefix is not None:
+        data = [os.path.join(data_prefix, ii) for ii in data]
+    data = sum([expand_sys_str(ii) for ii in data], [])
+    return data
+
+
 def workflow_concurrent_learning(
     config: Dict,
 ) -> Tuple[Step, Optional[Step]]:
@@ -505,14 +516,12 @@ def workflow_concurrent_learning(
         upload_python_packages = _upload_python_packages
 
     valid_data = config["inputs"]["valid_data_sys"]
-    if valid_data is not None:
+    if config["inputs"]["valid_data_uri"] is not None:
+        valid_data = get_artifact_from_uri(config["inputs"]["valid_data_uri"])
+    elif valid_data is not None:
         valid_data_prefix = config["inputs"]["valid_data_prefix"]
-        valid_data = [valid_data] if isinstance(valid_data, str) else valid_data
-        assert isinstance(valid_data, list)
-        if valid_data_prefix is not None:
-            valid_data = [os.path.join(valid_data_prefix, ii) for ii in valid_data]
-        valid_data = [expand_sys_str(ii) for ii in valid_data]
-        valid_data = upload_artifact(valid_data)
+        valid_data = get_systems_from_data(valid_data, valid_data_prefix)
+        valid_data = upload_artifact_and_print_uri(valid_data, "valid_data")
     concurrent_learning_op = make_concurrent_learning_op(
         train_style,
         explore_style,
@@ -570,35 +579,34 @@ def workflow_concurrent_learning(
     multitask = config["inputs"]["multitask"]
     if multitask:
         head = config["inputs"]["head"]
-        multi_init_data = config["inputs"]["multi_init_data"]
-        init_data = []
-        multi_init_data_idx = {}
-        for k, v in multi_init_data.items():
-            sys = v["sys"]
-            sys = [sys] if isinstance(sys, str) else sys
-            assert isinstance(sys, list)
-            if v["prefix"] is not None:
-                sys = [os.path.join(v["prefix"], ii) for ii in sys]
-            sys = [expand_sys_str(ii) for ii in sys]
-            istart = len(init_data)
-            init_data += sys
-            iend = len(init_data)
-            multi_init_data_idx[k] = list(range(istart, iend))
+        if config["inputs"]["multi_init_data_uri"] is not None:
+            init_data = get_artifact_from_uri(config["inputs"]["multi_init_data_uri"])
+        else:
+            multi_init_data = config["inputs"]["multi_init_data"]
+            init_data = {}
+            for k, v in multi_init_data.items():
+                sys = v["sys"]
+                sys = get_systems_from_data(sys, v.get("prefix", None))
+                init_data[k] = sys
+            init_data = upload_artifact_and_print_uri(init_data, "multi_init_data")
         train_config["multitask"] = True
         train_config["head"] = head
-        train_config["multi_init_data_idx"] = multi_init_data_idx
         explore_config["head"] = head
     else:
-        init_data_prefix = config["inputs"]["init_data_prefix"]
-        init_data = config["inputs"]["init_data_sys"]
-        if init_data_prefix is not None:
-            init_data = [os.path.join(init_data_prefix, ii) for ii in init_data]
-        if isinstance(init_data, str):
-            init_data = expand_sys_str(init_data)
-    init_data = upload_artifact(init_data)
+        if config["inputs"]["init_data_uri"] is not None:
+            init_data = get_artifact_from_uri(config["inputs"]["init_data_uri"])
+        else:
+            init_data_prefix = config["inputs"]["init_data_prefix"]
+            init_data = config["inputs"]["init_data_sys"]
+            init_data = get_systems_from_data(init_data, init_data_prefix)
+            init_data = upload_artifact_and_print_uri(init_data, "init_data")
     iter_data = upload_artifact([])
-    if init_models_paths is not None:
-        init_models = upload_artifact(init_models_paths)
+    if train_style == "dp" and config["train"]["init_models_uri"] is not None:
+        init_models = get_artifact_from_uri(config["train"]["init_models_uri"])
+    elif train_style == "dp-dist" and config["train"]["student_model_uri"] is not None:
+        init_models = get_artifact_from_uri(config["train"]["student_model_uri"])
+    elif init_models_paths is not None:
+        init_models = upload_artifact_and_print_uri(init_models_paths, "init_models")
     else:
         init_models = None
 
