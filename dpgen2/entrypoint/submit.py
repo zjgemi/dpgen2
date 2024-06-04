@@ -892,14 +892,19 @@ def get_resubmit_keys(
         "scheduler",
         "id",
     ]
-    if len(matched_step_key(
-        all_step_keys,
-        [
-            "collect-run-calypso",
-            "prep-dp-optim",
-            "run-dp-optim",
-        ],
-    )) > 0:
+    if (
+        len(
+            matched_step_key(
+                all_step_keys,
+                [
+                    "collect-run-calypso",
+                    "prep-dp-optim",
+                    "run-dp-optim",
+                ],
+            )
+        )
+        > 0
+    ):
         # calypso default mode
         step_keys += [
             "collect-run-calypso",
