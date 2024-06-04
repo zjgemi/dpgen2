@@ -601,8 +601,10 @@ def workflow_concurrent_learning(
             init_data = get_systems_from_data(init_data, init_data_prefix)
             init_data = upload_artifact_and_print_uri(init_data, "init_data")
     iter_data = upload_artifact([])
-    if config["train"]["init_models_uri"] is not None:
+    if train_style == "dp" and config["train"]["init_models_uri"] is not None:
         init_models = get_artifact_from_uri(config["train"]["init_models_uri"])
+    elif train_style == "dp-dist" and config["train"]["student_model_uri"] is not None:
+        init_models = get_artifact_from_uri(config["train"]["student_model_uri"])
     elif init_models_paths is not None:
         init_models = upload_artifact_and_print_uri(init_models_paths, "init_models")
     else:
