@@ -87,7 +87,11 @@ class PrepCalyModelDevi(OP):
 
         """
         work_dir = Path(ip["task_name"])
-        traj_results_dir = [Path(dir_name).resolve() for dir_name in ip["traj_results"]]
+        traj_results_dir = [
+            Path(dir_name).resolve()
+            for dir_name in ip["traj_results"]
+            if dir_name is not None
+        ]
         trajs = [
             traj.resolve()
             for traj_dir in traj_results_dir

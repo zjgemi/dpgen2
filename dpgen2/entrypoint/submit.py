@@ -838,6 +838,8 @@ def get_superop(key):
         return key.replace("prep-caly-model-devi", "prep-run-explore")
     elif "run-caly-model-devi" in key:
         return re.sub("run-caly-model-devi-[0-9]*", "prep-run-explore", key)
+    elif "caly-evo-step" in key:
+        return re.sub("caly-evo-step-[0-9]*", "prep-run-explore", key)
     return None
 
 
@@ -871,30 +873,51 @@ def get_resubmit_keys(
     wf,
 ):
     all_step_keys = successful_step_keys(wf)
-    all_step_keys = matched_step_key(
-        all_step_keys,
-        [
-            "prep-run-train",
-            "prep-train",
-            "run-train",
-            "modify-train-script",
-            "prep-caly-input",
+    step_keys = [
+        "prep-run-train",
+        "prep-train",
+        "run-train",
+        "modify-train-script",
+        "prep-caly-input",
+        "prep-caly-model-devi",
+        "run-caly-model-devi",
+        "prep-run-explore",
+        "prep-lmp",
+        "run-lmp",
+        "select-confs",
+        "prep-run-fp",
+        "prep-fp",
+        "run-fp",
+        "collect-data",
+        "scheduler",
+        "id",
+    ]
+    if (
+        len(
+            matched_step_key(
+                all_step_keys,
+                [
+                    "collect-run-calypso",
+                    "prep-dp-optim",
+                    "run-dp-optim",
+                ],
+            )
+        )
+        > 0
+    ):
+        # calypso default mode
+        step_keys += [
             "collect-run-calypso",
             "prep-dp-optim",
             "run-dp-optim",
-            "prep-caly-model-devi",
-            "run-caly-model-devi",
-            "prep-run-explore",
-            "prep-lmp",
-            "run-lmp",
-            "select-confs",
-            "prep-run-fp",
-            "prep-fp",
-            "run-fp",
-            "collect-data",
-            "scheduler",
-            "id",
-        ],
+        ]
+    else:
+        # calypso merge mode
+        step_keys.append("caly-evo-step")
+
+    all_step_keys = matched_step_key(
+        all_step_keys,
+        step_keys,
     )
     all_step_keys = sort_slice_ops(
         all_step_keys,
