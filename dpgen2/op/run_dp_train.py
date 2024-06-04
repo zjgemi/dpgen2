@@ -530,7 +530,9 @@ class RunDPTrain(OP):
             elif "old_data_larger_than" in config["init_model_policy"]:
                 old_data_size_level = int(config["init_model_policy"].split(":")[-1])
                 if isinstance(init_data, dict):
-                    init_data_size = _get_data_size_of_all_systems(sum(init_data.values(), []))
+                    init_data_size = _get_data_size_of_all_systems(
+                        sum(init_data.values(), [])
+                    )
                 else:
                     init_data_size = _get_data_size_of_all_systems(init_data)
                 iter_data_old_size = _get_data_size_of_all_mult_sys(

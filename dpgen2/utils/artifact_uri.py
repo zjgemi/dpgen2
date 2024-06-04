@@ -1,4 +1,8 @@
-from dflow import S3Artifact, s3_config, upload_artifact
+from dflow import (
+    S3Artifact,
+    s3_config,
+    upload_artifact,
+)
 
 
 def get_artifact_from_uri(uri):
