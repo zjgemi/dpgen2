@@ -45,6 +45,7 @@ def dp_dist_train_args():
     doc_config = "Configuration of training"
     doc_template_script = "File names of the template training script. It can be a `List[str]`, the length of which is the same as `numb_models`. Each template script in the list is used to train a model. Can be a `str`, the models share the same template training script. "
     dock_student_model_path = "The path of student model"
+    doc_student_model_uri = "The URI of student model"
 
     return [
         Argument(
@@ -59,6 +60,13 @@ def dp_dist_train_args():
             "template_script", [List[str], str], optional=False, doc=doc_template_script
         ),
         Argument("student_model_path", str, optional=True, doc=dock_student_model_path),
+        Argument(
+            "student_model_uri",
+            str,
+            optional=True,
+            default=None,
+            doc=doc_student_model_uri,
+        ),
     ]
 
 
@@ -67,6 +75,7 @@ def dp_train_args():
     doc_config = "Configuration of training"
     doc_template_script = "File names of the template training script. It can be a `List[str]`, the length of which is the same as `numb_models`. Each template script in the list is used to train a model. Can be a `str`, the models share the same template training script. "
     doc_init_models_paths = "the paths to initial models"
+    doc_init_models_uri = "The URI of initial models"
 
     return [
         Argument(
@@ -88,6 +97,13 @@ def dp_train_args():
             default=None,
             doc=doc_init_models_paths,
             alias=["training_iter0_model_path"],
+        ),
+        Argument(
+            "init_models_uri",
+            str,
+            optional=True,
+            default=None,
+            doc=doc_init_models_uri,
         ),
     ]
 
@@ -270,14 +286,17 @@ def input_args():
     doc_do_finetune = textwrap.dedent(doc_do_finetune)
     doc_init_data_prefix = "The prefix of initial data systems"
     doc_init_sys = "The inital data systems"
+    doc_init_data_uri = "The URI of initial data"
     doc_multitask = "Do multitask training"
     doc_head = "Head to use in the multitask training"
     doc_multi_init_data = (
         "The inital data for multitask, it should be a dict, whose keys are task names and each value is a dict"
         "containing fields `prefix` and `sys` for initial data of each task"
     )
+    doc_multi_init_data_uri = "The URI of initial data for multitask"
     doc_valid_data_prefix = "The prefix of validation data systems"
     doc_valid_sys = "The validation data systems"
+    doc_valid_data_uri = "The URI of validation data"
 
     return [
         Argument("type_map", List[str], optional=False, doc=doc_type_map),
@@ -301,6 +320,13 @@ def input_args():
             doc=doc_init_sys,
         ),
         Argument(
+            "init_data_uri",
+            str,
+            optional=True,
+            default=None,
+            doc=doc_init_data_uri,
+        ),
+        Argument(
             "multitask",
             bool,
             optional=True,
@@ -322,6 +348,13 @@ def input_args():
             doc=doc_multi_init_data,
         ),
         Argument(
+            "multi_init_data_uri",
+            str,
+            optional=True,
+            default=None,
+            doc=doc_multi_init_data_uri,
+        ),
+        Argument(
             "valid_data_prefix",
             str,
             optional=True,
@@ -334,6 +367,13 @@ def input_args():
             optional=True,
             default=None,
             doc=doc_valid_sys,
+        ),
+        Argument(
+            "valid_data_uri",
+            str,
+            optional=True,
+            default=None,
+            doc=doc_valid_data_uri,
         ),
     ]
 

@@ -11,6 +11,7 @@ from typing import (
     List,
     Optional,
     Tuple,
+    Union,
 )
 
 import dpdata
@@ -26,6 +27,7 @@ from dflow.python import (
     Artifact,
     BigParameter,
     FatalError,
+    NestedDict,
     OPIOSign,
     Parameter,
     TransientError,
@@ -70,7 +72,7 @@ class RunDPTrain(OP):
                 ),
                 "task_path": Artifact(Path),
                 "init_model": Artifact(Path, optional=True),
-                "init_data": Artifact(List[Path]),
+                "init_data": Artifact(NestedDict[Path]),
                 "iter_data": Artifact(List[Path]),
                 "valid_data": Artifact(List[Path], optional=True),
             }
@@ -103,7 +105,7 @@ class RunDPTrain(OP):
             - `task_name`: (`str`) The name of training task.
             - `task_path`: (`Artifact(Path)`) The path that contains all input files prepareed by `PrepDPTrain`.
             - `init_model`: (`Artifact(Path)`) A frozen model to initialize the training.
-            - `init_data`: (`Artifact(List[Path])`) Initial training data.
+            - `init_data`: (`Artifact(NestedDict[Path])`) Initial training data.
             - `iter_data`: (`Artifact(List[Path])`) Training data generated in the DPGEN iterations.
 
         Returns
@@ -161,7 +163,12 @@ class RunDPTrain(OP):
         auto_prob_str = "prob_sys_size"
         if do_init_model:
             old_ratio = config["init_model_old_ratio"]
-            numb_old = len(init_data) + len(iter_data_old_exp)
+            if config["multitask"]:
+                head = config["head"]
+                len_init = len(init_data[head])
+            else:
+                len_init = len(init_data)
+            numb_old = len_init + len(iter_data_old_exp)
             numb_new = numb_old + len(iter_data_new_exp)
             auto_prob_str = f"prob_sys_size; 0:{numb_old}:{old_ratio}; {numb_old}:{numb_new}:{1.-old_ratio:g}"
 
@@ -296,7 +303,7 @@ class RunDPTrain(OP):
     def write_data_to_input_script(
         idict: dict,
         config,
-        init_data: List[Path],
+        init_data: Union[List[Path], Dict[str, List[Path]]],
         iter_data: List[Path],
         auto_prob_str: str = "prob_sys_size",
         major_version: str = "1",
@@ -305,11 +312,10 @@ class RunDPTrain(OP):
         odict = idict.copy()
         if config["multitask"]:
             head = config["head"]
-            multi_init_data_idx = config["multi_init_data_idx"]
             for k, v in odict["training"]["data_dict"].items():
                 v["training_data"]["systems"] = []
-                if k in multi_init_data_idx:
-                    v["training_data"]["systems"] += [str(init_data[ii]) for ii in multi_init_data_idx[k]]
+                if k in init_data:
+                    v["training_data"]["systems"] += [str(ii) for ii in init_data[k]]
                 if k == head:
                     v["training_data"]["systems"] += [str(ii) for ii in iter_data]
                 if config.get("impl", "tensorflow") == "pytorch":
@@ -425,7 +431,12 @@ class RunDPTrain(OP):
                 do_init_model = True
             elif "old_data_larger_than" in config["init_model_policy"]:
                 old_data_size_level = int(config["init_model_policy"].split(":")[-1])
-                init_data_size = _get_data_size_of_all_systems(init_data)
+                if isinstance(init_data, dict):
+                    init_data_size = _get_data_size_of_all_systems(
+                        sum(init_data.values(), [])
+                    )
+                else:
+                    init_data_size = _get_data_size_of_all_systems(init_data)
                 iter_data_old_size = _get_data_size_of_all_mult_sys(
                     iter_data[:-1], mixed_type=mixed_type
                 )
@@ -456,7 +467,6 @@ class RunDPTrain(OP):
         doc_finetune_args = "Extra arguments for finetuning"
         doc_multitask = "Do multitask training"
         doc_head = "Head to use in the multitask training"
-        doc_multi_init_data_idx = "A dict mapping from task name to list of indices in the init data"
         doc_init_model_with_finetune = "Use finetune for init model"
         return [
             Argument(
@@ -544,13 +554,6 @@ class RunDPTrain(OP):
                 default=None,
                 doc=doc_head,
             ),
-            Argument(
-                "multi_init_data_idx",
-                dict,
-                optional=True,
-                default=None,
-                doc=doc_multi_init_data_idx,
-            )
         ]
 
     @staticmethod
