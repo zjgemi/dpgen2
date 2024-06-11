@@ -58,7 +58,7 @@ class PrepCalyModelDevi(OP):
         return OPIOSign(
             {
                 "task_name_list": Parameter(List[str]),
-                "grouped_traj_list": Artifact(List[Path]),
+                "grouped_traj_list": Artifact(List[Path], archive=None),
             }
         )
 

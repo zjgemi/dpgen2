@@ -273,6 +273,7 @@ def _prep_run_caly(
                 input_parameter=["task_name"],
                 input_artifact=["traj_dirs"],
                 output_artifact=["traj", "model_devi"],
+                sub_path=True,
             ),
             python_packages=upload_python_packages,
             **run_template_config,
@@ -285,7 +286,7 @@ def _prep_run_caly(
             "traj_dirs": prep_caly_model_devi.outputs.artifacts["grouped_traj_list"],
             "models": prep_run_caly_steps.inputs.artifacts["models"],
         },
-        key="%s--run-caly-model-devi-{{item}}"
+        key="%s--run-caly-model-devi-{{item.order}}"
         % (prep_run_caly_steps.inputs.parameters["block_id"],),
         executor=run_executor,
         **prep_config,
