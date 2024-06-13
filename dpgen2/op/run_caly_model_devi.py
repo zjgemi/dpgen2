@@ -38,7 +38,7 @@ class RunCalyModelDevi(OP):
             {
                 "type_map": Parameter(List[str]),
                 "task_name": Parameter(str),
-                "traj_dirs": Artifact(List[Path]),
+                "traj_dir": Artifact(Path),
                 "models": Artifact(List[Path]),
             }
         )
@@ -66,7 +66,7 @@ class RunCalyModelDevi(OP):
             Input dict with components:
             - `type_map`: (`List[str]`) The type map of elements.
             - `task_name`: (`str`) The name of the task.
-            - `traj_dirs`: (`Artifact(List[Path])`) The List of paths that contains trajectory files.
+            - `traj_dir`: (`Artifact(Path)`) The path that contains trajectory files.
             - `models`: (`Artifact(List[Path])`) The frozen model to estimate the model deviation.
 
         Returns
@@ -91,7 +91,7 @@ class RunCalyModelDevi(OP):
 
         work_dir = Path(ip["task_name"])
 
-        traj_dirs = ip["traj_dirs"]
+        traj_dirs = [ip["traj_dir"]]
         traj_dirs = [traj_dir.resolve() for traj_dir in traj_dirs]
 
         dump_file_name = "traj.%d.dump"

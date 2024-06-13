@@ -271,7 +271,7 @@ def _prep_run_caly(
             run_caly_model_devi_op,
             slices=Slices(
                 input_parameter=["task_name"],
-                input_artifact=["traj_dirs"],
+                input_artifact=["traj_dir"],
                 output_artifact=["traj", "model_devi"],
                 sub_path=True,
             ),
@@ -283,7 +283,7 @@ def _prep_run_caly(
             "task_name": prep_caly_model_devi.outputs.parameters["task_name_list"],
         },
         artifacts={
-            "traj_dirs": prep_caly_model_devi.outputs.artifacts["grouped_traj_list"],
+            "traj_dir": prep_caly_model_devi.outputs.artifacts["grouped_traj_list"],
             "models": prep_run_caly_steps.inputs.artifacts["models"],
         },
         key="%s--run-caly-model-devi-{{item.order}}"

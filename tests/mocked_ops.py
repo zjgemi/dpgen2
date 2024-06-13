@@ -1198,7 +1198,7 @@ class MockedRunCalyModelDevi(RunCalyModelDevi):
 
         type_map = ip["type_map"]
 
-        traj_dirs = ip["traj_dirs"]
+        traj_dirs = [ip["traj_dir"]]
         traj_dirs = [traj_dir.resolve() for traj_dir in traj_dirs]
 
         models_dir = ip["models"]

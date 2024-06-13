@@ -297,7 +297,7 @@ ITEM: ATOMS id type x y z fx fy fz
                 {
                     "type_map": self.type_map,
                     "task_name": str(self.task_name),
-                    "traj_dirs": [self.work_dir],
+                    "traj_dir": [self.work_dir],
                     "models": self.models,
                 }
             )
