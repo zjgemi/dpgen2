@@ -54,6 +54,7 @@ def _make_train_command(
     finetune_mode,
     finetune_args,
     init_model_with_finetune,
+    train_args,
 ):
     # find checkpoint
     if impl == "tensorflow" and os.path.isfile("checkpoint"):
@@ -96,6 +97,7 @@ def _make_train_command(
         )
     else:
         command = dp_command + ["train", train_script_name]
+    command += train_args.split()
     return command
 
 
@@ -249,6 +251,7 @@ class RunDPTrain(OP):
         else:
             dp_command = ["dp"]
         finetune_args = config.get("finetune_args", "")
+        train_args = config.get("train_args", "")
         config = RunDPTrain.normalize_config(config)
         task_name = ip["task_name"]
         task_path = ip["task_path"]
@@ -338,6 +341,7 @@ class RunDPTrain(OP):
                 finetune_mode,
                 finetune_args,
                 init_model_with_finetune,
+                train_args,
             )
 
             ret, out, err = run_command(command)
@@ -566,6 +570,7 @@ class RunDPTrain(OP):
         doc_multitask = "Do multitask training"
         doc_head = "Head to use in the multitask training"
         doc_init_model_with_finetune = "Use finetune for init model"
+        doc_train_args = "Extra arguments for dp train"
         return [
             Argument(
                 "impl",
@@ -652,6 +657,13 @@ class RunDPTrain(OP):
                 optional=True,
                 default=None,
                 doc=doc_head,
+            ),
+            Argument(
+                "train_args",
+                str,
+                optional=True,
+                default="",
+                doc=doc_train_args,
             ),
         ]
 
