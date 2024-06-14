@@ -54,7 +54,7 @@ def _make_train_command(
     finetune_mode,
     finetune_args,
     init_model_with_finetune,
-    train_args,
+    train_args="",
 ):
     # find checkpoint
     if impl == "tensorflow" and os.path.isfile("checkpoint"):
