@@ -194,6 +194,7 @@ class RunDPTrain(OP):
                 "init_data": Artifact(NestedDict[Path]),
                 "iter_data": Artifact(List[Path]),
                 "valid_data": Artifact(List[Path], optional=True),
+                "optional_files": Artifact(List[Path], optional=True),
             }
         )
 
@@ -330,6 +331,10 @@ class RunDPTrain(OP):
             # dump train script
             with open(train_script_name, "w") as fp:
                 json.dump(train_dict, fp, indent=4)
+
+            if ip["optional_files"] is not None:
+                for f in ip["optional_files"]:
+                    Path(f.name).symlink_to(f)
 
             # train model
             command = _make_train_command(
