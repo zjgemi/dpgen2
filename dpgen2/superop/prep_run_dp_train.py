@@ -288,7 +288,9 @@ def _prep_run_dp_train(
             "init_data": train_steps.inputs.artifacts["init_data"],
             "iter_data": train_steps.inputs.artifacts["iter_data"],
             "valid_data": valid_data,
-            "optional_files": upload_artifact(optional_files) if optional_files is not None else None,
+            "optional_files": upload_artifact(optional_files)
+            if optional_files is not None
+            else None,
         },
         with_sequence=argo_sequence(
             argo_len(prep_train.outputs.parameters["task_names"]),
