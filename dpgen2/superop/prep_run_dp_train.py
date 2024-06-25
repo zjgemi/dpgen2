@@ -135,6 +135,7 @@ class PrepRunDPTrain(Steps):
         upload_python_packages: Optional[List[os.PathLike]] = None,
         finetune: bool = False,
         valid_data: Optional[S3Artifact] = None,
+        optional_files: Optional[List[str]] = None,
     ):
         self._input_parameters = {
             "block_id": InputParameter(type=str, value=""),
@@ -196,6 +197,7 @@ class PrepRunDPTrain(Steps):
             upload_python_packages=upload_python_packages,
             finetune=finetune,
             valid_data=valid_data,
+            optional_files=optional_files,
         )
 
     @property
@@ -230,6 +232,7 @@ def _prep_run_dp_train(
     upload_python_packages: Optional[List[os.PathLike]] = None,
     finetune: bool = False,
     valid_data: Optional[S3Artifact] = None,
+    optional_files: Optional[List[str]] = None,
 ):
     prep_config = deepcopy(prep_config)
     run_config = deepcopy(run_config)
@@ -285,6 +288,9 @@ def _prep_run_dp_train(
             "init_data": train_steps.inputs.artifacts["init_data"],
             "iter_data": train_steps.inputs.artifacts["iter_data"],
             "valid_data": valid_data,
+            "optional_files": upload_artifact(optional_files)
+            if optional_files is not None
+            else None,
         },
         with_sequence=argo_sequence(
             argo_len(prep_train.outputs.parameters["task_names"]),

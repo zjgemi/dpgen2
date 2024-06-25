@@ -46,6 +46,7 @@ def dp_dist_train_args():
     doc_template_script = "File names of the template training script. It can be a `List[str]`, the length of which is the same as `numb_models`. Each template script in the list is used to train a model. Can be a `str`, the models share the same template training script. "
     dock_student_model_path = "The path of student model"
     doc_student_model_uri = "The URI of student model"
+    doc_optional_files = "Optional files for training"
 
     return [
         Argument(
@@ -67,6 +68,13 @@ def dp_dist_train_args():
             default=None,
             doc=doc_student_model_uri,
         ),
+        Argument(
+            "optional_files",
+            list,
+            optional=True,
+            default=None,
+            doc=doc_optional_files,
+        ),
     ]
 
 
@@ -76,6 +84,7 @@ def dp_train_args():
     doc_template_script = "File names of the template training script. It can be a `List[str]`, the length of which is the same as `numb_models`. Each template script in the list is used to train a model. Can be a `str`, the models share the same template training script. "
     doc_init_models_paths = "the paths to initial models"
     doc_init_models_uri = "The URI of initial models"
+    doc_optional_files = "Optional files for training"
 
     return [
         Argument(
@@ -104,6 +113,13 @@ def dp_train_args():
             optional=True,
             default=None,
             doc=doc_init_models_uri,
+        ),
+        Argument(
+            "optional_files",
+            list,
+            optional=True,
+            default=None,
+            doc=doc_optional_files,
         ),
     ]
 
