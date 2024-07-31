@@ -1,8 +1,10 @@
+import os
 from pathlib import (
     Path,
 )
 from typing import (
     List,
+    Optional,
 )
 
 import dpdata
@@ -18,61 +20,29 @@ from dflow.python import (
 )
 
 try:
-    from fpop.abacus import (
-        AbacusInputs,
-        PrepAbacus,
-        RunAbacus,
+    from fpop.cp2k import (
+        Cp2kInputs,
+        PrepCp2k,
+        RunCp2k,
     )
 except ModuleNotFoundError:
-    AbacusInputs = PrepAbacus = RunAbacus = object
+    Cp2kInputs = PrepCp2k = RunCp2k = object
 
 from ..constants import (
     fp_default_out_data_name,
 )
 
 
-class FpOpAbacusInputs(AbacusInputs):  # type: ignore
+class FpOpCp2kInputs(Cp2kInputs):  # type: ignore
     @staticmethod
     def args():
-        doc_input_file = "A template INPUT file."
-        doc_pp_files = (
-            "The pseudopotential files for the elements. "
-            'For example: {"H": "/path/to/H.upf", "O": "/path/to/O.upf"}.'
-        )
-        doc_element_mass = (
-            "Specify the mass of some elements. "
-            'For example: {"H": 1.0079, "O": 15.9994}.'
-        )
-        doc_kpt_file = "The KPT file, by default None."
-        doc_orb_files = (
-            "The numerical orbital fiels for the elements, "
-            "by default None. "
-            'For example: {"H": "/path/to/H.orb", "O": "/path/to/O.orb"}.'
-        )
-        doc_deepks_descriptor = "The deepks descriptor file, by default None."
-        doc_deepks_model = "The deepks model file, by default None."
+        doc_inp_file = "The path to the user-submitted CP2K input file."
         return [
-            Argument("input_file", str, optional=False, doc=doc_input_file),
-            Argument("pp_files", dict, optional=False, doc=doc_pp_files),
-            Argument(
-                "element_mass", dict, optional=True, default=None, doc=doc_element_mass
-            ),
-            Argument("kpt_file", str, optional=True, default=None, doc=doc_kpt_file),
-            Argument("orb_files", dict, optional=True, default=None, doc=doc_orb_files),
-            Argument(
-                "deepks_descriptor",
-                str,
-                optional=True,
-                default=None,
-                doc=doc_deepks_descriptor,
-            ),
-            Argument(
-                "deepks_model", str, optional=True, default=None, doc=doc_deepks_model
-            ),
+            Argument("inp_file", str, optional=False, doc=doc_inp_file),
         ]
 
 
-class PrepFpOpAbacus(OP):
+class PrepFpOpCp2k(OP):
     @classmethod
     def get_input_sign(cls):
         return OPIOSign(
@@ -98,7 +68,7 @@ class PrepFpOpAbacus(OP):
         ip: OPIO,
     ) -> OPIO:
         confs = []
-        # remove atom types with 0 atom from type map, for abacus need pp_files
+        # remove atom types with 0 atom from type map
         # for all atom types in the type map
         for p in ip["confs"]:
             for f in p.rglob("type.raw"):
@@ -128,28 +98,18 @@ class PrepFpOpAbacus(OP):
                 "prep_image_config": ip["config"].get("prep", {}),
             }
         )
-        op = PrepAbacus()
+        op = PrepCp2k()
         return op.execute(op_in)  # type: ignore in the case of not importing fpop
 
 
-from typing import (
-    Tuple,
-)
+def get_run_type(lines: List[str]) -> Optional[str]:
+    for line in lines:
+        if "RUN_TYPE" in line:
+            return line.split()[-1]
+    return None
 
 
-def get_suffix_calculation(INPUT: List[str]) -> Tuple[str, str]:
-    suffix = "ABACUS"
-    calculation = "scf"
-    for iline in INPUT:
-        sline = iline.split("#")[0].split()
-        if len(sline) >= 2 and sline[0].lower() == "suffix":
-            suffix = sline[1].strip()
-        elif len(sline) >= 2 and sline[0].lower() == "calculation":
-            calculation = sline[1].strip()
-    return suffix, calculation
-
-
-class RunFpOpAbacus(OP):
+class RunFpOpCp2k(OP):
     @classmethod
     def get_input_sign(cls):
         return OPIOSign(
@@ -180,38 +140,46 @@ class RunFpOpAbacus(OP):
                 "task_name": ip["task_name"],
                 "task_path": ip["task_path"],
                 "backward_list": [],
+                "log_name": "output.log",
                 "run_image_config": run_config,
             }
         )
-        op = RunAbacus()
+        op = RunCp2k()
         op_out = op.execute(op_in)  # type: ignore in the case of not importing fpop
         workdir = op_out["backward_dir"].parent
 
+        file_path = os.path.join(str(workdir), "output.log")
+
         # convert the output to deepmd/npy format
-        with open("%s/INPUT" % workdir, "r") as f:
-            INPUT = f.readlines()
-        _, calculation = get_suffix_calculation(INPUT)
-        if calculation == "scf":
-            sys = dpdata.LabeledSystem(str(workdir), fmt="abacus/scf")
-        elif calculation == "md":
-            sys = dpdata.LabeledSystem(str(workdir), fmt="abacus/md")
-        elif calculation in ["relax", "cell-relax"]:
-            sys = dpdata.LabeledSystem(str(workdir), fmt="abacus/relax")
+        with open(workdir / "input.inp", "r") as f:
+            lines = f.readlines()
+
+        # 获取 RUN_TYPE
+        run_type = get_run_type(lines)
+
+        if run_type == "ENERGY_FORCE":
+            sys = dpdata.LabeledSystem(file_path, fmt="cp2kdata/e_f")
+        elif run_type == "MD":
+            sys = dpdata.LabeledSystem(
+                str(workdir), cp2k_output_name="output.log", fmt="cp2kdata/md"
+            )
         else:
-            raise ValueError("Type of calculation %s not supported" % calculation)
+            raise ValueError(f"Type of calculation {run_type} not supported")
+
+        # out_name = run_config.get("out", fp_default_out_data_name)
         out_name = fp_default_out_data_name
         sys.to("deepmd/npy", workdir / out_name)
 
         return OPIO(
             {
-                "log": workdir / "log",
+                "log": workdir / "output.log",
                 "labeled_data": workdir / out_name,
             }
         )
 
     @staticmethod
     def args():
-        doc_cmd = "The command of abacus"
+        doc_cmd = "The command of cp2k"
         return [
-            Argument("command", str, optional=True, default="abacus", doc=doc_cmd),
+            Argument("command", str, optional=True, default="cp2k", doc=doc_cmd),
         ]

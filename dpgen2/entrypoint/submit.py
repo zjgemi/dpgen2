@@ -155,6 +155,7 @@ def make_concurrent_learning_op(
     cl_step_config: dict = default_config,
     upload_python_packages: Optional[List[os.PathLike]] = None,
     valid_data: Optional[S3Artifact] = None,
+    train_optional_files: Optional[List[str]] = None,
 ):
     if train_style in ("dp", "dp-dist"):
         prep_run_train_op = PrepRunDPTrain(
@@ -165,6 +166,7 @@ def make_concurrent_learning_op(
             run_config=run_train_config,
             upload_python_packages=upload_python_packages,
             valid_data=valid_data,
+            optional_files=train_optional_files,
         )
     else:
         raise RuntimeError(f"unknown train_style {train_style}")
@@ -441,6 +443,7 @@ def workflow_concurrent_learning(
     collect_data_config = config["step_configs"]["collect_data_config"]
     cl_step_config = config["step_configs"]["cl_step_config"]
     upload_python_packages = config.get("upload_python_packages", None)
+    train_optional_files = config["train"].get("optional_files", None)
 
     if train_style == "dp":
         init_models_paths = config["train"].get("init_models_paths", None)
@@ -490,6 +493,7 @@ def workflow_concurrent_learning(
         cl_step_config=cl_step_config,
         upload_python_packages=upload_python_packages,
         valid_data=valid_data,
+        train_optional_files=train_optional_files,
     )
     scheduler = make_naive_exploration_scheduler(config)
 
