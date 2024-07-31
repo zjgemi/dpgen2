@@ -142,9 +142,7 @@ def _make_train_command_old(
                 str(init_model),
                 train_script_name,
             ]
-    elif finetune_mode == "finetune" or (
-        do_init_model and init_model_with_finetune
-    ):
+    elif finetune_mode == "finetune" or (do_init_model and init_model_with_finetune):
         command = (
             dp_command
             + [
