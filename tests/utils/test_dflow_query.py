@@ -61,12 +61,6 @@ from mocked_ops import (
 # isort: on
 
 dpgen_keys = [
-    "finetune--prep-train",
-    "finetune--run-train-0002",
-    "finetune--run-train-0000",
-    "finetune--run-train-0001",
-    "finetune--modify-train-script",
-    "finetune--prep-run-train",
     "init--scheduler",
     "init--id",
     "iter-000000--prep-train",
@@ -228,12 +222,6 @@ class TestDflowQuery(unittest.TestCase):
 
     def test_sort_slice_ops(self):
         expected_output = [
-            "finetune--prep-train",
-            "finetune--run-train-0000",
-            "finetune--run-train-0001",
-            "finetune--run-train-0002",
-            "finetune--modify-train-script",
-            "finetune--prep-run-train",
             "init--scheduler",
             "init--id",
             "iter-000000--prep-train",
@@ -272,10 +260,6 @@ class TestDflowQuery(unittest.TestCase):
 
     def test_print_keys(self):
         expected_output = [
-            "                   0 : finetune--prep-train",
-            "              1 -> 3 : finetune--run-train-0000 -> finetune--run-train-0002",
-            "                   4 : finetune--modify-train-script",
-            "                   5 : finetune--prep-run-train",
             "                   6 : init--scheduler",
             "                   7 : init--id",
             "                   8 : iter-000000--prep-train",
