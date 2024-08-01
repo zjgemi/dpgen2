@@ -750,7 +750,6 @@ class TestRunDPTrain(unittest.TestCase):
         )
         with open(out["script"]) as fp:
             jdata = json.load(fp)
-            print("jdata", jdata)
             self.assertDictEqual(jdata, self.expected_init_model_odict_v2)
 
 
