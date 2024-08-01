@@ -693,6 +693,7 @@ class TestRunDPTrain(unittest.TestCase):
         mocked_run.side_effect = [(0, "foo\n", ""), (0, "bar\n", "")]
 
         config = self.config.copy()
+        config["init_model_policy"] = "yes"
         task_path = self.task_path
         Path(task_path).mkdir(exist_ok=True)
         with open(Path(task_path) / train_script_name, "w") as fp:
@@ -712,7 +713,7 @@ class TestRunDPTrain(unittest.TestCase):
                     "iter_data": [Path(ii) for ii in self.iter_data],
                     "optional_parameter": {
                         "mixed_type": False,
-                        "finetune_mode": "train-init",
+                        "finetune_mode": "no",
                     },
                 }
             )
@@ -749,7 +750,8 @@ class TestRunDPTrain(unittest.TestCase):
         )
         with open(out["script"]) as fp:
             jdata = json.load(fp)
-            self.assertDictEqual(jdata, self.expected_odict_v2)
+            print("jdata", jdata)
+            self.assertDictEqual(jdata, self.expected_init_model_odict_v2)
 
 
 class TestRunDPTrainNullIterData(unittest.TestCase):
@@ -962,7 +964,7 @@ class TestMakeTrainCommand(unittest.TestCase):
             [True, False],
             ["tensorflow", "pytorch"],
             [True, False],
-            ["finetune", "train-init"],
+            ["finetune", "no"],
             [True, False],
         ):
             if res:

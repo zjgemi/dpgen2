@@ -432,8 +432,7 @@ class TestTrainDp(unittest.TestCase):
         self.assertEqual(step.phase, "Succeeded")
 
         new_template_script = step.outputs.parameters["template_script"].value
-        expected_list = [{"foo": "bar"} for i in range(self.numb_models)]
-        assert new_template_script == expected_list
+        assert new_template_script == self.template_script
 
         download_artifact(step.outputs.artifacts["scripts"])
         download_artifact(step.outputs.artifacts["models"])
