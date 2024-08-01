@@ -425,7 +425,7 @@ def get_systems_from_data(data, data_prefix=None):
 
 def workflow_concurrent_learning(
     config: Dict,
-) -> Tuple[Step, Optional[Step]]:
+) -> Step:
     default_config = config["default_step_config"]
 
     train_config = config["train"]["config"]
