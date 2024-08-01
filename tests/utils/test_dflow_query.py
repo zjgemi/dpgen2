@@ -269,7 +269,7 @@ class TestDflowQuery(unittest.TestCase):
         expected_output = "\n".join(expected_output + [""])
 
         ret = print_keys_in_nice_format(
-            dpgen_keys[:13],
+            dpgen_keys[:7],
             ["run-train", "run-lmp", "run-fp"],
             idx_fmt_len=8,
         )
