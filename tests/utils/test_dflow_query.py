@@ -260,11 +260,11 @@ class TestDflowQuery(unittest.TestCase):
 
     def test_print_keys(self):
         expected_output = [
-            "                   6 : init--scheduler",
-            "                   7 : init--id",
-            "                   8 : iter-000000--prep-train",
-            "             9 -> 11 : iter-000000--run-train-0000 -> iter-000000--run-train-0002",
-            "                  12 : iter-000000--prep-run-train",
+            "                   0 : init--scheduler",
+            "                   1 : init--id",
+            "                   2 : iter-000000--prep-train",
+            "              3 -> 5 : iter-000000--run-train-0000 -> iter-000000--run-train-0002",
+            "                   6 : iter-000000--prep-run-train",
         ]
         expected_output = "\n".join(expected_output + [""])
 
