@@ -50,6 +50,16 @@ class TrajRenderLammps(TrajRender):
         if len(np.shape(dd)) == 1:  # In case model-devi.out is 1-dimensional
             dd = dd.reshape((1, len(dd)))
 
+        # Remove duplicated steps due to a bug of LAMMPS
+        if len(set(dd[:, 0])) != len(dd[:, 0]):
+            new_dd = []
+            steps = []
+            for row in dd:
+                if row[0] not in steps:
+                    new_dd.append(row)
+                    steps.append(row[0])
+            dd = np.array(new_dd)
+
         model_devi.add(DeviManager.MAX_DEVI_V, dd[:, 1])
         model_devi.add(DeviManager.MIN_DEVI_V, dd[:, 2])
         model_devi.add(DeviManager.AVG_DEVI_V, dd[:, 3])
