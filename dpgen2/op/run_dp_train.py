@@ -100,65 +100,6 @@ def _make_train_command(
     return command
 
 
-def _make_train_command_old(
-    dp_command,
-    train_script_name,
-    impl,
-    do_init_model,
-    init_model,
-    finetune_mode,
-    finetune_args,
-    init_model_with_finetune,
-):
-    if impl == "tensorflow" and os.path.isfile("checkpoint"):
-        command = dp_command + [
-            "train",
-            "--restart",
-            "model.ckpt",
-            train_script_name,
-        ]
-    elif impl == "pytorch" and len(glob.glob("model.ckpt-[0-9]*.pt")) > 0:
-        checkpoint = "model.ckpt-%s.pt" % max(
-            [int(f[11:-3]) for f in glob.glob("model.ckpt-[0-9]*.pt")]
-        )
-        command = dp_command + [
-            "train",
-            "--restart",
-            checkpoint,
-            train_script_name,
-        ]
-    elif do_init_model and not init_model_with_finetune:
-        if impl == "pytorch":
-            command = dp_command + [
-                "train",
-                "--init-model",
-                str(init_model),
-                train_script_name,
-            ]
-        else:
-            command = dp_command + [
-                "train",
-                "--init-frz-model",
-                str(init_model),
-                train_script_name,
-            ]
-    elif finetune_mode == "finetune" or (do_init_model and init_model_with_finetune):
-        command = (
-            dp_command
-            + [
-                "train",
-                train_script_name,
-                "--finetune",
-                str(init_model),
-            ]
-            + finetune_args.split()
-        )
-    else:
-        command = dp_command + ["train", train_script_name]
-
-    return command
-
-
 class RunDPTrain(OP):
     r"""Execute a DP training task. Train and freeze a DP model.
 
