@@ -414,53 +414,6 @@ def make_optional_parameter(
     return {"data_mixed_type": mixed_type, "finetune_mode": finetune_mode}
 
 
-def make_finetune_step(
-    config,
-    prep_train_config,
-    run_train_config,
-    upload_python_packages,
-    numb_models,
-    template_script,
-    train_config,
-    init_models,
-    init_data,
-    iter_data,
-    valid_data=None,
-):
-    finetune_optional_parameter = {
-        "mixed_type": config["inputs"]["mixed_type"],
-        "finetune_mode": "finetune",
-    }
-
-    finetune_op = PrepRunDPTrain(
-        "finetune",
-        PrepDPTrain,
-        RunDPTrain,
-        prep_config=prep_train_config,
-        run_config=run_train_config,
-        upload_python_packages=upload_python_packages,
-        finetune=True,
-        valid_data=valid_data,
-    )
-    finetune_step = Step(
-        "finetune-step",
-        template=finetune_op,
-        parameters={
-            "block_id": "finetune",
-            "numb_models": numb_models,
-            "template_script": template_script,
-            "train_config": train_config,
-            "run_optional_parameter": finetune_optional_parameter,
-        },
-        artifacts={
-            "init_models": init_models,
-            "init_data": init_data,
-            "iter_data": iter_data,
-        },
-    )
-    return finetune_step
-
-
 def get_systems_from_data(data, data_prefix=None):
     data = [data] if isinstance(data, str) else data
     assert isinstance(data, list)
@@ -472,7 +425,7 @@ def get_systems_from_data(data, data_prefix=None):
 
 def workflow_concurrent_learning(
     config: Dict,
-) -> Tuple[Step, Optional[Step]]:
+) -> Step:
     default_config = config["default_step_config"]
 
     train_config = config["train"]["config"]
@@ -614,32 +567,17 @@ def workflow_concurrent_learning(
     else:
         init_models = None
 
-    finetune_step = None
     optional_parameter = make_optional_parameter(
         config["inputs"]["mixed_type"],
     )
 
     if config["inputs"].get("do_finetune", False):
-        finetune_step = make_finetune_step(
-            config,
-            prep_train_config,
-            run_train_config,
-            upload_python_packages,
-            numb_models,
-            template_script,
-            train_config,
-            init_models,
-            init_data,
-            iter_data,
-            valid_data=valid_data,
-        )
-
-        init_models = finetune_step.outputs.artifacts["models"]
-        template_script = finetune_step.outputs.parameters["template_script"]
-
+        if train_config["init_model_policy"] != "yes":
+            logging.warning("In finetune mode, init_model_policy is forced to be 'yes'")
+            train_config["init_model_policy"] = "yes"
         optional_parameter = make_optional_parameter(
             config["inputs"]["mixed_type"],
-            finetune_mode="train-init",
+            finetune_mode="finetune",
         )
 
     # here the scheduler is passed as input parameter to the concurrent_learning_op
@@ -662,7 +600,7 @@ def workflow_concurrent_learning(
             "iter_data": iter_data,
         },
     )
-    return dpgen_step, finetune_step
+    return dpgen_step
 
 
 def get_scheduler_ids(
@@ -747,9 +685,7 @@ def submit_concurrent_learning(
 
     global_config_workflow(wf_config)
 
-    dpgen_step, finetune_step = workflow_concurrent_learning(
-        wf_config,
-    )
+    dpgen_step = workflow_concurrent_learning(wf_config)
 
     if reuse_step is not None and replace_scheduler:
         scheduler_new = copy.deepcopy(
@@ -785,16 +721,8 @@ def submit_concurrent_learning(
             "conf_selector",
             selector,
         )
-        # the modify-train-script step will be added as reuse step.
-        # the following hack is not needed anymore.
-        # wf_config["inputs"]["do_finetune"] = False
-        # finetune will not be done again if the old process is reused.
 
     wf = Workflow(name=wf_config["name"], parallelism=wf_config["parallelism"])
-
-    if wf_config["inputs"].get("do_finetune", False):
-        assert finetune_step is not None
-        wf.add(finetune_step)
 
     wf.add(dpgen_step)
 
@@ -889,7 +817,6 @@ def get_resubmit_keys(
         "prep-run-train",
         "prep-train",
         "run-train",
-        "modify-train-script",
         "prep-caly-input",
         "prep-caly-model-devi",
         "run-caly-model-devi",
