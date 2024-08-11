@@ -161,7 +161,7 @@ class XXXTaskGroup(ExplorationTaskGroup):
         return self
 ```
 
-The arguments that initialize a `XXXTaskGroup` are defined in the input files of json format. dpgen2 uses the [`dargs`](https://https://github.com/deepmodeling/dargs) package to validate and normalize the arguments and to document them.
+The arguments that initialize a `XXXTaskGroup` are defined in the input files of json format. dpgen2 uses the [`dargs`](https://github.com/deepmodeling/dargs) package to validate and normalize the arguments and to document them.
 
 Then we define the exploration arguments schema in the dpgen2 input configuration. Add a function `xxx_task_group_args` specifying arguments related to the tasks `explore.stages[*][*]` by virtue of `dargs` ([documents](https://docs.deepmodeling.com/projects/dargs/en/latest/#https://)), a function `xxx_normalize` normalizing input values, and a function `make_xxx_task_group_from_config` converting input configuration to a `XXXTaskGroup` object in [dpgen2/exploration/task/make_task_group_from_config.py](https://github.com/deepmodeling/dpgen2/blob/master/dpgen2/exploration/task/make_task_group_from_config.py).
 
