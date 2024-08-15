@@ -189,6 +189,7 @@ def lmp_args():
         "Then each stage is defined by a list of exploration task groups. "
         "Each task group is described in :ref:`the task group definition<task_group_sec>` "
     )
+    doc_filters = "A list of configuration filters"
 
     return [
         Argument(
@@ -227,6 +228,7 @@ def lmp_args():
             alias=["configuration"],
         ),
         Argument("stages", List[List[dict]], optional=False, doc=doc_stages),
+        Argument("filters", List[dict], optional=True, default=[], doc=doc_filters),
     ]
 
 
@@ -272,6 +274,7 @@ def caly_args():
         "Then each stage is defined by a list of exploration task groups. "
         "Each task group is described in :ref:`the task group definition<task_group_sec>` "
     )
+    doc_filters = "A list of configuration filters"
 
     return [
         Argument(
@@ -310,6 +313,7 @@ def caly_args():
             alias=["configuration"],
         ),
         Argument("stages", List[List[dict]], optional=False, doc=doc_stages),
+        Argument("filters", List[dict], optional=True, default=[], doc=doc_filters),
     ]
 
 

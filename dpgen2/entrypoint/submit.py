@@ -5,6 +5,7 @@ import logging
 import os
 import pickle
 import re
+from copy import deepcopy
 from pathlib import (
     Path,
 )
@@ -70,6 +71,8 @@ from dpgen2.exploration.scheduler import (
     ExplorationScheduler,
 )
 from dpgen2.exploration.selector import (
+    conf_filter_styles,
+    ConfFilters,
     ConfSelectorFrames,
 )
 from dpgen2.exploration.task import (
@@ -272,6 +275,17 @@ def make_naive_exploration_scheduler(
         )
 
 
+def get_conf_filters(config):
+    conf_filters = None
+    if len(config) > 0:
+        conf_filters = ConfFilters()
+        for c in config:
+            c = deepcopy(c)
+            conf_filter = conf_filter_styles[c.pop("type")](**c)
+            conf_filters.add(conf_filter)
+    return conf_filters
+
+
 def make_calypso_naive_exploration_scheduler(config):
     model_devi_jobs = config["explore"]["stages"]
     fp_task_max = config["fp"]["task_max"]
@@ -279,6 +293,7 @@ def make_calypso_naive_exploration_scheduler(config):
     fatal_at_max = config["explore"]["fatal_at_max"]
     convergence = config["explore"]["convergence"]
     output_nopbc = config["explore"]["output_nopbc"]
+    conf_filters = get_conf_filters(config["explore"]["filters"])
     scheduler = ExplorationScheduler()
     # report
     conv_style = convergence.pop("type")
@@ -289,6 +304,7 @@ def make_calypso_naive_exploration_scheduler(config):
         render,
         report,
         fp_task_max,
+        conf_filters,
     )
 
     for job_ in model_devi_jobs:
@@ -329,6 +345,7 @@ def make_lmp_naive_exploration_scheduler(config):
     fatal_at_max = config["explore"]["fatal_at_max"]
     convergence = config["explore"]["convergence"]
     output_nopbc = config["explore"]["output_nopbc"]
+    conf_filters = get_conf_filters(config["explore"]["filters"])
     scheduler = ExplorationScheduler()
     # report
     conv_style = convergence.pop("type")
@@ -339,6 +356,7 @@ def make_lmp_naive_exploration_scheduler(config):
         render,
         report,
         fp_task_max,
+        conf_filters,
     )
 
     sys_configs_lmp = []

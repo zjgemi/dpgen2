@@ -67,7 +67,7 @@ class ConfFilters:
                     ff.check(
                         conf["coords"][ii],
                         conf["cells"][ii],
-                        conf["atom_types"],
+                        np.array([conf["atom_names"][t] for t in conf["atom_types"]]),
                         conf.nopbc,
                     )
                     for ii in range(conf.get_nframes())
