@@ -1,15 +1,16 @@
-import dpdata
 import os
-import numpy as np
 import unittest
 
-from .context import (
-    dpgen2,
-)
+import dpdata
+import numpy as np
+
 from dpgen2.exploration.selector import (
     DistanceConfFilter,
 )
 
+from .context import (
+    dpgen2,
+)
 
 POSCAR_1 = """ Er
 1.0

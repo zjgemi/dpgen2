@@ -5,7 +5,9 @@ import logging
 import os
 import pickle
 import re
-from copy import deepcopy
+from copy import (
+    deepcopy,
+)
 from pathlib import (
     Path,
 )
@@ -71,9 +73,9 @@ from dpgen2.exploration.scheduler import (
     ExplorationScheduler,
 )
 from dpgen2.exploration.selector import (
-    conf_filter_styles,
     ConfFilters,
     ConfSelectorFrames,
+    conf_filter_styles,
 )
 from dpgen2.exploration.task import (
     CustomizedLmpTemplateTaskGroup,
