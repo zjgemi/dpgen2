@@ -317,10 +317,85 @@ def caly_args():
     ]
 
 
+def run_diffcsp_args():
+    doc_gen_tasks = "Number of DiffCSP generation tasks"
+    doc_gen_command = "Command for DiffCSP generation"
+    doc_relax_group_size = "Group size for relaxation"
+    return [
+        Argument(
+            "gen_tasks",
+            int,
+            optional=True,
+            default=1,
+            doc=doc_gen_tasks,
+        ),
+        Argument(
+            "gen_command",
+            str,
+            optional=False,
+            doc=doc_gen_command,
+        ),
+        Argument(
+            "relax_group_size",
+            int,
+            optional=True,
+            default=100,
+            doc=doc_relax_group_size,
+        ),
+    ]
+
+
+def diffcsp_args():
+    doc_config = "Configuration of DiffCSP exploration"
+    doc_max_numb_iter = "Maximum number of iterations per stage"
+    doc_fatal_at_max = (
+        "Fatal when the number of iteration per stage reaches the `max_numb_iter`"
+    )
+    doc_output_nopbc = "Remove pbc of the output configurations"
+    doc_convergence = "The method of convergence check."
+    doc_stages = (
+        "The definition of exploration stages of type `List[List[ExplorationTaskGroup]`. "
+        "The outer list provides the enumeration of the exploration stages. "
+        "Then each stage is defined by a list of exploration task groups. "
+        "Each task group is described in :ref:`the task group definition<task_group_sec>` "
+    )
+    doc_filters = "A list of configuration filters"
+
+    return [
+        Argument(
+            "config",
+            dict,
+            run_diffcsp_args(),
+            optional=False,
+            doc=doc_config,
+        ),
+        Argument(
+            "max_numb_iter", int, optional=True, default=10, doc=doc_max_numb_iter
+        ),
+        Argument(
+            "fatal_at_max", bool, optional=True, default=True, doc=doc_fatal_at_max
+        ),
+        Argument(
+            "output_nopbc", bool, optional=True, default=False, doc=doc_output_nopbc
+        ),
+        Argument(
+            "convergence",
+            dict,
+            [],
+            [variant_conv()],
+            optional=False,
+            doc=doc_convergence,
+        ),
+        Argument("stages", List[List[dict]], optional=False, doc=doc_stages),
+        Argument("filters", List[dict], optional=True, default=[], doc=doc_filters),
+    ]
+
+
 def variant_explore():
     doc = "The type of the exploration"
     doc_lmp = "The exploration by LAMMPS simulations"
     doc_calypso = "The exploration by CALYPSO structure prediction"
+    doc_diffcsp = "The exploration by DiffCSP"
     return Variant(
         "type",
         [
@@ -328,6 +403,7 @@ def variant_explore():
             Argument("calypso", dict, caly_args(), doc=doc_calypso),
             Argument("calypso:default", dict, caly_args(), doc=doc_calypso),
             Argument("calypso:merge", dict, caly_args(), doc=doc_calypso),
+            Argument("diffcsp", dict, diffcsp_args(), doc=doc_diffcsp),
         ],
         doc=doc,
     )
