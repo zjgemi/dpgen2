@@ -2,13 +2,33 @@ import glob
 import os
 import shutil
 import unittest
-from pathlib import Path
+from pathlib import (
+    Path,
+)
 
-from dflow import Step, Workflow, upload_artifact, download_artifact
-from dflow.python import OP, OPIO, upload_packages
-from dpgen2.exploration.task import DiffCSPTaskGroup
-from dpgen2.op import DiffCSPGen, PrepRelax, RunRelax
-from dpgen2.superop import PrepRunDiffCSP
+from dflow import (
+    Step,
+    Workflow,
+    download_artifact,
+    upload_artifact,
+)
+from dflow.python import (
+    OP,
+    OPIO,
+    upload_packages,
+)
+
+from dpgen2.exploration.task import (
+    DiffCSPTaskGroup,
+)
+from dpgen2.op import (
+    DiffCSPGen,
+    PrepRelax,
+    RunRelax,
+)
+from dpgen2.superop import (
+    PrepRunDiffCSP,
+)
 
 if "__file__" in locals():
     upload_packages.append(__file__)
@@ -25,9 +45,11 @@ class MockedDiffCSPGen(DiffCSPGen):
         for i in range(2):
             fpath = task_dir / ("%s.cif" % i)
             fpath.write_text("Mocked cif.")
-        return OPIO({
-            "cifs": list(Path(task_dir).glob("*.cif")),
-        })
+        return OPIO(
+            {
+                "cifs": list(Path(task_dir).glob("*.cif")),
+            }
+        )
 
 
 class MockedRunRelax(RunRelax):
@@ -48,10 +70,12 @@ class MockedRunRelax(RunRelax):
             model_devi = ip["task_path"] / ("model_devi.%s.out" % name)
             model_devi.write_text("Mocked model_devi.")
             model_devis.append(model_devi)
-        return OPIO({
-            "trajs": trajs,
-            "model_devis": model_devis,
-        })
+        return OPIO(
+            {
+                "trajs": trajs,
+                "model_devis": model_devis,
+            }
+        )
 
 
 class TestPrepRunDiffCSP(unittest.TestCase):
@@ -61,10 +85,7 @@ class TestPrepRunDiffCSP(unittest.TestCase):
 
         wf = Workflow("test-prep-run-diffcsp")
         steps = PrepRunDiffCSP(
-            "prep-run-diffcsp",
-            MockedDiffCSPGen,
-            PrepRelax,
-            MockedRunRelax
+            "prep-run-diffcsp", MockedDiffCSPGen, PrepRelax, MockedRunRelax
         )
         step = Step(
             "main",
