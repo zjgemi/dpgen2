@@ -1,12 +1,9 @@
-import json
 import os
 from pathlib import (
     Path,
 )
 from typing import (
     List,
-    Set,
-    Tuple,
 )
 from dflow.python import (
     OP,
@@ -14,7 +11,6 @@ from dflow.python import (
     Artifact,
     BigParameter,
     OPIOSign,
-    Parameter,
 )
 from dpgen2.exploration.task import (
     DiffCSPTaskGroup,
@@ -109,8 +105,6 @@ class RunRelax(OP):
             traj_file = ip["task_path"] / ("traj.%s.dump" % fname)
             traj_file.write_text(dump_str)
             trajs.append(traj_file)
-            forces_list = np.array(forces_list)
-            virial_list = np.array(virial_list)
             devi = [np.array(step_list)]
             devi += list(calc_model_devi_v(np.array(virial_list)))
             devi += list(calc_model_devi_f(np.array(forces_list)))

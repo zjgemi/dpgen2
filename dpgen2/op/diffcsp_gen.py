@@ -1,28 +1,23 @@
-import json
 import os
 from pathlib import (
     Path,
 )
 from typing import (
     List,
-    Set,
-    Tuple,
 )
 from dflow.python import (
     OP,
     OPIO,
     Artifact,
-    BigParameter,
     OPIOSign,
-    Parameter,
 )
 
 
 def convert_pt_to_cif(input_file, output_dir):
     import numpy as np
     import torch
-    from pymatgen.core.structure import Structure
     from pymatgen.core.lattice import Lattice
+    from pymatgen.core.structure import Structure
 
     data = torch.load(input_file, map_location=torch.device('cpu'))
     if not os.path.exists(output_dir):
@@ -78,8 +73,6 @@ class DiffCSPGen(OP):
         self,
         ip: OPIO,
     ) -> OPIO:
-        import torch
-
         cmd = ip["config"]["gen_command"]
         args = cmd.split()
         try:

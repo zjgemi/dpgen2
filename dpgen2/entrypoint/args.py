@@ -425,7 +425,15 @@ def diffcsp_args():
             doc=doc_convergence,
         ),
         Argument("stages", List[List[dict]], optional=False, doc=doc_stages),
-        Argument("filters", List[dict], optional=True, default=[], doc=doc_filters),
+        Argument(
+            "filters",
+            list,
+            [],
+            [variant_filter()],
+            optional=True,
+            default=[],
+            doc=doc_filters,
+        ),
     ]
 
 
