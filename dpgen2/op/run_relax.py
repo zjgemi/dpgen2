@@ -53,6 +53,9 @@ class RunRelax(OP):
 
         import ase  # type: ignore
         import numpy as np
+        from ase.calculators.singlepoint import (  # type: ignore
+            SinglePointCalculator,
+        )
         from deepmd.infer import (  # type: ignore
             DeepPot,
         )
@@ -115,7 +118,7 @@ class RunRelax(OP):
                     pbc=True,
                     cell=data["cell"][i],
                 )
-                calc = ase.calculators.singlepoint.SinglePointCalculator(
+                calc = SinglePointCalculator(
                     atoms,
                     energy=data["energy"][i],
                     forces=data["forces"][i],
@@ -136,10 +139,10 @@ class RunRelax(OP):
             for j in range(1, len(models)):
                 dp = graphs[j]
                 atype = [
-                    dp.get_type_map().index(ase.Atom(i).symbol)
+                    dp.get_type_map().index(ase.Atom(i).symbol)  # type: ignore
                     for i in data["atomic_number"]
                 ]
-                _, forces, virial = dp.eval(
+                _, forces, virial = dp.eval(  # type: ignore
                     np.array(coords_list), np.array(cell_list), atype
                 )
                 forces_list[j] = forces

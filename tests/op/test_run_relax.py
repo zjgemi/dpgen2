@@ -283,15 +283,6 @@ class SinglePointCalculator:
         self.stress = stress
 
 
-class Foo:
-    pass
-
-
-calculators = Foo()
-calculators.singlepoint = Foo()
-calculators.singlepoint.SinglePointCalculator = SinglePointCalculator
-
-
 class Atom:
     def __init__(self, n):
         self.symbol = type_map[n - 1]
@@ -306,6 +297,7 @@ class TestRunRelax(unittest.TestCase):
         sys.modules["lam_optimize.main"] = sys.modules[__name__]
         sys.modules["lam_optimize.relaxer"] = sys.modules[__name__]
         sys.modules["ase"] = sys.modules[__name__]
+        sys.modules["ase.calculators.singlepoint"] = sys.modules[__name__]
 
         task_group = DiffCSPTaskGroup()
         task_group.make_task()
