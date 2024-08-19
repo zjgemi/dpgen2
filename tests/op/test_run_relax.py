@@ -272,9 +272,7 @@ class Atoms:
     def get_stress(self, voigt):
         stress = self.calc.stress
         s1, s2, s3, s4, s5, s6 = np.transpose(stress)
-        return np.transpose([[s1, s6, s5],
-                             [s6, s2, s4],
-                             [s5, s4, s3]])
+        return np.transpose([[s1, s6, s5], [s6, s2, s4], [s5, s4, s3]])
 
     def __len__(self):
         return len(self.numbers)
@@ -296,7 +294,7 @@ calculators.singlepoint.SinglePointCalculator = SinglePointCalculator
 
 class Atom:
     def __init__(self, n):
-        self.symbol = type_map[n-1]
+        self.symbol = type_map[n - 1]
 
 
 class TestRunRelax(unittest.TestCase):
