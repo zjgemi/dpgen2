@@ -8,7 +8,7 @@ from .customized_lmp_template_task_group import (
     CustomizedLmpTemplateTaskGroup,
 )
 from .diffcsp_task_group import (
-    DiffCSPTaskGroup
+    DiffCSPTaskGroup,
 )
 from .lmp_template_task_group import (
     LmpTemplateTaskGroup,

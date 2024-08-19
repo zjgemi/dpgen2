@@ -510,6 +510,7 @@ def make_calypso_task_group_from_config(config):
     tgroup.set_params(**config)
     return tgroup
 
+
 def diffcsp_task_group_args():
     doc_diffcsp_task_grp = "DiffCSP exploration tasks"
     doc_trj_freq = "The frequency of dumping configurations and model devis"

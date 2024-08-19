@@ -69,8 +69,7 @@ class PrepRunDiffCSP(Steps):
         self._input_artifacts = {
             "models": InputArtifact(),
         }
-        self._output_parameters = {
-        }
+        self._output_parameters = {}
         self._output_artifacts = {
             "trajs": OutputArtifact(),
             "model_devis": OutputArtifact(),
@@ -205,10 +204,16 @@ def _prep_run_diffcsp(
         },
         key="%s--run-relax-{{item}}" % block_id,
         executor=run_executor,
-        with_sequence=argo_sequence(prep_relax.outputs.parameters["ntasks"], format="%06d"),
+        with_sequence=argo_sequence(
+            prep_relax.outputs.parameters["ntasks"], format="%06d"
+        ),
     )
     prep_run_diffcsp_steps.add(run_relax)
 
-    prep_run_diffcsp_steps.outputs.artifacts["trajs"]._from = run_relax.outputs.artifacts["trajs"]
-    prep_run_diffcsp_steps.outputs.artifacts["model_devis"]._from = run_relax.outputs.artifacts["model_devis"]
+    prep_run_diffcsp_steps.outputs.artifacts[
+        "trajs"
+    ]._from = run_relax.outputs.artifacts["trajs"]
+    prep_run_diffcsp_steps.outputs.artifacts[
+        "model_devis"
+    ]._from = run_relax.outputs.artifacts["model_devis"]
     return prep_run_diffcsp_steps

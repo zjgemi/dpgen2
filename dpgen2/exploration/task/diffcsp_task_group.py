@@ -30,7 +30,7 @@ class DiffCSPTaskGroup(ExplorationTaskGroup):
         self.steps = steps
         self.timeout = timeout
 
-    def make_task(self) -> 'DiffCSPTaskGroup':
+    def make_task(self) -> "DiffCSPTaskGroup":
         """
         Make the DiffCSP task group.
 

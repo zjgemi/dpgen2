@@ -1,10 +1,17 @@
 import os
 import shutil
 import unittest
-from pathlib import Path
+from pathlib import (
+    Path,
+)
 
-from dflow.python import OPIO
-from dpgen2.op import PrepRelax
+from dflow.python import (
+    OPIO,
+)
+
+from dpgen2.op import (
+    PrepRelax,
+)
 
 
 class TestPrepRelax(unittest.TestCase):
@@ -14,12 +21,14 @@ class TestPrepRelax(unittest.TestCase):
             p = Path("%i.cif" % i)
             p.write_text("Mocked cif.")
             cifs.append(p)
-        op_in = OPIO({
-            "expl_config": {
-                "relax_group_size": 2,
-            },
-            "cifs": cifs,
-        })
+        op_in = OPIO(
+            {
+                "expl_config": {
+                    "relax_group_size": 2,
+                },
+                "cifs": cifs,
+            }
+        )
         op = PrepRelax()
         op_out = op.execute(op_in)
         self.assertEqual(op_out["ntasks"], 2)

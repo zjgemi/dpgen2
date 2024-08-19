@@ -5,6 +5,7 @@ from pathlib import (
 from typing import (
     List,
 )
+
 from dflow.python import (
     OP,
     OPIO,
@@ -12,44 +13,62 @@ from dflow.python import (
     BigParameter,
     OPIOSign,
 )
+
 from dpgen2.exploration.task import (
     DiffCSPTaskGroup,
 )
-from .run_caly_model_devi import atoms2lmpdump
+
+from .run_caly_model_devi import (
+    atoms2lmpdump,
+)
 
 
 class RunRelax(OP):
     @classmethod
     def get_input_sign(cls):
-        return OPIOSign({
-            "diffcsp_task_grp": BigParameter(DiffCSPTaskGroup),
-            "task_path": Artifact(Path),
-            "models": Artifact(List[Path]),
-        })
+        return OPIOSign(
+            {
+                "diffcsp_task_grp": BigParameter(DiffCSPTaskGroup),
+                "task_path": Artifact(Path),
+                "models": Artifact(List[Path]),
+            }
+        )
 
     @classmethod
     def get_output_sign(cls):
-        return OPIOSign({
-            "trajs": Artifact(List[Path], archive=None),
-            "model_devis": Artifact(List[Path], archive=None),
-        })
+        return OPIOSign(
+            {
+                "trajs": Artifact(List[Path], archive=None),
+                "model_devis": Artifact(List[Path], archive=None),
+            }
+        )
 
     @OP.exec_sign_check
     def execute(
         self,
         ip: OPIO,
     ) -> OPIO:
-        import ase
-        import numpy as np
         import pickle
         import traceback
-        from deepmd.infer import DeepPot
-        from deepmd.infer.model_devi import calc_model_devi_f, calc_model_devi_v
-        from lam_optimize.main import relax_run
-        from lam_optimize.relaxer import Relaxer
+
+        import ase
+        import numpy as np
+        from deepmd.infer import (
+            DeepPot,
+        )
+        from deepmd.infer.model_devi import (
+            calc_model_devi_f,
+            calc_model_devi_v,
+        )
+        from lam_optimize.main import (
+            relax_run,
+        )
+        from lam_optimize.relaxer import (
+            Relaxer,
+        )
 
         task_group = ip["diffcsp_task_grp"]
-        task = next(iter(task_group)) # Only support single task
+        task = next(iter(task_group))  # Only support single task
         models = ip["models"]
         relaxer = Relaxer(models[0])
         type_map = relaxer.calculator.dp.get_type_map()
@@ -58,8 +77,15 @@ class RunRelax(OP):
         timeout = task.timeout
         os.makedirs("relax_trajs", exist_ok=True)
         relax_run(
-            ip["task_path"], relaxer, fmax=fmax, steps=steps, traj_file="relax_trajs",
-            timeout=timeout, check_convergence=False, check_duplicate=False)
+            ip["task_path"],
+            relaxer,
+            fmax=fmax,
+            steps=steps,
+            traj_file="relax_trajs",
+            timeout=timeout,
+            check_convergence=False,
+            check_duplicate=False,
+        )
 
         trajs = []
         model_devis = []
@@ -84,10 +110,17 @@ class RunRelax(OP):
             cell_list = []
             for i in range(0, nsteps, trj_freq):
                 atoms = ase.Atoms(
-                    numbers=data["atomic_number"], positions=data["atom_positions"][i],
-                    pbc=True, cell=data["cell"][i])
+                    numbers=data["atomic_number"],
+                    positions=data["atom_positions"][i],
+                    pbc=True,
+                    cell=data["cell"][i],
+                )
                 calc = ase.calculators.singlepoint.SinglePointCalculator(
-                    atoms, energy=data["energy"][i], forces=data["forces"][i], stress=data["stresses"][i])
+                    atoms,
+                    energy=data["energy"][i],
+                    forces=data["forces"][i],
+                    stress=data["stresses"][i],
+                )
                 atoms.calc = calc
                 dump_str += atoms2lmpdump(atoms, i, type_map)
                 coords_list.append(data["atom_positions"][i])
@@ -95,11 +128,20 @@ class RunRelax(OP):
                 step_list.append(i)
                 # Use results of model 0 directly
                 forces_list[0].append(data["forces"][i])
-                virial_list[0].append(-atoms.get_volume() * atoms.get_stress(False).reshape(9) / len(atoms))
+                virial_list[0].append(
+                    -atoms.get_volume()
+                    * atoms.get_stress(False).reshape(9)
+                    / len(atoms)
+                )
             for j in range(1, len(models)):
                 dp = graphs[j]
-                atype = [dp.get_type_map().index(ase.Atom(i).symbol) for i in data["atomic_number"]]
-                _, forces, virial = dp.eval(np.array(coords_list), np.array(cell_list), atype)
+                atype = [
+                    dp.get_type_map().index(ase.Atom(i).symbol)
+                    for i in data["atomic_number"]
+                ]
+                _, forces, virial = dp.eval(
+                    np.array(coords_list), np.array(cell_list), atype
+                )
                 forces_list[j] = forces
                 virial_list[j] = virial / len(atype)
             traj_file = ip["task_path"] / ("traj.%s.dump" % fname)
@@ -122,13 +164,15 @@ class RunRelax(OP):
             np.savetxt(
                 model_devi_file,
                 devi,
-                fmt=["%12d"] + ["%19.6e"]*6,
+                fmt=["%12d"] + ["%19.6e"] * 6,
                 delimiter="",
                 header=header,
             )
             model_devis.append(model_devi_file)
 
-        return OPIO({
-            "trajs": trajs,
-            "model_devis": model_devis,
-        })
+        return OPIO(
+            {
+                "trajs": trajs,
+                "model_devis": model_devis,
+            }
+        )
