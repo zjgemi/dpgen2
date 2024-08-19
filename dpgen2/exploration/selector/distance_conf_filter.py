@@ -1,8 +1,15 @@
-from copy import deepcopy
+from copy import (
+    deepcopy,
+)
+from typing import (
+    List,
+)
+
 import dargs
-from dargs import Argument
-from typing import List
 import numpy as np
+from dargs import (
+    Argument,
+)
 
 from . import (
     ConfFilter,
@@ -124,7 +131,9 @@ def check_multiples(a, b, c, multiple):
 
 
 class DistanceConfFilter(ConfFilter):
-    def __init__(self, custom_safe_dist=None, safe_dist_ratio=1.0, theta=60.0, length_ratio=5.0):
+    def __init__(
+        self, custom_safe_dist=None, safe_dist_ratio=1.0, theta=60.0, length_ratio=5.0
+    ):
         self.custom_safe_dist = custom_safe_dist if custom_safe_dist is not None else {}
         self.safe_dist_ratio = safe_dist_ratio
         self.theta = theta
@@ -148,7 +157,7 @@ class DistanceConfFilter(ConfFilter):
         safe_dist.update(self.custom_safe_dist)
         for k in safe_dist:
             # bohr -> ang and multiply by a relaxation ratio
-            safe_dist[k] *= 0.529/1.2*self.safe_dist_ratio
+            safe_dist[k] *= 0.529 / 1.2 * self.safe_dist_ratio
 
         atom_names = list(safe_dist)
         structure = Atoms(
@@ -158,12 +167,12 @@ class DistanceConfFilter(ConfFilter):
             pbc=(not nopbc),
         )
 
-        cell, _ = structure.get_cell().standard_form() # type: ignore
+        cell, _ = structure.get_cell().standard_form()  # type: ignore
 
         if (
-            cell[1][0] > np.tan(self.theta/180.*np.pi) * cell[1][1]
-            or cell[2][0] > np.tan(self.theta/180.*np.pi) * cell[2][2]
-            or cell[2][1] > np.tan(self.theta/180.*np.pi) * cell[2][2]
+            cell[1][0] > np.tan(self.theta / 180.0 * np.pi) * cell[1][1]
+            or cell[2][0] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]
+            or cell[2][1] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]
         ):
             print("Inclined box")
             return False

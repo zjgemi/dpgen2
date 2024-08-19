@@ -250,7 +250,15 @@ def lmp_args():
             alias=["configuration"],
         ),
         Argument("stages", List[List[dict]], optional=False, doc=doc_stages),
-        Argument("filters", list, [], [variant_filter()], optional=True, default=[], doc=doc_filters),
+        Argument(
+            "filters",
+            list,
+            [],
+            [variant_filter()],
+            optional=True,
+            default=[],
+            doc=doc_filters,
+        ),
     ]
 
 
@@ -335,7 +343,15 @@ def caly_args():
             alias=["configuration"],
         ),
         Argument("stages", List[List[dict]], optional=False, doc=doc_stages),
-        Argument("filters", list, [], [variant_filter()], optional=True, default=[], doc=doc_filters),
+        Argument(
+            "filters",
+            list,
+            [],
+            [variant_filter()],
+            optional=True,
+            default=[],
+            doc=doc_filters,
+        ),
     ]
 
 
