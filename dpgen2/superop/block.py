@@ -52,11 +52,11 @@ from dpgen2.utils.step_config import normalize as normalize_step_dict
 from .prep_run_calypso import (
     PrepRunCaly,
 )
-from .prep_run_dp_train import (
-    PrepRunDPTrain,
-)
 from .prep_run_diffcsp import (
     PrepRunDiffCSP,
+)
+from .prep_run_dp_train import (
+    PrepRunDPTrain,
 )
 from .prep_run_fp import (
     PrepRunFp,
