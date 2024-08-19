@@ -15,7 +15,6 @@ from dflow import (
 from dflow.python import (
     OP,
     OPIO,
-    upload_packages,
 )
 
 from dpgen2.exploration.task import (
@@ -29,9 +28,6 @@ from dpgen2.op import (
 from dpgen2.superop import (
     PrepRunDiffCSP,
 )
-
-if "__file__" in locals():
-    upload_packages.append(__file__)
 
 
 class MockedDiffCSPGen(DiffCSPGen):
@@ -84,8 +80,13 @@ class TestPrepRunDiffCSP(unittest.TestCase):
         task_group.make_task()
 
         wf = Workflow("test-prep-run-diffcsp")
+        upload_packages = []
+        if "__file__" in globals():
+            upload_packages.append(__file__)
+            upload_packages.append(os.path.dirname(__file__))
         steps = PrepRunDiffCSP(
-            "prep-run-diffcsp", MockedDiffCSPGen, PrepRelax, MockedRunRelax
+            "prep-run-diffcsp", MockedDiffCSPGen, PrepRelax, MockedRunRelax,
+            upload_python_packages=upload_packages,
         )
         step = Step(
             "main",
