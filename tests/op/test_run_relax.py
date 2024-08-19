@@ -6,6 +6,9 @@ import unittest
 from pathlib import (
     Path,
 )
+from unittest.mock import (
+    patch,
+)
 
 import numpy as np
 from dflow.python import (
@@ -19,132 +22,134 @@ from dpgen2.op import (
     RunRelax,
 )
 
+type_map = [
+    "H",
+    "He",
+    "Li",
+    "Be",
+    "B",
+    "C",
+    "N",
+    "O",
+    "F",
+    "Ne",
+    "Na",
+    "Mg",
+    "Al",
+    "Si",
+    "P",
+    "S",
+    "Cl",
+    "Ar",
+    "K",
+    "Ca",
+    "Sc",
+    "Ti",
+    "V",
+    "Cr",
+    "Mn",
+    "Fe",
+    "Co",
+    "Ni",
+    "Cu",
+    "Zn",
+    "Ga",
+    "Ge",
+    "As",
+    "Se",
+    "Br",
+    "Kr",
+    "Rb",
+    "Sr",
+    "Y",
+    "Zr",
+    "Nb",
+    "Mo",
+    "Tc",
+    "Ru",
+    "Rh",
+    "Pd",
+    "Ag",
+    "Cd",
+    "In",
+    "Sn",
+    "Sb",
+    "Te",
+    "I",
+    "Xe",
+    "Cs",
+    "Ba",
+    "La",
+    "Ce",
+    "Pr",
+    "Nd",
+    "Pm",
+    "Sm",
+    "Eu",
+    "Gd",
+    "Tb",
+    "Dy",
+    "Ho",
+    "Er",
+    "Tm",
+    "Yb",
+    "Lu",
+    "Hf",
+    "Ta",
+    "W",
+    "Re",
+    "Os",
+    "Ir",
+    "Pt",
+    "Au",
+    "Hg",
+    "Tl",
+    "Pb",
+    "Bi",
+    "Po",
+    "At",
+    "Rn",
+    "Fr",
+    "Ra",
+    "Ac",
+    "Th",
+    "Pa",
+    "U",
+    "Np",
+    "Pu",
+    "Am",
+    "Cm",
+    "Bk",
+    "Cf",
+    "Es",
+    "Fm",
+    "Md",
+    "No",
+    "Lr",
+    "Rf",
+    "Db",
+    "Sg",
+    "Bh",
+    "Hs",
+    "Mt",
+    "Ds",
+    "Rg",
+    "Cn",
+    "Nh",
+    "Fl",
+    "Mc",
+    "Lv",
+    "Ts",
+    "Og",
+]
+
 
 class DeepPot:
     def __init__(self, *args, **kwargs):
         pass
 
     def get_type_map(self):
-        return [
-            "H",
-            "He",
-            "Li",
-            "Be",
-            "B",
-            "C",
-            "N",
-            "O",
-            "F",
-            "Ne",
-            "Na",
-            "Mg",
-            "Al",
-            "Si",
-            "P",
-            "S",
-            "Cl",
-            "Ar",
-            "K",
-            "Ca",
-            "Sc",
-            "Ti",
-            "V",
-            "Cr",
-            "Mn",
-            "Fe",
-            "Co",
-            "Ni",
-            "Cu",
-            "Zn",
-            "Ga",
-            "Ge",
-            "As",
-            "Se",
-            "Br",
-            "Kr",
-            "Rb",
-            "Sr",
-            "Y",
-            "Zr",
-            "Nb",
-            "Mo",
-            "Tc",
-            "Ru",
-            "Rh",
-            "Pd",
-            "Ag",
-            "Cd",
-            "In",
-            "Sn",
-            "Sb",
-            "Te",
-            "I",
-            "Xe",
-            "Cs",
-            "Ba",
-            "La",
-            "Ce",
-            "Pr",
-            "Nd",
-            "Pm",
-            "Sm",
-            "Eu",
-            "Gd",
-            "Tb",
-            "Dy",
-            "Ho",
-            "Er",
-            "Tm",
-            "Yb",
-            "Lu",
-            "Hf",
-            "Ta",
-            "W",
-            "Re",
-            "Os",
-            "Ir",
-            "Pt",
-            "Au",
-            "Hg",
-            "Tl",
-            "Pb",
-            "Bi",
-            "Po",
-            "At",
-            "Rn",
-            "Fr",
-            "Ra",
-            "Ac",
-            "Th",
-            "Pa",
-            "U",
-            "Np",
-            "Pu",
-            "Am",
-            "Cm",
-            "Bk",
-            "Cf",
-            "Es",
-            "Fm",
-            "Md",
-            "No",
-            "Lr",
-            "Rf",
-            "Db",
-            "Sg",
-            "Bh",
-            "Hs",
-            "Mt",
-            "Ds",
-            "Rg",
-            "Cn",
-            "Nh",
-            "Fl",
-            "Mc",
-            "Lv",
-            "Ts",
-            "Og",
-        ]
+        return type_map
 
     def eval(*args, **kwargs):
         e = np.array([[-24.51994085]])
@@ -256,12 +261,53 @@ class Relaxer:
         self.calculator = DPCalculator(dp)
 
 
+class Atoms:
+    def __init__(self, numbers, positions, pbc, cell):
+        self.numbers = numbers
+        self.cell = cell
+
+    def get_volume(self):
+        return np.abs(np.linalg.det(self.cell))
+
+    def get_stress(self, voigt):
+        stress = self.calc.stress
+        s1, s2, s3, s4, s5, s6 = np.transpose(stress)
+        return np.transpose([[s1, s6, s5],
+                             [s6, s2, s4],
+                             [s5, s4, s3]])
+
+    def __len__(self):
+        return len(self.numbers)
+
+
+class SinglePointCalculator:
+    def __init__(self, atoms, energy, forces, stress):
+        self.stress = stress
+
+
+class Foo:
+    pass
+
+
+calculators = Foo()
+calculators.singlepoint = Foo()
+calculators.singlepoint.SinglePointCalculator = SinglePointCalculator
+
+
+class Atom:
+    def __init__(self, n):
+        self.symbol = type_map[n-1]
+
+
 class TestRunRelax(unittest.TestCase):
-    def testRunRelax(self):
+    @patch("dpgen2.op.run_relax.atoms2lmpdump")
+    def testRunRelax(self, mocked_run):
+        mocked_run.side_effect = ["ITEM: TIMESTEP"]
         sys.modules["deepmd.infer"] = sys.modules[__name__]
         sys.modules["deepmd.infer.model_devi"] = sys.modules[__name__]
         sys.modules["lam_optimize.main"] = sys.modules[__name__]
         sys.modules["lam_optimize.relaxer"] = sys.modules[__name__]
+        sys.modules["ase"] = sys.modules[__name__]
 
         task_group = DiffCSPTaskGroup()
         task_group.make_task()

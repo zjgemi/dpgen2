@@ -24,6 +24,21 @@ class MockedTorchTensor:
         return np.array(self.array)
 
 
+class Lattice:
+    @classmethod
+    def from_parameters(cls, *args, **kwargs):
+        return cls()
+
+
+class Structure:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def to(self, filename):
+        with open(filename, "w") as f:
+            f.write("# generated using pymatgen")
+
+
 class TestDiffCSPGen(unittest.TestCase):
     def testDiffCSPGen(self):
         mocked_torch = Mock()
@@ -453,6 +468,8 @@ class TestDiffCSPGen(unittest.TestCase):
             ),
         }
         sys.modules["torch"] = mocked_torch
+        sys.modules["pymatgen.core.lattice"] = sys.modules[__name__]
+        sys.modules["pymatgen.core.structure"] = sys.modules[__name__]
         config = {"gen_command": "echo 'mocked generation' --model_path ."}
         op = DiffCSPGen()
         op_in = OPIO({"config": config, "task_id": "000000"})
