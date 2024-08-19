@@ -16,11 +16,11 @@ from dflow.python import (
 
 def convert_pt_to_cif(input_file, output_dir):
     import numpy as np
-    import torch
-    from pymatgen.core.lattice import (
+    import torch  # type: ignore
+    from pymatgen.core.lattice import (  # type: ignore
         Lattice,
     )
-    from pymatgen.core.structure import (
+    from pymatgen.core.structure import (  # type: ignore
         Structure,
     )
 

@@ -160,7 +160,7 @@ def _prep_run_diffcsp(
         },
         key="%s--diffcsp-gen-{{item}}" % block_id,
         executor=prep_executor,
-        with_sequence=argo_sequence(expl_config["gen_tasks"], format="%06d"),
+        with_sequence=argo_sequence(expl_config["gen_tasks"], format="%06d"),  # type: ignore
     )
     prep_run_diffcsp_steps.add(diffcsp_gen)
 

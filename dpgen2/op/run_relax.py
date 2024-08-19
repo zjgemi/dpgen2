@@ -38,8 +38,8 @@ class RunRelax(OP):
     def get_output_sign(cls):
         return OPIOSign(
             {
-                "trajs": Artifact(List[Path], archive=None),
-                "model_devis": Artifact(List[Path], archive=None),
+                "trajs": Artifact(List[Path]),
+                "model_devis": Artifact(List[Path]),
             }
         )
 
@@ -51,19 +51,19 @@ class RunRelax(OP):
         import pickle
         import traceback
 
-        import ase
+        import ase  # type: ignore
         import numpy as np
-        from deepmd.infer import (
+        from deepmd.infer import (  # type: ignore
             DeepPot,
         )
-        from deepmd.infer.model_devi import (
+        from deepmd.infer.model_devi import (  # type: ignore
             calc_model_devi_f,
             calc_model_devi_v,
         )
-        from lam_optimize.main import (
+        from lam_optimize.main import (  # type: ignore
             relax_run,
         )
-        from lam_optimize.relaxer import (
+        from lam_optimize.relaxer import (  # type: ignore
             Relaxer,
         )
 

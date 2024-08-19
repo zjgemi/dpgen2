@@ -55,6 +55,9 @@ from .prep_run_calypso import (
 from .prep_run_dp_train import (
     PrepRunDPTrain,
 )
+from .prep_run_diffcsp import (
+    PrepRunDiffCSP,
+)
 from .prep_run_fp import (
     PrepRunFp,
 )
@@ -86,7 +89,7 @@ class ConcurrentLearningBlock(Steps):
         self,
         name: str,
         prep_run_dp_train_op: PrepRunDPTrain,
-        prep_run_explore_op: Union[PrepRunLmp, PrepRunCaly],
+        prep_run_explore_op: Union[PrepRunLmp, PrepRunCaly, PrepRunDiffCSP],
         select_confs_op: Type[OP],
         prep_run_fp_op: PrepRunFp,
         collect_data_op: Type[OP],

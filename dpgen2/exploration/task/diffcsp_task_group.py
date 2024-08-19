@@ -46,8 +46,8 @@ class DiffCSPTaskGroup(ExplorationTaskGroup):
 
     def _make_diffcsp_task(self) -> ExplorationTask:
         task = ExplorationTask()
-        task.trj_freq = self.trj_freq
-        task.fmax = self.fmax
-        task.steps = self.steps
-        task.timeout = self.timeout
+        task.trj_freq = self.trj_freq  # type: ignore
+        task.fmax = self.fmax  # type: ignore
+        task.steps = self.steps  # type: ignore
+        task.timeout = self.timeout  # type: ignore
         return task
