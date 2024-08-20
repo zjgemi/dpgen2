@@ -53,11 +53,6 @@ class ConfFilters:
         natoms = sum(conf["atom_numbs"])  # type: ignore
         selected_idx = np.arange(conf.get_nframes())
         for ff in self._filters:
-            fsel = np.where(
-                [
-                    ff.check(conf[ii])
-                    for ii in range(conf.get_nframes())
-                ]
-            )[0]
+            fsel = np.where([ff.check(conf[ii]) for ii in range(conf.get_nframes())])[0]
             selected_idx = np.intersect1d(selected_idx, fsel)
         return conf.sub_system(selected_idx)

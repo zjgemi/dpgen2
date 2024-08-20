@@ -156,7 +156,10 @@ class DistanceConfFilter(ConfFilter):
         atom_names = list(safe_dist)
         structure = Atoms(
             positions=frame["coords"][0],
-            numbers=[atom_names.index(frame["atom_names"][t]) + 1 for t in frame["atom_types"]],
+            numbers=[
+                atom_names.index(frame["atom_names"][t]) + 1
+                for t in frame["atom_types"]
+            ],
             cell=frame["cells"][0],
             pbc=(not frame.nopbc),
         )
@@ -228,7 +231,10 @@ class BoxSkewnessConfFilter(ConfFilter):
         atom_names = list(safe_dist_dict)
         structure = Atoms(
             positions=frame["coords"][0],
-            numbers=[atom_names.index(frame["atom_names"][t]) + 1 for t in frame["atom_types"]],
+            numbers=[
+                atom_names.index(frame["atom_names"][t]) + 1
+                for t in frame["atom_types"]
+            ],
             cell=frame["cells"][0],
             pbc=(not frame.nopbc),
         )
@@ -281,7 +287,10 @@ class BoxLengthFilter(ConfFilter):
         atom_names = list(safe_dist_dict)
         structure = Atoms(
             positions=frame["coords"][0],
-            numbers=[atom_names.index(frame["atom_names"][t]) + 1 for t in frame["atom_types"]],
+            numbers=[
+                atom_names.index(frame["atom_names"][t]) + 1
+                for t in frame["atom_types"]
+            ],
             cell=frame["cells"][0],
             pbc=(not frame.nopbc),
         )
