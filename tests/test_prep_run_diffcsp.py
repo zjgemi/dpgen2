@@ -85,7 +85,10 @@ class TestPrepRunDiffCSP(unittest.TestCase):
             upload_packages.append(__file__)
             upload_packages.append(os.path.dirname(__file__))
         steps = PrepRunDiffCSP(
-            "prep-run-diffcsp", MockedDiffCSPGen, PrepRelax, MockedRunRelax,
+            "prep-run-diffcsp",
+            MockedDiffCSPGen,
+            PrepRelax,
+            MockedRunRelax,
             upload_python_packages=upload_packages,
         )
         step = Step(
