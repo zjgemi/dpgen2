@@ -132,12 +132,10 @@ def check_multiples(a, b, c, multiple):
 
 class DistanceConfFilter(ConfFilter):
     def __init__(
-        self, custom_safe_dist=None, safe_dist_ratio=1.0, theta=60.0, length_ratio=5.0
+        self, custom_safe_dist=None, safe_dist_ratio=1.0
     ):
         self.custom_safe_dist = custom_safe_dist if custom_safe_dist is not None else {}
         self.safe_dist_ratio = safe_dist_ratio
-        self.theta = theta
-        self.length_ratio = length_ratio
 
     def check(
         self,
@@ -167,24 +165,6 @@ class DistanceConfFilter(ConfFilter):
             pbc=(not nopbc),
         )
 
-        cell, _ = structure.get_cell().standard_form()  # type: ignore
-
-        if (
-            cell[1][0] > np.tan(self.theta / 180.0 * np.pi) * cell[1][1]
-            or cell[2][0] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]
-            or cell[2][1] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]
-        ):
-            print("Inclined box")
-            return False
-
-        a = cell[0][0]
-        b = cell[1][1]
-        c = cell[2][2]
-
-        if check_multiples(a, b, c, self.length_ratio):
-            print("One side is %s larger than another" % self.length_ratio)
-            return False
-
         P = [[2, 0, 0], [0, 2, 0], [0, 0, 2]]
         extended_structure = make_supercell(structure, P)
 
@@ -205,7 +185,6 @@ class DistanceConfFilter(ConfFilter):
                     )
                     return False
 
-        print("Valid structure")
         return True
 
     @staticmethod
@@ -220,8 +199,6 @@ class DistanceConfFilter(ConfFilter):
 
         doc_custom_safe_dist = "Custom safe distance for each element"
         doc_safe_dist_ratio = "The ratio multiplied to the safe distance"
-        doc_theta = "The threshold for the angle of the box"
-        doc_length_ratio = "The threshold for the length ratio of the box"
         return [
             Argument(
                 "custom_safe_dist",
@@ -237,6 +214,57 @@ class DistanceConfFilter(ConfFilter):
                 default=1.0,
                 doc=doc_safe_dist_ratio,
             ),
+        ]
+
+
+class BoxSkewnessConfFilter(ConfFilter):
+    def __init__(
+        self, theta=60.0
+    ):
+        self.theta = theta
+
+    def check(
+        self,
+        coords: np.ndarray,
+        cell: np.ndarray,
+        atom_types: np.ndarray,
+        nopbc: bool,
+    ):
+        from ase import (
+            Atoms,
+        )
+
+        atom_names = list(safe_dist_dict)
+        structure = Atoms(
+            positions=coords,
+            numbers=[atom_names.index(n) + 1 for n in atom_types],
+            cell=cell,
+            pbc=(not nopbc),
+        )
+
+        cell, _ = structure.get_cell().standard_form()  # type: ignore
+
+        if (
+            cell[1][0] > np.tan(self.theta / 180.0 * np.pi) * cell[1][1]
+            or cell[2][0] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]
+            or cell[2][1] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]
+        ):
+            print("Inclined box")
+            return False
+        return True
+
+    @staticmethod
+    def args() -> List[dargs.Argument]:
+        r"""The argument definition of the `ConfFilter`.
+
+        Returns
+        -------
+        arguments: List[dargs.Argument]
+            List of dargs.Argument defines the arguments of the `ConfFilter`.
+        """
+
+        doc_theta = "The threshold for the angle of the box"
+        return [
             Argument(
                 "theta",
                 float,
@@ -244,6 +272,57 @@ class DistanceConfFilter(ConfFilter):
                 default=60.0,
                 doc=doc_theta,
             ),
+        ]
+
+
+class BoxLengthFilter(ConfFilter):
+    def __init__(
+        self, length_ratio=5.0
+    ):
+        self.length_ratio = length_ratio
+
+    def check(
+        self,
+        coords: np.ndarray,
+        cell: np.ndarray,
+        atom_types: np.ndarray,
+        nopbc: bool,
+    ):
+        from ase import (
+            Atoms,
+        )
+
+        atom_names = list(safe_dist_dict)
+        structure = Atoms(
+            positions=coords,
+            numbers=[atom_names.index(n) + 1 for n in atom_types],
+            cell=cell,
+            pbc=(not nopbc),
+        )
+
+        cell, _ = structure.get_cell().standard_form()  # type: ignore
+
+        a = cell[0][0]
+        b = cell[1][1]
+        c = cell[2][2]
+
+        if check_multiples(a, b, c, self.length_ratio):
+            print("One side is %s larger than another" % self.length_ratio)
+            return False
+        return True
+
+    @staticmethod
+    def args() -> List[dargs.Argument]:
+        r"""The argument definition of the `ConfFilter`.
+
+        Returns
+        -------
+        arguments: List[dargs.Argument]
+            List of dargs.Argument defines the arguments of the `ConfFilter`.
+        """
+
+        doc_length_ratio = "The threshold for the length ratio of the box"
+        return [
             Argument(
                 "length_ratio",
                 float,

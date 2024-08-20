@@ -6,13 +6,15 @@ import numpy as np
 
 from dpgen2.exploration.selector import (
     DistanceConfFilter,
+    BoxLengthFilter,
+    BoxSkewnessConfFilter,
 )
 
 from .context import (
     dpgen2,
 )
 
-POSCAR_1 = """ Er
+POSCAR_valid = """ Er
 1.0
    7.00390434172054       0.000000000000000E+000  0.000000000000000E+000
   -3.50195193887670        6.06555921954188       0.000000000000000E+000
@@ -34,35 +36,147 @@ Direct
 """
 
 
-POSCAR_2 = """Re3 B2 Au4
-1.0
-9.9156076828901600e+00 0.0000000000000000e+00 0.0000000000000000e+00
-7.9377192881745906e-07 1.0513827981441199e+01 0.0000000000000000e+00
-3.0151272178709800e+00 1.9108776119269221e-08 1.2610865642770299e+00
+POSCAR_tilt = """POSCAR file written by OVITO Basic 3.10.6
+1
+9.9156076829 0.0 0.0
+7.9377192882e-07 10.5138279814 0.0
+11.9805 1.9108776119e-08 6.3054328214
 Re B Au
 3 2 4
-Cartesian
-   7.2596148617    1.5118565582    1.1482828020
-   7.2596154272    9.0019714580    1.1482828020
-  11.9303483902    0.0000000165    1.0888892057
-   4.2582035339    5.2569140081    1.1494063597
-   5.4733204545    0.0000000019    0.1275328112
-  11.5360001153    6.8393419913    1.1990816350
-  11.5359998763    3.6744860264    1.1990816350
-   5.4768941202    6.8571150073    0.0060127006
-   5.4768938786    3.6567129744    0.0060127006
+Direct
+0.4552610161 0.1437969637 0.9105503417
+0.4552610161 0.8562030363 0.9105503417
+0.9406309225 4.4367368569e-14 0.8634531812
+0.1522944187 0.5 0.9114412858
+0.5212391304 -3.0871058636e-12 0.1011293077
+0.8742903123 0.6505092137 0.9508321387
+0.8742903123 0.3494907863 0.9508321387
+0.5509009668 0.6521996574 0.004767873
+0.5509009668 0.3478003426 0.004767873
 """
+
+
+POSCAR_long = """POSCAR file written by OVITO Basic 3.10.6
+1
+11.8987292195 0.0 0.0
+9.5252631458e-07 12.6165935777 0.0
+0.0 2.2930531343e-08 2.0177385028
+Re B Au
+3 2 4
+Direct
+0.4552610161 0.1437969637 0.9105503417
+0.4552610161 0.8562030363 0.9105503417
+0.9406309225 4.4367368568e-14 0.8634531812
+0.1522944187 0.5 0.9114412858
+0.5212391304 -3.0871058636e-12 0.1011293077
+0.8742903123 0.6505092137 0.9508321387
+0.8742903123 0.3494907863 0.9508321387
+0.5509009668 0.6521996574 0.004767873
+0.5509009668 0.3478003426 0.004767873
+"""
+
+
+POSCAR_close = """POSCAR file written by OVITO Basic 3.10.6
+1
+9.9156076829 0.0 0.0
+7.9377192882e-07 10.5138279814 0.0
+3.0151272179 1.9108776119e-08 6.3054328214
+Re B Au
+3 2 4
+Direct
+0.4552610161 0.1437969637 0.9105503417
+0.5078872031 0.9988722905 1.069143737
+0.9406309225 4.4367368569e-14 0.8634531812
+0.1522944187 0.5 0.9114412858
+0.5212391304 -3.0871058636e-12 0.1011293077
+0.8742903123 0.6505092137 0.9508321387
+0.8742903123 0.3494907863 0.9508321387
+0.5509009668 0.6521996574 0.004767873
+0.5509009668 0.3478003426 0.004767873
+"""
+
+
+class TestBoxSkewnessConfFilter(unittest.TestCase):
+    def setUp(self):
+        with open("POSCAR_valid", "w") as f:
+            f.write(POSCAR_valid)
+        with open("POSCAR_tilt", "w") as f:
+            f.write(POSCAR_tilt)
+
+    def test_valid(self):
+        system = dpdata.System("POSCAR_valid", fmt="poscar")
+        distance_conf_filter = BoxSkewnessConfFilter()
+        valid = distance_conf_filter.check(
+            system["coords"][0],
+            system["cells"][0],
+            np.array([system["atom_names"][t] for t in system["atom_types"]]),
+            system.nopbc,
+        )
+        self.assertTrue(valid)
+
+    def test_invalid(self):
+        system = dpdata.System("POSCAR_tilt", fmt="poscar")
+        distance_conf_filter = BoxSkewnessConfFilter()
+        valid = distance_conf_filter.check(
+            system["coords"][0],
+            system["cells"][0],
+            np.array([system["atom_names"][t] for t in system["atom_types"]]),
+            system.nopbc,
+        )
+        self.assertFalse(valid)
+
+    def tearDown(self):
+        if os.path.isfile("POSCAR_valid"):
+            os.remove("POSCAR_valid")
+        if os.path.isfile("POSCAR_tilt"):
+            os.remove("POSCAR_tilt")
+
+
+class TestBoxLengthConfFilter(unittest.TestCase):
+    def setUp(self):
+        with open("POSCAR_valid", "w") as f:
+            f.write(POSCAR_valid)
+        with open("POSCAR_long", "w") as f:
+            f.write(POSCAR_long)
+
+    def test_valid(self):
+        system = dpdata.System("POSCAR_valid", fmt="poscar")
+        distance_conf_filter = BoxLengthFilter()
+        valid = distance_conf_filter.check(
+            system["coords"][0],
+            system["cells"][0],
+            np.array([system["atom_names"][t] for t in system["atom_types"]]),
+            system.nopbc,
+        )
+        self.assertTrue(valid)
+
+    def test_invalid(self):
+        system = dpdata.System("POSCAR_long", fmt="poscar")
+        distance_conf_filter = BoxLengthFilter()
+        valid = distance_conf_filter.check(
+            system["coords"][0],
+            system["cells"][0],
+            np.array([system["atom_names"][t] for t in system["atom_types"]]),
+            system.nopbc,
+        )
+        self.assertFalse(valid)
+
+    def tearDown(self):
+        if os.path.isfile("POSCAR_valid"):
+            os.remove("POSCAR_valid")
+        if os.path.isfile("POSCAR_long"):
+            os.remove("POSCAR_long")
 
 
 class TestDistanceConfFilter(unittest.TestCase):
     def setUp(self):
-        with open("POSCAR_1", "w") as f:
-            f.write(POSCAR_1)
-        with open("POSCAR_2", "w") as f:
-            f.write(POSCAR_2)
+        with open("POSCAR_valid", "w") as f:
+            f.write(POSCAR_valid)
+        with open("POSCAR_close", "w") as f:
+            f.write(POSCAR_close)
 
     def test_valid(self):
-        system = dpdata.System("POSCAR_1", fmt="poscar")
+        system = dpdata.System("POSCAR_valid", fmt="poscar")
         distance_conf_filter = DistanceConfFilter()
         valid = distance_conf_filter.check(
             system["coords"][0],
@@ -73,7 +187,7 @@ class TestDistanceConfFilter(unittest.TestCase):
         self.assertTrue(valid)
 
     def test_invalid(self):
-        system = dpdata.System("POSCAR_2", fmt="poscar")
+        system = dpdata.System("POSCAR_close", fmt="poscar")
         distance_conf_filter = DistanceConfFilter()
         valid = distance_conf_filter.check(
             system["coords"][0],
@@ -84,7 +198,7 @@ class TestDistanceConfFilter(unittest.TestCase):
         self.assertFalse(valid)
 
     def tearDown(self):
-        if os.path.isfile("POSCAR_1"):
-            os.remove("POSCAR_1")
-        if os.path.isfile("POSCAR_2"):
-            os.remove("POSCAR_2")
+        if os.path.isfile("POSCAR_valid"):
+            os.remove("POSCAR_valid")
+        if os.path.isfile("POSCAR_close"):
+            os.remove("POSCAR_close")

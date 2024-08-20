@@ -10,8 +10,12 @@ from .conf_selector_frame import (
 )
 from .distance_conf_filter import (
     DistanceConfFilter,
+    BoxSkewnessConfFilter,
+    BoxLengthFilter,
 )
 
 conf_filter_styles = {
     "distance": DistanceConfFilter,
+    "box_skewness": BoxSkewnessConfFilter,
+    "box_length": BoxLengthFilter,
 }
