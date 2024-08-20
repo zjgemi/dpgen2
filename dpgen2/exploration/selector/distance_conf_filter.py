@@ -239,12 +239,12 @@ class BoxSkewnessConfFilter(ConfFilter):
             pbc=(not frame.nopbc),
         )
 
-        cell, _ = structure.get_cell().standard_form()  # type: ignore
+        cell, _ = structure.get_cell().standard_form()
 
         if (
-            cell[1][0] > np.tan(self.theta / 180.0 * np.pi) * cell[1][1]
-            or cell[2][0] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]
-            or cell[2][1] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]
+            cell[1][0] > np.tan(self.theta / 180.0 * np.pi) * cell[1][1]  # type: ignore
+            or cell[2][0] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]  # type: ignore
+            or cell[2][1] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]  # type: ignore
         ):
             print("Inclined box")
             return False
@@ -295,11 +295,11 @@ class BoxLengthFilter(ConfFilter):
             pbc=(not frame.nopbc),
         )
 
-        cell, _ = structure.get_cell().standard_form()  # type: ignore
+        cell, _ = structure.get_cell().standard_form()
 
-        a = cell[0][0]
-        b = cell[1][1]
-        c = cell[2][2]
+        a = cell[0][0]  # type: ignore
+        b = cell[1][1]  # type: ignore
+        c = cell[2][2]  # type: ignore
 
         if check_multiples(a, b, c, self.length_ratio):
             print("One side is %s larger than another" % self.length_ratio)
