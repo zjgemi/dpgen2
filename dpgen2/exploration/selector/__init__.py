@@ -9,9 +9,9 @@ from .conf_selector_frame import (
     ConfSelectorFrames,
 )
 from .distance_conf_filter import (
-    DistanceConfFilter,
-    BoxSkewnessConfFilter,
     BoxLengthFilter,
+    BoxSkewnessConfFilter,
+    DistanceConfFilter,
 )
 
 conf_filter_styles = {

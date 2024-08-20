@@ -5,9 +5,9 @@ import dpdata
 import numpy as np
 
 from dpgen2.exploration.selector import (
-    DistanceConfFilter,
     BoxLengthFilter,
     BoxSkewnessConfFilter,
+    DistanceConfFilter,
 )
 
 from .context import (

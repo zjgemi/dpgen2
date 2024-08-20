@@ -131,9 +131,7 @@ def check_multiples(a, b, c, multiple):
 
 
 class DistanceConfFilter(ConfFilter):
-    def __init__(
-        self, custom_safe_dist=None, safe_dist_ratio=1.0
-    ):
+    def __init__(self, custom_safe_dist=None, safe_dist_ratio=1.0):
         self.custom_safe_dist = custom_safe_dist if custom_safe_dist is not None else {}
         self.safe_dist_ratio = safe_dist_ratio
 
@@ -218,9 +216,7 @@ class DistanceConfFilter(ConfFilter):
 
 
 class BoxSkewnessConfFilter(ConfFilter):
-    def __init__(
-        self, theta=60.0
-    ):
+    def __init__(self, theta=60.0):
         self.theta = theta
 
     def check(
@@ -276,9 +272,7 @@ class BoxSkewnessConfFilter(ConfFilter):
 
 
 class BoxLengthFilter(ConfFilter):
-    def __init__(
-        self, length_ratio=5.0
-    ):
+    def __init__(self, length_ratio=5.0):
         self.length_ratio = length_ratio
 
     def check(
