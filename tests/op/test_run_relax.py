@@ -261,33 +261,6 @@ class Relaxer:
         self.calculator = DPCalculator(dp)
 
 
-class Atoms:
-    def __init__(self, numbers, positions, pbc, cell):
-        self.numbers = numbers
-        self.cell = cell
-
-    def get_volume(self):
-        return np.abs(np.linalg.det(self.cell))
-
-    def get_stress(self, voigt):
-        stress = self.calc.stress
-        s1, s2, s3, s4, s5, s6 = np.transpose(stress)
-        return np.transpose([[s1, s6, s5], [s6, s2, s4], [s5, s4, s3]])
-
-    def __len__(self):
-        return len(self.numbers)
-
-
-class SinglePointCalculator:
-    def __init__(self, atoms, energy, forces, stress):
-        self.stress = stress
-
-
-class Atom:
-    def __init__(self, n):
-        self.symbol = type_map[n - 1]
-
-
 class TestRunRelax(unittest.TestCase):
     @patch("dpgen2.op.run_relax.atoms2lmpdump")
     def testRunRelax(self, mocked_run):
@@ -296,8 +269,6 @@ class TestRunRelax(unittest.TestCase):
         sys.modules["deepmd.infer.model_devi"] = sys.modules[__name__]
         sys.modules["lam_optimize.main"] = sys.modules[__name__]
         sys.modules["lam_optimize.relaxer"] = sys.modules[__name__]
-        sys.modules["ase"] = sys.modules[__name__]
-        sys.modules["ase.calculators.singlepoint"] = sys.modules[__name__]
 
         task_group = DiffCSPTaskGroup()
         task_group.make_task()
