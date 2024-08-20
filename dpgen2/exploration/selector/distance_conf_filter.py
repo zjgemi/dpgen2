@@ -239,7 +239,7 @@ class BoxSkewnessConfFilter(ConfFilter):
             pbc=(not frame.nopbc),
         )
 
-        cell, _ = structure.get_cell().standard_form()
+        cell, _ = structure.get_cell().standard_form()  # type: ignore
 
         if (
             cell[1][0] > np.tan(self.theta / 180.0 * np.pi) * cell[1][1]
@@ -295,7 +295,7 @@ class BoxLengthFilter(ConfFilter):
             pbc=(not frame.nopbc),
         )
 
-        cell, _ = structure.get_cell().standard_form()
+        cell, _ = structure.get_cell().standard_form()  # type: ignore
 
         a = cell[0][0]
         b = cell[1][1]
