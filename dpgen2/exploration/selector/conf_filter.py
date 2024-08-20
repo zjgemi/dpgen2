@@ -15,23 +15,14 @@ class ConfFilter(ABC):
     @abstractmethod
     def check(
         self,
-        coords: np.ndarray,
-        cell: np.ndarray,
-        atom_types: np.ndarray,
-        nopbc: bool,
+        frame: dpdata.System,
     ) -> bool:
         """Check if the configuration is valid.
 
         Parameters
         ----------
-        coords : numpy.array
-            The coordinates, numpy array of shape natoms x 3
-        cell : numpy.array
-            The cell tensor. numpy array of shape 3 x 3
-        atom_types : numpy.array
-            The atom types. numpy array of shape natoms
-        nopbc : bool
-            If no periodic boundary condition.
+        frame : dpdata.System
+            A dpdata.System containing a single frame
 
         Returns
         -------
@@ -64,12 +55,7 @@ class ConfFilters:
         for ff in self._filters:
             fsel = np.where(
                 [
-                    ff.check(
-                        conf["coords"][ii],
-                        conf["cells"][ii],
-                        np.array([conf["atom_names"][t] for t in conf["atom_types"]]),
-                        conf.nopbc,
-                    )
+                    ff.check(conf[ii])
                     for ii in range(conf.get_nframes())
                 ]
             )[0]

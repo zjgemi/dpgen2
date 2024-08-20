@@ -6,6 +6,7 @@ from typing import (
 )
 
 import dargs
+import dpdata
 import numpy as np
 from dargs import (
     Argument,
@@ -137,10 +138,7 @@ class DistanceConfFilter(ConfFilter):
 
     def check(
         self,
-        coords: np.ndarray,
-        cell: np.ndarray,
-        atom_types: np.ndarray,
-        nopbc: bool,
+        frame: dpdata.System,
     ):
         from ase import (
             Atoms,
@@ -157,10 +155,10 @@ class DistanceConfFilter(ConfFilter):
 
         atom_names = list(safe_dist)
         structure = Atoms(
-            positions=coords,
-            numbers=[atom_names.index(n) + 1 for n in atom_types],
-            cell=cell,
-            pbc=(not nopbc),
+            positions=frame["coords"][0],
+            numbers=[atom_names.index(frame["atom_names"][t]) + 1 for t in frame["atom_types"]],
+            cell=frame["cells"][0],
+            pbc=(not frame.nopbc),
         )
 
         P = [[2, 0, 0], [0, 2, 0], [0, 0, 2]]
@@ -195,7 +193,7 @@ class DistanceConfFilter(ConfFilter):
             List of dargs.Argument defines the arguments of the `ConfFilter`.
         """
 
-        doc_custom_safe_dist = "Custom safe distance for each element"
+        doc_custom_safe_dist = "Custom safe distance (in unit of bohr) for each element"
         doc_safe_dist_ratio = "The ratio multiplied to the safe distance"
         return [
             Argument(
@@ -221,10 +219,7 @@ class BoxSkewnessConfFilter(ConfFilter):
 
     def check(
         self,
-        coords: np.ndarray,
-        cell: np.ndarray,
-        atom_types: np.ndarray,
-        nopbc: bool,
+        frame: dpdata.System,
     ):
         from ase import (
             Atoms,
@@ -232,13 +227,13 @@ class BoxSkewnessConfFilter(ConfFilter):
 
         atom_names = list(safe_dist_dict)
         structure = Atoms(
-            positions=coords,
-            numbers=[atom_names.index(n) + 1 for n in atom_types],
-            cell=cell,
-            pbc=(not nopbc),
+            positions=frame["coords"][0],
+            numbers=[atom_names.index(frame["atom_names"][t]) + 1 for t in frame["atom_types"]],
+            cell=frame["cells"][0],
+            pbc=(not frame.nopbc),
         )
 
-        cell, _ = structure.get_cell().standard_form()  # type: ignore
+        cell, _ = structure.get_cell().standard_form()
 
         if (
             cell[1][0] > np.tan(self.theta / 180.0 * np.pi) * cell[1][1]
@@ -259,7 +254,7 @@ class BoxSkewnessConfFilter(ConfFilter):
             List of dargs.Argument defines the arguments of the `ConfFilter`.
         """
 
-        doc_theta = "The threshold for the angle of the box"
+        doc_theta = "The threshold for angles between the edges of the cell. If all angles are larger than this value the check is passed"
         return [
             Argument(
                 "theta",
@@ -277,10 +272,7 @@ class BoxLengthFilter(ConfFilter):
 
     def check(
         self,
-        coords: np.ndarray,
-        cell: np.ndarray,
-        atom_types: np.ndarray,
-        nopbc: bool,
+        frame: dpdata.System,
     ):
         from ase import (
             Atoms,
@@ -288,13 +280,13 @@ class BoxLengthFilter(ConfFilter):
 
         atom_names = list(safe_dist_dict)
         structure = Atoms(
-            positions=coords,
-            numbers=[atom_names.index(n) + 1 for n in atom_types],
-            cell=cell,
-            pbc=(not nopbc),
+            positions=frame["coords"][0],
+            numbers=[atom_names.index(frame["atom_names"][t]) + 1 for t in frame["atom_types"]],
+            cell=frame["cells"][0],
+            pbc=(not frame.nopbc),
         )
 
-        cell, _ = structure.get_cell().standard_form()  # type: ignore
+        cell, _ = structure.get_cell().standard_form()
 
         a = cell[0][0]
         b = cell[1][1]
@@ -315,7 +307,7 @@ class BoxLengthFilter(ConfFilter):
             List of dargs.Argument defines the arguments of the `ConfFilter`.
         """
 
-        doc_length_ratio = "The threshold for the length ratio of the box"
+        doc_length_ratio = "The threshold for the length ratio between the edges of the cell. If all length ratios are smaller than this value the check is passed"
         return [
             Argument(
                 "length_ratio",

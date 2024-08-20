@@ -106,23 +106,13 @@ class TestBoxSkewnessConfFilter(unittest.TestCase):
     def test_valid(self):
         system = dpdata.System("POSCAR_valid", fmt="poscar")
         distance_conf_filter = BoxSkewnessConfFilter()
-        valid = distance_conf_filter.check(
-            system["coords"][0],
-            system["cells"][0],
-            np.array([system["atom_names"][t] for t in system["atom_types"]]),
-            system.nopbc,
-        )
+        valid = distance_conf_filter.check(system)
         self.assertTrue(valid)
 
     def test_invalid(self):
         system = dpdata.System("POSCAR_tilt", fmt="poscar")
         distance_conf_filter = BoxSkewnessConfFilter()
-        valid = distance_conf_filter.check(
-            system["coords"][0],
-            system["cells"][0],
-            np.array([system["atom_names"][t] for t in system["atom_types"]]),
-            system.nopbc,
-        )
+        valid = distance_conf_filter.check(system)
         self.assertFalse(valid)
 
     def tearDown(self):
@@ -142,23 +132,13 @@ class TestBoxLengthConfFilter(unittest.TestCase):
     def test_valid(self):
         system = dpdata.System("POSCAR_valid", fmt="poscar")
         distance_conf_filter = BoxLengthFilter()
-        valid = distance_conf_filter.check(
-            system["coords"][0],
-            system["cells"][0],
-            np.array([system["atom_names"][t] for t in system["atom_types"]]),
-            system.nopbc,
-        )
+        valid = distance_conf_filter.check(system)
         self.assertTrue(valid)
 
     def test_invalid(self):
         system = dpdata.System("POSCAR_long", fmt="poscar")
         distance_conf_filter = BoxLengthFilter()
-        valid = distance_conf_filter.check(
-            system["coords"][0],
-            system["cells"][0],
-            np.array([system["atom_names"][t] for t in system["atom_types"]]),
-            system.nopbc,
-        )
+        valid = distance_conf_filter.check(system)
         self.assertFalse(valid)
 
     def tearDown(self):
@@ -178,23 +158,13 @@ class TestDistanceConfFilter(unittest.TestCase):
     def test_valid(self):
         system = dpdata.System("POSCAR_valid", fmt="poscar")
         distance_conf_filter = DistanceConfFilter()
-        valid = distance_conf_filter.check(
-            system["coords"][0],
-            system["cells"][0],
-            np.array([system["atom_names"][t] for t in system["atom_types"]]),
-            system.nopbc,
-        )
+        valid = distance_conf_filter.check(system)
         self.assertTrue(valid)
 
     def test_invalid(self):
         system = dpdata.System("POSCAR_close", fmt="poscar")
         distance_conf_filter = DistanceConfFilter()
-        valid = distance_conf_filter.check(
-            system["coords"][0],
-            system["cells"][0],
-            np.array([system["atom_names"][t] for t in system["atom_types"]]),
-            system.nopbc,
-        )
+        valid = distance_conf_filter.check(system)
         self.assertFalse(valid)
 
     def tearDown(self):
