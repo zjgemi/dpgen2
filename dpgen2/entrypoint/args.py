@@ -19,6 +19,9 @@ from dpgen2.constants import (
 from dpgen2.exploration.report import (
     conv_styles,
 )
+from dpgen2.exploration.selector import (
+    conf_filter_styles,
+)
 from dpgen2.fp import (
     fp_styles,
 )
@@ -174,6 +177,25 @@ def variant_conf():
     )
 
 
+def variant_filter():
+    doc = "the type of the configuration filter."
+    var_list = []
+    for kk in conf_filter_styles.keys():
+        var_list.append(
+            Argument(
+                kk,
+                dict,
+                conf_filter_styles[kk].args(),
+                doc="Configuration filter of type %s" % kk,
+            )
+        )
+    return Variant(
+        "type",
+        var_list,
+        doc=doc,
+    )
+
+
 def lmp_args():
     doc_config = "Configuration of lmp exploration"
     doc_max_numb_iter = "Maximum number of iterations per stage"
@@ -189,6 +211,7 @@ def lmp_args():
         "Then each stage is defined by a list of exploration task groups. "
         "Each task group is described in :ref:`the task group definition<task_group_sec>` "
     )
+    doc_filters = "A list of configuration filters"
 
     return [
         Argument(
@@ -227,6 +250,15 @@ def lmp_args():
             alias=["configuration"],
         ),
         Argument("stages", List[List[dict]], optional=False, doc=doc_stages),
+        Argument(
+            "filters",
+            list,
+            [],
+            [variant_filter()],
+            optional=True,
+            default=[],
+            doc=doc_filters,
+        ),
     ]
 
 
@@ -272,6 +304,7 @@ def caly_args():
         "Then each stage is defined by a list of exploration task groups. "
         "Each task group is described in :ref:`the task group definition<task_group_sec>` "
     )
+    doc_filters = "A list of configuration filters"
 
     return [
         Argument(
@@ -310,6 +343,15 @@ def caly_args():
             alias=["configuration"],
         ),
         Argument("stages", List[List[dict]], optional=False, doc=doc_stages),
+        Argument(
+            "filters",
+            list,
+            [],
+            [variant_filter()],
+            optional=True,
+            default=[],
+            doc=doc_filters,
+        ),
     ]
 
 
