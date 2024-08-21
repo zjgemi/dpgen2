@@ -1,3 +1,4 @@
+import logging
 from copy import (
     deepcopy,
 )
@@ -124,7 +125,7 @@ def check_multiples(a, b, c, multiple):
         for j in range(len(values)):
             if i != j:
                 if values[i] > multiple * values[j]:
-                    print(
+                    logging.warning(
                         f"Value {values[i]} is {multiple} times greater than {values[j]}"
                     )
                     return True
@@ -179,7 +180,7 @@ class DistanceConfFilter(ConfFilter):
                 dr = safe_dist[type_i] + safe_dist[type_j]
 
                 if dist < dr:
-                    print(
+                    logging.warning(
                         f"Dangerous close for {type_i} - {type_j}, {dist:.5f} less than {dr:.5f}"
                     )
                     return False
@@ -246,7 +247,7 @@ class BoxSkewnessConfFilter(ConfFilter):
             or cell[2][0] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]  # type: ignore
             or cell[2][1] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]  # type: ignore
         ):
-            print("Inclined box")
+            logging.warning("Inclined box")
             return False
         return True
 
@@ -302,7 +303,7 @@ class BoxLengthFilter(ConfFilter):
         c = cell[2][2]  # type: ignore
 
         if check_multiples(a, b, c, self.length_ratio):
-            print("One side is %s larger than another" % self.length_ratio)
+            logging.warning("One side is %s larger than another" % self.length_ratio)
             return False
         return True
 
