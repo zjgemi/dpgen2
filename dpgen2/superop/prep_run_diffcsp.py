@@ -40,10 +40,7 @@ from dflow.python import (
     Slices,
 )
 
-from dpgen2.constants import (
-    dpgen2.utils.step_config,
-    from,
-    import,
+from dpgen2.utils.step_config import (
     init_executor,
 )
 from dpgen2.utils.step_config import normalize as normalize_step_dict
