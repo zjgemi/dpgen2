@@ -144,10 +144,13 @@ def revise_lmp_input_model(lmp_lines, task_model_list, trj_freq, deepmd_version=
     for arg in lmp_lines[idx].split()[2:]:
         keywords += " " + arg
     graph_list = " ".join(task_model_list)
-    lmp_lines[idx] = "pair_style      deepmd %s out_freq %d out_file model_devi.out%s" % (
-        graph_list,
-        trj_freq,
-        keywords,
+    lmp_lines[idx] = (
+        "pair_style      deepmd %s out_freq %d out_file model_devi.out%s"
+        % (
+            graph_list,
+            trj_freq,
+            keywords,
+        )
     )
     return lmp_lines
 
