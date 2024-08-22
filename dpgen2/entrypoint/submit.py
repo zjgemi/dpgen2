@@ -288,9 +288,7 @@ def make_naive_exploration_scheduler(
     elif "calypso" in explore_style or explore_style == "diffcsp":
         return make_naive_exploration_scheduler_without_conf(config, explore_style)
     else:
-        raise KeyError(
-            f"Unknown explore_style `{explore_style}`"
-        )
+        raise KeyError(f"Unknown explore_style `{explore_style}`")
 
 
 def get_conf_filters(config):
@@ -343,9 +341,7 @@ def make_naive_exploration_scheduler_without_conf(config, explore_style):
                 # make task group
                 tgroup = make_diffcsp_task_group_from_config(jconf)
             else:
-                raise KeyError(
-                    f"Unknown explore_style `{explore_style}`"
-                )
+                raise KeyError(f"Unknown explore_style `{explore_style}`")
             # add the list to task group
             tasks = tgroup.make_task()
             stage.add_task_group(tasks)
