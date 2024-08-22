@@ -41,7 +41,9 @@ from dflow.python import (
 )
 
 from dpgen2.constants import (
-from dpgen2.utils.step_config import (
+    dpgen2.utils.step_config,
+    from,
+    import,
     init_executor,
 )
 from dpgen2.utils.step_config import normalize as normalize_step_dict
