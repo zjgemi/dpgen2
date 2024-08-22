@@ -1,12 +1,4 @@
-import copy
-import logging
-import random
-from typing import (
-    List,
-    Optional,
-)
-
-import numpy as np
+from typing import Optional
 
 from .task import (
     ExplorationTask,
