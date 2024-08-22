@@ -140,10 +140,14 @@ def find_only_one_key(lmp_lines, key):
 
 def revise_lmp_input_model(lmp_lines, task_model_list, trj_freq, deepmd_version="1"):
     idx = find_only_one_key(lmp_lines, ["pair_style", "deepmd"])
+    keywords = ""
+    for arg in lmp_lines[idx].split()[2:]:
+        keywords += " " + arg
     graph_list = " ".join(task_model_list)
-    lmp_lines[idx] = "pair_style      deepmd %s out_freq %d out_file model_devi.out" % (
+    lmp_lines[idx] = "pair_style      deepmd %s out_freq %d out_file model_devi.out%s" % (
         graph_list,
         trj_freq,
+        keywords,
     )
     return lmp_lines
 
