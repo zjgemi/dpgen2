@@ -41,8 +41,6 @@ from dflow.python import (
 )
 
 from dpgen2.constants import (
-    calypso_index_pattern,
-)
 from dpgen2.utils.step_config import (
     init_executor,
 )
