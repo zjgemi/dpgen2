@@ -10,6 +10,9 @@ from dpgen2.constants import (
     model_name_pattern,
     plm_input_name,
 )
+from dpgen2.exploration.task import (
+    DiffCSPTaskGroup,
+)
 from dpgen2.exploration.task.caly_task_group import (
     CalyTaskGroup,
 )
@@ -505,6 +508,63 @@ def make_calypso_task_group_from_config(config):
 
     tgroup = CalyTaskGroup()
     tgroup.set_params(**config)
+    return tgroup
+
+
+def diffcsp_task_group_args():
+    doc_diffcsp_task_grp = "DiffCSP exploration tasks"
+    doc_trj_freq = "The frequency of dumping configurations and model devis"
+    doc_fmax = "Force tolerence in relaxation"
+    doc_steps = "Maximum number of steps in relaxation"
+    doc_timeout = "Timeout (seconds) in relaxation"
+    return Argument(
+        "task_group",
+        dict,
+        [
+            Argument(
+                "trj_freq",
+                int,
+                optional=True,
+                default=10,
+                doc=doc_trj_freq,
+                alias=["t_freq", "trj_freq", "traj_freq"],
+            ),
+            Argument(
+                "fmax",
+                float,
+                optional=True,
+                default=1e-4,
+                doc=doc_fmax,
+            ),
+            Argument(
+                "steps",
+                int,
+                optional=True,
+                default=200,
+                doc=doc_steps,
+            ),
+            Argument(
+                "timeout",
+                int,
+                optional=True,
+                default=None,
+                doc=doc_timeout,
+            ),
+        ],
+        doc=doc_diffcsp_task_grp,
+    )
+
+
+def diffcsp_normalize(config):
+    args = diffcsp_task_group_args()
+    config = args.normalize_value(config, trim_pattern="_*")
+    args.check_value(config, strict=False)
+    return config
+
+
+def make_diffcsp_task_group_from_config(config):
+    config = diffcsp_normalize(config)
+    tgroup = DiffCSPTaskGroup(**config)
     return tgroup
 
 

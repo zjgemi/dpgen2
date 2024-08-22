@@ -84,7 +84,9 @@ from dpgen2.exploration.task import (
     LmpTemplateTaskGroup,
     NPTTaskGroup,
     caly_normalize,
+    diffcsp_normalize,
     make_calypso_task_group_from_config,
+    make_diffcsp_task_group_from_config,
     make_lmp_task_group_from_config,
     normalize_lmp_task_group_config,
 )
@@ -97,15 +99,18 @@ from dpgen2.fp import (
 from dpgen2.op import (
     CollectData,
     CollRunCaly,
+    DiffCSPGen,
     PrepCalyDPOptim,
     PrepCalyInput,
     PrepCalyModelDevi,
     PrepDPTrain,
     PrepLmp,
+    PrepRelax,
     RunCalyDPOptim,
     RunCalyModelDevi,
     RunDPTrain,
     RunLmp,
+    RunRelax,
     SelectConfs,
 )
 from dpgen2.op.caly_evo_step_merge import (
@@ -114,6 +119,7 @@ from dpgen2.op.caly_evo_step_merge import (
 from dpgen2.superop import (
     ConcurrentLearningBlock,
     PrepRunCaly,
+    PrepRunDiffCSP,
     PrepRunDPTrain,
     PrepRunFp,
     PrepRunLmp,
@@ -223,6 +229,16 @@ def make_concurrent_learning_op(
             run_config=run_explore_config,
             upload_python_packages=upload_python_packages,
         )
+    elif explore_style == "diffcsp":
+        prep_run_explore_op = PrepRunDiffCSP(
+            "prep-run-diffcsp",
+            DiffCSPGen,
+            PrepRelax,
+            RunRelax,
+            prep_config=prep_explore_config,
+            run_config=run_explore_config,
+            upload_python_packages=upload_python_packages,
+        )
     else:
         raise RuntimeError(f"unknown explore_style {explore_style}")
 
@@ -269,12 +285,10 @@ def make_naive_exploration_scheduler(
 
     if explore_style == "lmp":
         return make_lmp_naive_exploration_scheduler(config)
-    elif "calypso" in explore_style:
-        return make_calypso_naive_exploration_scheduler(config)
+    elif "calypso" in explore_style or explore_style == "diffcsp":
+        return make_naive_exploration_scheduler_without_conf(config, explore_style)
     else:
-        raise KeyError(
-            f"Unknown key `{explore_style}`, Only support `lmp`, `calypso`, `calypso:merge` and `calypso:default`."
-        )
+        raise KeyError(f"Unknown explore_style `{explore_style}`")
 
 
 def get_conf_filters(config):
@@ -288,7 +302,7 @@ def get_conf_filters(config):
     return conf_filters
 
 
-def make_calypso_naive_exploration_scheduler(config):
+def make_naive_exploration_scheduler_without_conf(config, explore_style):
     model_devi_jobs = config["explore"]["stages"]
     fp_task_max = config["fp"]["task_max"]
     max_numb_iter = config["explore"]["max_numb_iter"]
@@ -300,6 +314,7 @@ def make_calypso_naive_exploration_scheduler(config):
     # report
     conv_style = convergence.pop("type")
     report = conv_styles[conv_style](**convergence)
+    # trajectory render, the format of the output trajs are assumed to be lammps/dump
     render = TrajRenderLammps(nopbc=output_nopbc)
     # selector
     selector = ConfSelectorFrames(
@@ -317,9 +332,16 @@ def make_calypso_naive_exploration_scheduler(config):
         # stage
         stage = ExplorationStage()
         for jj in job:
-            jconf = caly_normalize(jj)
-            # make task group
-            tgroup = make_calypso_task_group_from_config(jconf)
+            if "calypso" in explore_style:
+                jconf = caly_normalize(jj)
+                # make task group
+                tgroup = make_calypso_task_group_from_config(jconf)
+            elif explore_style == "diffcsp":
+                jconf = diffcsp_normalize(jj)
+                # make task group
+                tgroup = make_diffcsp_task_group_from_config(jconf)
+            else:
+                raise KeyError(f"Unknown explore_style `{explore_style}`")
             # add the list to task group
             tasks = tgroup.make_task()
             stage.add_task_group(tasks)
@@ -800,6 +822,12 @@ def get_superop(key):
         return re.sub("run-caly-model-devi-[0-9]*", "prep-run-explore", key)
     elif "caly-evo-step" in key:
         return re.sub("caly-evo-step-[0-9]*", "prep-run-explore", key)
+    elif "diffcsp-gen-" in key:
+        return re.sub("diffcsp-gen-[0-9]*", "prep-run-explore", key)
+    elif "prep-relax" in key:
+        return re.sub("prep-relax", "prep-run-explore", key)
+    elif "run-relax-" in key:
+        return re.sub("run-relax-[0-9]*", "prep-run-explore", key)
     return None
 
 
@@ -843,6 +871,9 @@ def get_resubmit_keys(
         "prep-run-explore",
         "prep-lmp",
         "run-lmp",
+        "diffcsp-gen",
+        "prep-relax",
+        "run-relax",
         "select-confs",
         "prep-run-fp",
         "prep-fp",
@@ -880,7 +911,7 @@ def get_resubmit_keys(
     )
     all_step_keys = sort_slice_ops(
         all_step_keys,
-        ["run-train", "run-lmp", "run-fp"],
+        ["run-train", "run-lmp", "run-fp", "diffcsp-gen", "run-relax"],
     )
     folded_keys = fold_keys(all_step_keys)
     return folded_keys
@@ -905,7 +936,7 @@ def resubmit_concurrent_learning(
     if list_steps:
         prt_str = print_keys_in_nice_format(
             all_step_keys,
-            ["run-train", "run-lmp", "run-fp"],
+            ["run-train", "run-lmp", "run-fp", "diffcsp-gen", "run-relax"],
         )
         print(prt_str)
 

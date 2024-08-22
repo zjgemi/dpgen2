@@ -52,6 +52,9 @@ from dpgen2.utils.step_config import normalize as normalize_step_dict
 from .prep_run_calypso import (
     PrepRunCaly,
 )
+from .prep_run_diffcsp import (
+    PrepRunDiffCSP,
+)
 from .prep_run_dp_train import (
     PrepRunDPTrain,
 )
@@ -86,7 +89,7 @@ class ConcurrentLearningBlock(Steps):
         self,
         name: str,
         prep_run_dp_train_op: PrepRunDPTrain,
-        prep_run_explore_op: Union[PrepRunLmp, PrepRunCaly],
+        prep_run_explore_op: Union[PrepRunLmp, PrepRunCaly, PrepRunDiffCSP],
         select_confs_op: Type[OP],
         prep_run_fp_op: PrepRunFp,
         collect_data_op: Type[OP],
