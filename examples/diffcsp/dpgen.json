@@ -403,6 +403,21 @@
         },
         "max_numb_iter": 16,
         "fatal_at_max": false,
+        "filters": [
+            {
+                "type": "box_skewness",
+                "theta": 60.0
+            },
+            {
+                "type": "box_length",
+                "length_ratio": 5.0
+            },
+            {
+                "type": "distance",
+                "custom_safe_dist": {},
+                "safe_dist_ratio": 1.0
+            }
+        ],
         "stages": [
             [
                 {
