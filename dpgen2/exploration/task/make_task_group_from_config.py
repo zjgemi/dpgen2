@@ -100,6 +100,7 @@ def lmp_template_task_group_args():
     doc_plm_template_fname = "The file name of plumed input template"
     doc_revisions = "The revisions. Should be a dict providing the key - list of desired values pair. Key is the word to be replaced in the templates, and it may appear in both the lammps and plumed input templates. All values in the value list will be enmerated."
     doc_traj_freq = "The frequency of dumping configurations and thermodynamic states"
+    doc_extra_pair_style_args = "The extra arguments for pair_style"
 
     return [
         Argument("conf_idx", list, optional=False, doc=doc_conf_idx, alias=["sys_idx"]),
@@ -125,7 +126,7 @@ def lmp_template_task_group_args():
             doc=doc_plm_template_fname,
             alias=["plm_template", "plm"],
         ),
-        Argument("revisions", dict, optional=True, default={}),
+        Argument("revisions", dict, optional=True, default={}, doc=doc_revisions),
         Argument(
             "traj_freq",
             int,
@@ -134,6 +135,13 @@ def lmp_template_task_group_args():
             doc=doc_traj_freq,
             alias=["t_freq", "trj_freq", "trj_freq"],
         ),
+        Argument(
+            "extra_pair_style_args",
+            str,
+            optional=True,
+            default="",
+            doc=doc_extra_pair_style_args,
+        )
     ]
 
 
