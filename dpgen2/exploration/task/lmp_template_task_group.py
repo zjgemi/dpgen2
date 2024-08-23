@@ -145,10 +145,13 @@ def revise_lmp_input_model(lmp_lines, task_model_list, trj_freq, extra_pair_styl
     if extra_pair_style_args:
         extra_pair_style_args = " " + extra_pair_style_args
     graph_list = " ".join(task_model_list)
-    lmp_lines[idx] = "pair_style      deepmd %s out_freq %d out_file model_devi.out%s" % (
-        graph_list,
-        trj_freq,
-        extra_pair_style_args,
+    lmp_lines[idx] = (
+        "pair_style      deepmd %s out_freq %d out_file model_devi.out%s"
+        % (
+            graph_list,
+            trj_freq,
+            extra_pair_style_args,
+        )
     )
     return lmp_lines
 
