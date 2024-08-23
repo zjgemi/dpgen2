@@ -141,7 +141,7 @@ def lmp_template_task_group_args():
             optional=True,
             default="",
             doc=doc_extra_pair_style_args,
-        )
+        ),
     ]
 
 
