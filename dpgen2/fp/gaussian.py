@@ -219,5 +219,5 @@ class RunGaussian(RunFp):
             ),
             Argument(
                 "post_command", str, optional=True, default=None, doc=doc_post_command
-            )
+            ),
         ]
