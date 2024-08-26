@@ -170,7 +170,7 @@ def _prep_run_fp(
                 "int('{{item}}')",
                 input_parameter=["task_name"],
                 input_artifact=["task_path"],
-                output_artifact=["log", "labeled_data"],
+                output_artifact=["log", "labeled_data", "extra_outputs"],
                 **template_slice_config,
             ),
             python_packages=upload_python_packages,
