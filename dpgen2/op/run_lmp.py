@@ -79,6 +79,7 @@ class RunLmp(OP):
                 "traj": Artifact(Path),
                 "model_devi": Artifact(Path),
                 "plm_output": Artifact(Path, optional=True),
+                "optional_output": Artifact(Path, optional=True),
             }
         )
 
@@ -204,6 +205,14 @@ class RunLmp(OP):
                 )
                 raise TransientError("lmp failed")
 
+            ele_temp = get_ele_temp(lmp_input_name)
+            if ele_temp is not None:
+                data = {
+                    "ele_temp": ele_temp,
+                }
+                with open("job.json", "w") as f:
+                    json.dump(data, f, indent=4)
+
         ret_dict = {
             "log": work_dir / lmp_log_name,
             "traj": work_dir / lmp_traj_name,
@@ -215,6 +224,8 @@ class RunLmp(OP):
             else {}
         )
         ret_dict.update(plm_output)
+        if ele_temp is not None:
+            ret_dict["optional_output"] = work_dir / "job.json"
 
         return OPIO(ret_dict)
 
@@ -310,3 +321,23 @@ def find_only_one_key(lmp_lines, key, raise_not_found=True):
         else:
             return None
     return found[0]
+
+
+def get_ele_temp(lmp_input_name):
+    with open(lmp_input_name, encoding="utf8") as f:
+        lmp_input_lines = f.readlines()
+
+    idx = find_only_one_key(
+        lmp_input_lines, ["pair_style", "deepmd"], raise_not_found=False
+    )
+    if idx is None:
+        return
+    fields = lmp_input_lines[idx].split()
+
+    if "fparam" in fields:
+        return fields[fields.index("fparam") + 1]
+
+    if "aparam" in fields:
+        return fields[fields.index("aparam") + 1]
+
+    return None

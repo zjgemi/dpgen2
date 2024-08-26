@@ -52,6 +52,8 @@ class TrajRender(ABC):
         id_selected: List[List[int]],
         type_map: Optional[List[str]] = None,
         conf_filters: Optional["ConfFilters"] = None,
+        use_ele_temp: int = 0,
+        ele_temp: Optional[List[float]] = None,
     ) -> dpdata.MultiSystems:
         r"""Get configurations from trajectory by selection.
 

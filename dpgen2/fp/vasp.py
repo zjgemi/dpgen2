@@ -1,4 +1,7 @@
+import json
 import logging
+import os
+import re
 from pathlib import (
     Path,
 )
@@ -33,8 +36,9 @@ from dpgen2.constants import (
     fp_default_log_name,
     fp_default_out_data_name,
 )
-from dpgen2.utils.run_command import (
+from dpgen2.utils import (
     run_command,
+    setup_ele_temp,
 )
 
 from .prep_fp import (
@@ -55,6 +59,27 @@ vasp_pot_name = "POTCAR"
 vasp_kp_name = "KPOINTS"
 
 
+def clean_lines(string_list, remove_empty_lines=True):
+    """Strips whitespace, carriage returns and empty lines from a list of strings.
+
+    Args:
+        string_list: List of strings
+        remove_empty_lines: Set to True to skip lines which are empty after
+            stripping.
+
+    Returns:
+        List of clean strings with no whitespaces.
+    """
+    for s in string_list:
+        clean_s = s
+        if "#" in s:
+            ind = s.index("#")
+            clean_s = s[:ind]
+        clean_s = clean_s.strip()
+        if (not remove_empty_lines) or clean_s != "":
+            yield clean_s
+
+
 class PrepVasp(PrepFp):
     def prep_task(
         self,
@@ -72,7 +97,37 @@ class PrepVasp(PrepFp):
         """
 
         conf_frame.to("vasp/poscar", vasp_conf_name)
-        Path(vasp_input_name).write_text(vasp_inputs.incar_template)
+        incar = vasp_inputs.incar_template
+
+        use_ele_temp = 0
+        ele_temp = None
+        if "fparam" in conf_frame.data:
+            use_ele_temp = 1
+            ele_temp = conf_frame.data["fparam"][0][0]
+        if "aparam" in conf_frame.data:
+            use_ele_temp = 2
+            ele_temp = conf_frame.data["aparam"][0][0][0]
+        if ele_temp:
+            lines = list(clean_lines(incar.splitlines()))
+            params = {}
+            for line in lines:
+                for sline in line.split(";"):
+                    if m := re.match(r"(\w+)\s*=\s*(.*)", sline.strip()):
+                        key = m.group(1).strip()
+                        val = m.group(2).strip()
+                        params[key.upper()] = val
+            params["ISMEAR"] = -1
+            import scipy.constants as pc
+            params["SIGMA"] = ele_temp * pc.Boltzmann / pc.electron_volt
+            incar = "\n".join([key + " = " + str(val) for key, val in params.items()]) + "\n"
+            data = {
+                "use_ele_temp": use_ele_temp,
+                "ele_temp": ele_temp,
+            }
+            with open("job.json", "w") as f:
+                json.dump(data, f, indent=4)
+
+        Path(vasp_input_name).write_text(incar)
         # fix the case when some element have 0 atom, e.g. H0O2
         tmp_frame = dpdata.System(vasp_conf_name, fmt="vasp/poscar")
         Path(vasp_pot_name).write_text(vasp_inputs.make_potcar(tmp_frame["atom_names"]))
@@ -141,6 +196,16 @@ class RunVasp(RunFp):
             raise TransientError("vasp failed")
         # convert the output to deepmd/npy format
         sys = dpdata.LabeledSystem("OUTCAR")
+        if os.path.exists("job.json"):
+            with open("job.json", "r") as f:
+                data = json.load(f)
+            if "use_ele_temp" in data and "ele_temp" in data:
+                if data["use_ele_temp"] == 1:
+                    setup_ele_temp(False)
+                    sys.data["fparam"] = np.tile(data["ele_temp"], [1, 1])
+                elif data["use_ele_temp"] == 2:
+                    setup_ele_temp(True)
+                    sys.data["fparam"] = np.tile(data["ele_temp"], [1, sys.get_natoms(), 1])
         sys.to("deepmd/npy", out_name)
         return out_name, log_name
 

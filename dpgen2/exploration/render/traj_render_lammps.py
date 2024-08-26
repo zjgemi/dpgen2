@@ -63,6 +63,8 @@ class TrajRenderLammps(TrajRender):
         id_selected: List[List[int]],
         type_map: Optional[List[str]] = None,
         conf_filters: Optional["ConfFilters"] = None,
+        use_ele_temp: int = 0,
+        ele_temp: Optional[List[float]] = None,
     ) -> dpdata.MultiSystems:
         ntraj = len(trajs)
         traj_fmt = "lammps/dump"
@@ -71,6 +73,10 @@ class TrajRenderLammps(TrajRender):
             if len(id_selected[ii]) > 0:
                 ss = dpdata.System(trajs[ii], fmt=traj_fmt, type_map=type_map)
                 ss.nopbc = self.nopbc
+                if use_ele_temp == 1 and ele_temp:
+                    ss.data["fparam"] = np.tile(ele_temp[ii], [len(ss), 1])
+                elif use_ele_temp == 2 and ele_temp:
+                    ss.data["aparam"] = np.tile(ele_temp[ii], [len(ss), ss.get_natoms(), 1])
                 ss = ss.sub_system(id_selected[ii])
                 ms.append(ss)
         if conf_filters is not None:

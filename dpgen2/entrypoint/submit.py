@@ -370,6 +370,7 @@ def make_lmp_naive_exploration_scheduler(config):
     convergence = config["explore"]["convergence"]
     output_nopbc = config["explore"]["output_nopbc"]
     conf_filters = get_conf_filters(config["explore"]["filters"])
+    use_ele_temp = config["inputs"]["use_ele_temp"]
     scheduler = ExplorationScheduler()
     # report
     conv_style = convergence.pop("type")
@@ -381,6 +382,7 @@ def make_lmp_naive_exploration_scheduler(config):
         report,
         fp_task_max,
         conf_filters,
+        use_ele_temp,
     )
 
     sys_configs_lmp = []
