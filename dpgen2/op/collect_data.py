@@ -10,6 +10,7 @@ from typing import (
 )
 
 import dpdata
+import numpy as np
 from dflow.python import (
     OP,
     OPIO,
@@ -17,6 +18,9 @@ from dflow.python import (
     BigParameter,
     OPIOSign,
     Parameter,
+)
+from dpgen2.utils import (
+    setup_ele_temp,
 )
 
 
@@ -90,7 +94,14 @@ class CollectData(OP):
         iter_data = ip["iter_data"]
 
         ms = dpdata.MultiSystems(type_map=type_map)
+        use_ele_temp = 0
         for ii in labeled_data:
+            if len(list(ii.rglob("fparam.npy"))) > 0:
+                setup_ele_temp(False)
+                use_ele_temp = 1
+            if len(list(ii.rglob("aparam.npy"))) > 0:
+                setup_ele_temp(True)
+                use_ele_temp = 2
             ss = dpdata.LabeledSystem(ii, fmt="deepmd/npy")
             ms.append(ss)
 
@@ -99,6 +110,28 @@ class CollectData(OP):
         Path(name).mkdir()
         if mixed_type:
             ms.to_deepmd_npy_mixed(name)  # type: ignore
+            if use_ele_temp:
+                # Work around dpdata does not support custom dtype for mixed-type
+                fmtobj = dpdata.system.load_format("deepmd/npy/mixed")
+                mixed_systems = fmtobj.mix_system(
+                    *list(ms.systems.values()), type_map=ms.atom_names
+                )
+                for fn in mixed_systems:
+                    folder = os.path.join(name, fn)
+                    nframes = mixed_systems[fn].get_nframes()
+                    set_size = 2000
+
+                    nsets = nframes // set_size
+                    if set_size * nsets < nframes:
+                        nsets += 1
+                    for ii in range(nsets):
+                        set_stt = ii * set_size
+                        set_end = (ii + 1) * set_size
+                        set_folder = os.path.join(folder, "set.%06d" % ii)
+                        if use_ele_temp == 1:
+                            np.save(os.path.join(set_folder, "fparam"), mixed_systems[fn].data["fparam"][set_stt:set_end])
+                        elif use_ele_temp == 2:
+                            np.save(os.path.join(set_folder, "aparam"), mixed_systems[fn].data["aparam"][set_stt:set_end])
         else:
             ms.to_deepmd_npy(name)  # type: ignore
         iter_data.append(Path(name))
