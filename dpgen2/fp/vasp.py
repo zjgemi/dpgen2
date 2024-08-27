@@ -112,7 +112,8 @@ class PrepVasp(PrepFp):
             params = {}
             for line in lines:
                 for sline in line.split(";"):
-                    if m := re.match(r"(\w+)\s*=\s*(.*)", sline.strip()):
+                    m = re.match(r"(\w+)\s*=\s*(.*)", sline.strip())
+                    if m:
                         key = m.group(1).strip()
                         val = m.group(2).strip()
                         params[key.upper()] = val
