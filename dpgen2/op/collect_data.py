@@ -19,6 +19,7 @@ from dflow.python import (
     OPIOSign,
     Parameter,
 )
+
 from dpgen2.utils import (
     setup_ele_temp,
 )
@@ -129,9 +130,15 @@ class CollectData(OP):
                         set_end = (ii + 1) * set_size
                         set_folder = os.path.join(folder, "set.%06d" % ii)
                         if use_ele_temp == 1:
-                            np.save(os.path.join(set_folder, "fparam"), mixed_systems[fn].data["fparam"][set_stt:set_end])
+                            np.save(
+                                os.path.join(set_folder, "fparam"),
+                                mixed_systems[fn].data["fparam"][set_stt:set_end],
+                            )
                         elif use_ele_temp == 2:
-                            np.save(os.path.join(set_folder, "aparam"), mixed_systems[fn].data["aparam"][set_stt:set_end])
+                            np.save(
+                                os.path.join(set_folder, "aparam"),
+                                mixed_systems[fn].data["aparam"][set_stt:set_end],
+                            )
         else:
             ms.to_deepmd_npy(name)  # type: ignore
         iter_data.append(Path(name))
