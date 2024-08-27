@@ -210,7 +210,7 @@ class RunVasp(RunFp):
                     sys.data["fparam"] = np.tile(data["ele_temp"], [1, 1])
                 elif data["use_ele_temp"] == 2:
                     setup_ele_temp(True)
-                    sys.data["fparam"] = np.tile(
+                    sys.data["aparam"] = np.tile(
                         data["ele_temp"], [1, sys.get_natoms(), 1]
                     )
         sys.to("deepmd/npy", out_name)
