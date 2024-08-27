@@ -335,9 +335,9 @@ def get_ele_temp(lmp_input_name):
     fields = lmp_input_lines[idx].split()
 
     if "fparam" in fields:
-        return fields[fields.index("fparam") + 1]
+        return float(fields[fields.index("fparam") + 1])
 
     if "aparam" in fields:
-        return fields[fields.index("aparam") + 1]
+        return float(fields[fields.index("aparam") + 1])
 
     return None
