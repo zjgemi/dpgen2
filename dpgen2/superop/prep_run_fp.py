@@ -70,6 +70,7 @@ class PrepRunFp(Steps):
         self._output_artifacts = {
             "logs": OutputArtifact(),
             "labeled_data": OutputArtifact(),
+            "extra_outputs": OutputArtifact(),
         }
 
         super().__init__(
@@ -199,6 +200,9 @@ def _prep_run_fp(
     prep_run_steps.outputs.artifacts["logs"]._from = run_fp.outputs.artifacts["log"]
     prep_run_steps.outputs.artifacts["labeled_data"]._from = run_fp.outputs.artifacts[
         "labeled_data"
+    ]
+    prep_run_steps.outputs.artifacts["extra_outputs"]._from = run_fp.outputs.artifacts[
+        "extra_outputs"
     ]
 
     return prep_run_steps

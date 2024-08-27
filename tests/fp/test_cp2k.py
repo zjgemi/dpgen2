@@ -48,6 +48,7 @@ class TestFpOpCp2k(unittest.TestCase):
                 "command": "cp -r %s output.log && cat %s"
                 % (data_path / "output.log", data_path / "output.log"),
             },
+            "extra_output_files": [],
         }
         confs = [data_path / "sys-3"]
         type_map = ["Na"]
