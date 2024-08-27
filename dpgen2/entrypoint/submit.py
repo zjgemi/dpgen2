@@ -566,6 +566,7 @@ def workflow_concurrent_learning(
 
     fp_config["inputs"] = fp_inputs
     fp_config["run"] = config["fp"]["run_config"]
+    fp_config["extra_output_files"] = config["fp"]["extra_output_files"]
     if fp_style == "deepmd":
         assert (
             "teacher_model_path" in fp_config["run"]

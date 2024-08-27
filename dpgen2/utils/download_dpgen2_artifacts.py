@@ -67,7 +67,8 @@ op_download_setting = {
     "prep-run-fp": DownloadDefinition()
     .add_input("confs")
     .add_output("logs")
-    .add_output("labeled_data"),
+    .add_output("labeled_data")
+    .add_output("extra_outputs"),
     "collect-data": DownloadDefinition().add_output("iter_data"),
 }
 

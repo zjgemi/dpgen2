@@ -166,6 +166,7 @@ class RunFpOpAbacus(OP):
             {
                 "log": Artifact(Path),
                 "labeled_data": Artifact(Path),
+                "extra_outputs": Artifact(List[Path]),
             }
         )
 
@@ -202,10 +203,15 @@ class RunFpOpAbacus(OP):
         out_name = fp_default_out_data_name
         sys.to("deepmd/npy", workdir / out_name)
 
+        extra_outputs = []
+        for fname in ip["config"]["extra_output_files"]:
+            extra_outputs += list(workdir.glob(fname))
+
         return OPIO(
             {
                 "log": workdir / "log",
                 "labeled_data": workdir / out_name,
+                "extra_outputs": extra_outputs,
             }
         )
 

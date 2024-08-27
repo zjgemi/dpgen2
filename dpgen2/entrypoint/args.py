@@ -459,6 +459,7 @@ def fp_args(inputs, run):
     doc_inputs_config = "Configuration for preparing vasp inputs"
     doc_run_config = "Configuration for running vasp tasks"
     doc_task_max = "Maximum number of vasp tasks for each iteration"
+    doc_extra_output_files = "Extra output file names, support wildcards"
 
     return [
         Argument(
@@ -476,6 +477,13 @@ def fp_args(inputs, run):
             doc=doc_run_config,
         ),
         Argument("task_max", int, optional=True, default=10, doc=doc_task_max),
+        Argument(
+            "extra_output_files",
+            list,
+            optional=True,
+            default=[],
+            doc=doc_extra_output_files,
+        ),
     ]
 
 
