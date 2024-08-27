@@ -521,6 +521,7 @@ class MockedRunVasp(RunVasp):
             {
                 "log": work_dir / log,
                 "labeled_data": work_dir / labeled_data,
+                "extra_outputs": [],
             }
         )
 
@@ -578,6 +579,7 @@ class MockedRunVaspFail1(RunVasp):
             {
                 "log": work_dir / log,
                 "labeled_data": work_dir / labeled_data,
+                "extra_outputs": [],
             }
         )
 
@@ -633,6 +635,7 @@ class MockedRunVaspRestart(RunVasp):
             {
                 "log": work_dir / log,
                 "labeled_data": work_dir / labeled_data,
+                "extra_outputs": [],
             }
         )
 
