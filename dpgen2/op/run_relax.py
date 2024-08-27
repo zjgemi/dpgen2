@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import (
     Path,
@@ -14,8 +15,14 @@ from dflow.python import (
     OPIOSign,
 )
 
+from dpgen2.constants import (
+    pytorch_model_name_pattern,
+)
 from dpgen2.exploration.task import (
     DiffCSPTaskGroup,
+)
+from dpgen2.utils.run_command import (
+    run_command,
 )
 
 from .run_caly_model_devi import (
@@ -29,6 +36,7 @@ class RunRelax(OP):
         return OPIOSign(
             {
                 "diffcsp_task_grp": BigParameter(DiffCSPTaskGroup),
+                "expl_config": dict,
                 "task_path": Artifact(Path),
                 "models": Artifact(List[Path]),
             }
@@ -73,6 +81,32 @@ class RunRelax(OP):
         task_group = ip["diffcsp_task_grp"]
         task = next(iter(task_group))  # Only support single task
         models = ip["models"]
+        if ip["expl_config"].get("head") is not None:
+            frozen_models = []
+            for idx in range(len(models)):
+                mname = pytorch_model_name_pattern % (idx)
+                freeze_cmd = "dp --pt freeze -c %s --head %s -o %s" % (
+                    models[idx], ip["expl_config"]["head"], mname)
+                ret, out, err = run_command(freeze_cmd, shell=True)
+                if ret != 0:
+                    logging.error(
+                        "".join(
+                            (
+                                "freeze failed\n",
+                                "command was",
+                                freeze_cmd,
+                                "out msg",
+                                out,
+                                "\n",
+                                "err msg",
+                                err,
+                                "\n",
+                            )
+                        )
+                    )
+                    raise RuntimeError("freeze failed")
+                frozen_models.append(Path(mname))
+            models = frozen_models
         relaxer = Relaxer(models[0])
         type_map = relaxer.calculator.dp.get_type_map()
         fmax = task.fmax

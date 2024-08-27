@@ -276,6 +276,7 @@ class TestRunRelax(unittest.TestCase):
         op_in = OPIO(
             {
                 "diffcsp_task_grp": task_group,
+                "expl_config": {},
                 "task_path": Path("task.000000"),
                 "models": [Path("model_0.pt"), Path("model_1.pt")],
             }

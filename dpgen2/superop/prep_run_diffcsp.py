@@ -196,6 +196,7 @@ def _prep_run_diffcsp(
         ),
         parameters={
             "diffcsp_task_grp": expl_task_grp,
+            "expl_config": expl_config,
         },
         artifacts={
             "models": models,
