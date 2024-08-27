@@ -151,7 +151,9 @@ class TestSelectConfs(unittest.TestCase):
         trajs = ["foo", "bar", None, "tar"]
         model_devis = ["zar", "par", None, "mar"]
         optional_outputs = ["dar", "far", None, "gar"]
-        trajs, model_devis, optional_outputs = SelectConfs.validate_trajs(trajs, model_devis, optional_outputs)
+        trajs, model_devis, optional_outputs = SelectConfs.validate_trajs(
+            trajs, model_devis, optional_outputs
+        )
         self.assertEqual(trajs, ["foo", "bar", "tar"])
         self.assertEqual(model_devis, ["zar", "par", "mar"])
         self.assertEqual(optional_outputs, ["dar", "far", "gar"])
@@ -160,4 +162,6 @@ class TestSelectConfs(unittest.TestCase):
         model_devis = ["zar", "par"]
         optional_outputs = ["dar", None]
         with self.assertRaises(FatalError) as context:
-            trajs, model_devis, optional_outputs = SelectConfs.validate_trajs(trajs, model_devis, optional_outputs)
+            trajs, model_devis, optional_outputs = SelectConfs.validate_trajs(
+                trajs, model_devis, optional_outputs
+            )
