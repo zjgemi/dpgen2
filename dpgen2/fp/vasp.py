@@ -156,7 +156,7 @@ class RunVasp(RunFp):
             A list of optional input files names.
 
         """
-        return []
+        return ["job.json"]
 
     def run_task(
         self,
