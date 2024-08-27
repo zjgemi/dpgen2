@@ -182,11 +182,10 @@ class RunDPTrain(OP):
         finetune_mode = ip["optional_parameter"]["finetune_mode"]
         config = ip["config"] if ip["config"] is not None else {}
         impl = ip["config"].get("impl", "tensorflow")
+        dp_command = ip["config"].get("command", "dp").split()
         assert impl in ["tensorflow", "pytorch"]
         if impl == "pytorch":
-            dp_command = ["dp", "--pt"]
-        else:
-            dp_command = ["dp"]
+            dp_command += "--pt"
         finetune_args = config.get("finetune_args", "")
         train_args = config.get("train_args", "")
         config = RunDPTrain.normalize_config(config)
@@ -495,6 +494,7 @@ class RunDPTrain(OP):
 
     @staticmethod
     def training_args():
+        doc_command = "The command for DP, 'dp' for default"
         doc_impl = "The implementation/backend of DP. It can be 'tensorflow' or 'pytorch'. 'tensorflow' for default."
         doc_init_model_policy = "The policy of init-model training. It can be\n\n\
     - 'no': No init-model training. Traing from scratch.\n\n\
@@ -518,6 +518,13 @@ class RunDPTrain(OP):
         doc_init_model_with_finetune = "Use finetune for init model"
         doc_train_args = "Extra arguments for dp train"
         return [
+            Argument(
+                "command",
+                str,
+                optional=True,
+                default="dp",
+                doc=doc_command,
+            ),
             Argument(
                 "impl",
                 str,
