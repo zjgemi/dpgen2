@@ -614,7 +614,7 @@ def input_args():
             optional=True,
             default=0,
             doc=doc_use_ele_temp,
-        )
+        ),
     ]
 
 

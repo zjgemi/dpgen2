@@ -266,7 +266,9 @@ def _block_cl(
         artifacts={
             "trajs": prep_run_explore.outputs.artifacts["trajs"],
             "model_devis": prep_run_explore.outputs.artifacts["model_devis"],
-            "optional_outputs": prep_run_explore.outputs.artifacts["optional_outputs"] if "optional_outputs" in prep_run_explore.outputs.artifacts else None,
+            "optional_outputs": prep_run_explore.outputs.artifacts["optional_outputs"]
+            if "optional_outputs" in prep_run_explore.outputs.artifacts
+            else None,
         },
         key=step_keys["select-confs"],
         executor=select_confs_executor,

@@ -119,8 +119,12 @@ class PrepVasp(PrepFp):
                         params[key.upper()] = val
             params["ISMEAR"] = -1
             import scipy.constants as pc
+
             params["SIGMA"] = ele_temp * pc.Boltzmann / pc.electron_volt
-            incar = "\n".join([key + " = " + str(val) for key, val in params.items()]) + "\n"
+            incar = (
+                "\n".join([key + " = " + str(val) for key, val in params.items()])
+                + "\n"
+            )
             data = {
                 "use_ele_temp": use_ele_temp,
                 "ele_temp": ele_temp,
@@ -206,7 +210,9 @@ class RunVasp(RunFp):
                     sys.data["fparam"] = np.tile(data["ele_temp"], [1, 1])
                 elif data["use_ele_temp"] == 2:
                     setup_ele_temp(True)
-                    sys.data["fparam"] = np.tile(data["ele_temp"], [1, sys.get_natoms(), 1])
+                    sys.data["fparam"] = np.tile(
+                        data["ele_temp"], [1, sys.get_natoms(), 1]
+                    )
         sys.to("deepmd/npy", out_name)
         return out_name, log_name
 

@@ -120,7 +120,10 @@ class PrepFp(OP, ABC):
             if len(list(mm.rglob("aparam.npy"))) > 0:
                 setup_ele_temp(True)
             ms = dpdata.MultiSystems(type_map=type_map)
-            if len(list(mm.rglob("fparam.npy"))) > 0 or len(list(mm.rglob("aparam.npy"))) > 0:
+            if (
+                len(list(mm.rglob("fparam.npy"))) > 0
+                or len(list(mm.rglob("aparam.npy"))) > 0
+            ):
                 # Work around dpdata only support custom dtypes for labeled system
                 for dtype in dpdata.LabeledSystem.DTYPES:
                     if dtype.name in ["energies", "forces"]:

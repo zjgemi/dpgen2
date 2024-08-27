@@ -76,7 +76,9 @@ class TrajRenderLammps(TrajRender):
                 if use_ele_temp == 1 and ele_temp:
                     ss.data["fparam"] = np.tile(ele_temp[ii], [len(ss), 1])
                 elif use_ele_temp == 2 and ele_temp:
-                    ss.data["aparam"] = np.tile(ele_temp[ii], [len(ss), ss.get_natoms(), 1])
+                    ss.data["aparam"] = np.tile(
+                        ele_temp[ii], [len(ss), ss.get_natoms(), 1]
+                    )
                 ss = ss.sub_system(id_selected[ii])
                 ms.append(ss)
         if conf_filters is not None:

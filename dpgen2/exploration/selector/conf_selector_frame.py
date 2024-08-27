@@ -109,10 +109,17 @@ class ConfSelectorFrames(ConfSelector):
                 elif self.use_ele_temp == 2:
                     setup_ele_temp(True)
                 else:
-                    raise ValueError("Invalid value for 'use_ele_temp': %s", self.use_ele_temp)
+                    raise ValueError(
+                        "Invalid value for 'use_ele_temp': %s", self.use_ele_temp
+                    )
 
         ms = self.traj_render.get_confs(
-            trajs, id_cand_list, type_map, self.conf_filters, self.use_ele_temp, ele_temp
+            trajs,
+            id_cand_list,
+            type_map,
+            self.conf_filters,
+            self.use_ele_temp,
+            ele_temp,
         )
 
         out_path = Path("confs")

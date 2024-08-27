@@ -1,6 +1,9 @@
 import dpdata
 import numpy as np
-from dpdata.data_type import Axis, DataType
+from dpdata.data_type import (
+    Axis,
+    DataType,
+)
 
 
 def setup_ele_temp(atomic: bool):
