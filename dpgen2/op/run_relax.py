@@ -86,7 +86,10 @@ class RunRelax(OP):
             for idx in range(len(models)):
                 mname = pytorch_model_name_pattern % (idx)
                 freeze_cmd = "dp --pt freeze -c %s --head %s -o %s" % (
-                    models[idx], ip["expl_config"]["head"], mname)
+                    models[idx],
+                    ip["expl_config"]["head"],
+                    mname,
+                )
                 ret, out, err = run_command(freeze_cmd, shell=True)
                 if ret != 0:
                     logging.error(
