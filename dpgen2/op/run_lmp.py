@@ -255,7 +255,9 @@ class RunLmp(OP):
                 doc=doc_shuffle_models,
             ),
             Argument("head", str, optional=True, default=None, doc=doc_head),
-            Argument("use_ele_temp", int, optional=True, default=0, doc=doc_use_ele_temp),
+            Argument(
+                "use_ele_temp", int, optional=True, default=0, doc=doc_use_ele_temp
+            ),
         ]
 
     @staticmethod
