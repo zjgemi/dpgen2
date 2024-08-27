@@ -70,6 +70,7 @@ class PrepRunFp(Steps):
         self._output_artifacts = {
             "logs": OutputArtifact(),
             "labeled_data": OutputArtifact(),
+            "extra_outputs": OutputArtifact(),
         }
 
         super().__init__(
@@ -170,7 +171,7 @@ def _prep_run_fp(
                 "int('{{item}}')",
                 input_parameter=["task_name"],
                 input_artifact=["task_path"],
-                output_artifact=["log", "labeled_data"],
+                output_artifact=["log", "labeled_data", "extra_outputs"],
                 **template_slice_config,
             ),
             python_packages=upload_python_packages,
@@ -199,6 +200,9 @@ def _prep_run_fp(
     prep_run_steps.outputs.artifacts["logs"]._from = run_fp.outputs.artifacts["log"]
     prep_run_steps.outputs.artifacts["labeled_data"]._from = run_fp.outputs.artifacts[
         "labeled_data"
+    ]
+    prep_run_steps.outputs.artifacts["extra_outputs"]._from = run_fp.outputs.artifacts[
+        "extra_outputs"
     ]
 
     return prep_run_steps
