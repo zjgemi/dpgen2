@@ -134,6 +134,7 @@ class SelectConfs(OP):
                         )
             elif tt is None and mm is None:
                 if optional_outputs:
+                    oo = optional_outputs[i]
                     if oo is not None:
                         raise FatalError(
                             f"trajs frame is {tt} while optional_outputs frame is {oo}"
