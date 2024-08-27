@@ -129,7 +129,7 @@ class RunDPTrain(OP):
                 "init_model": Artifact(Path, optional=True),
                 "init_data": Artifact(NestedDict[Path]),
                 "iter_data": Artifact(List[Path]),
-                "valid_data": Artifact(List[Path], optional=True),
+                "valid_data": Artifact(NestedDict[Path], optional=True),
                 "optional_files": Artifact(List[Path], optional=True),
             }
         )
@@ -356,7 +356,7 @@ class RunDPTrain(OP):
         iter_data: List[Path],
         auto_prob_str: str = "prob_sys_size",
         major_version: str = "1",
-        valid_data: Optional[List[Path]] = None,
+        valid_data: Optional[Union[List[Path], Dict[str, List[Path]]]] = None,
     ):
         odict = idict.copy()
         if config["multitask"]:
@@ -368,6 +368,11 @@ class RunDPTrain(OP):
                 if k == head:
                     v["training_data"]["systems"] += [str(ii) for ii in iter_data]
                     v["training_data"]["auto_prob"] = auto_prob_str
+                if valid_data is None:
+                    v.pop("validation_data", None)
+                else:
+                    v["validation_data"] = v.get("validation_data", {"batch_size": 1})
+                    v["validation_data"]["systems"] = [str(ii) for ii in valid_data[k]]
             return odict
         data_list = [str(ii) for ii in init_data] + [str(ii) for ii in iter_data]
         if major_version == "1":

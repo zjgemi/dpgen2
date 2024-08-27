@@ -521,6 +521,11 @@ def input_args():
     doc_valid_data_prefix = "The prefix of validation data systems"
     doc_valid_sys = "The validation data systems"
     doc_valid_data_uri = "The URI of validation data"
+    doc_multi_valid_data = (
+        "The validation data for multitask, it should be a dict, whose keys are task names and each value is a dict"
+        "containing fields `prefix` and `sys` for initial data of each task"
+    )
+    doc_multi_valid_data_uri = "The URI of validation data for multitask"
 
     return [
         Argument("type_map", List[str], optional=False, doc=doc_type_map),
@@ -598,6 +603,20 @@ def input_args():
             optional=True,
             default=None,
             doc=doc_valid_data_uri,
+        ),
+        Argument(
+            "multi_valid_data",
+            dict,
+            optional=True,
+            default=None,
+            doc=doc_multi_valid_data,
+        ),
+        Argument(
+            "multi_valid_data_uri",
+            str,
+            optional=True,
+            default=None,
+            doc=doc_multi_valid_data_uri,
         ),
     ]
 
