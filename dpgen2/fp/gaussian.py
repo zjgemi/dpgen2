@@ -3,6 +3,7 @@ import logging
 from typing import (
     Any,
     List,
+    Optional,
     Tuple,
 )
 
@@ -134,7 +135,7 @@ class RunGaussian(RunFp):
         self,
         command: str,
         out: str,
-        post_command: str = None,
+        post_command: Optional[str] = None,
     ) -> Tuple[str, str]:
         r"""Defines how one FP task runs
 
