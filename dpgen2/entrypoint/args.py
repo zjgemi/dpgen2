@@ -529,7 +529,7 @@ def input_args():
     doc_valid_data_prefix = "The prefix of validation data systems"
     doc_valid_sys = "The validation data systems"
     doc_valid_data_uri = "The URI of validation data"
-    doc_use_ele_temp = "Whether to use electronic temperature, 0 for no, 1 for atomic temperature, and 2 for frame temperature"
+    doc_use_ele_temp = "Whether to use electronic temperature, 0 for no, 1 for frame temperature, and 2 for atomic temperature"
 
     return [
         Argument("type_map", List[str], optional=False, doc=doc_type_map),

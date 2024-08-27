@@ -237,6 +237,7 @@ class RunLmp(OP):
         doc_teacher_model = "The teacher model in `Knowledge Distillation`"
         doc_shuffle_models = "Randomly pick a model from the group of models to drive theexploration MD simulation"
         doc_head = "Select a head from multitask"
+        doc_use_ele_temp = "Whether to use electronic temperature, 0 for no, 1 for frame temperature, and 2 for atomic temperature"
         return [
             Argument("command", str, optional=True, default="lmp", doc=doc_lmp_cmd),
             Argument(
@@ -254,6 +255,7 @@ class RunLmp(OP):
                 doc=doc_shuffle_models,
             ),
             Argument("head", str, optional=True, default=None, doc=doc_head),
+            Argument("use_ele_temp", int, optional=True, default=0, doc=doc_use_ele_temp),
         ]
 
     @staticmethod
