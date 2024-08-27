@@ -185,7 +185,7 @@ class RunDPTrain(OP):
         dp_command = ip["config"].get("command", "dp").split()
         assert impl in ["tensorflow", "pytorch"]
         if impl == "pytorch":
-            dp_command += "--pt"
+            dp_command.append("--pt")
         finetune_args = config.get("finetune_args", "")
         train_args = config.get("train_args", "")
         config = RunDPTrain.normalize_config(config)
