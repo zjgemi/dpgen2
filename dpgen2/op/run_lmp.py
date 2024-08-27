@@ -205,13 +205,15 @@ class RunLmp(OP):
                 )
                 raise TransientError("lmp failed")
 
-            ele_temp = get_ele_temp(lmp_input_name)
-            if ele_temp is not None:
-                data = {
-                    "ele_temp": ele_temp,
-                }
-                with open("job.json", "w") as f:
-                    json.dump(data, f, indent=4)
+            ele_temp = None
+            if config.get("use_ele_temp", 0):
+                ele_temp = get_ele_temp(lmp_log_name)
+                if ele_temp is not None:
+                    data = {
+                        "ele_temp": ele_temp,
+                    }
+                    with open("job.json", "w") as f:
+                        json.dump(data, f, indent=4)
 
         ret_dict = {
             "log": work_dir / lmp_log_name,
@@ -323,21 +325,23 @@ def find_only_one_key(lmp_lines, key, raise_not_found=True):
     return found[0]
 
 
-def get_ele_temp(lmp_input_name):
-    with open(lmp_input_name, encoding="utf8") as f:
-        lmp_input_lines = f.readlines()
+def get_ele_temp(lmp_log_name):
+    with open(lmp_log_name, encoding="utf8") as f:
+        lmp_log_lines = f.readlines()
 
-    idx = find_only_one_key(
-        lmp_input_lines, ["pair_style", "deepmd"], raise_not_found=False
-    )
-    if idx is None:
-        return
-    fields = lmp_input_lines[idx].split()
-
-    if "fparam" in fields:
-        return float(fields[fields.index("fparam") + 1])
-
-    if "aparam" in fields:
-        return float(fields[fields.index("aparam") + 1])
+    for line in lmp_log_lines:
+        fields = line.split()
+        if fields[:2] == ["pair_style", "deepmd"]:
+            if "fparam" in fields:
+                # for rendering variables
+                try:
+                    return float(fields[fields.index("fparam") + 1])
+                except Exception:
+                    pass
+            if "aparam" in fields:
+                try:
+                    return float(fields[fields.index("aparam") + 1])
+                except Exception:
+                    pass
 
     return None

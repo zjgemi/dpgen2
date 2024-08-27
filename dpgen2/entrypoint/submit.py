@@ -612,6 +612,9 @@ def workflow_concurrent_learning(
     else:
         init_models = None
 
+    if config["inputs"]["use_ele_temp"]:
+        explore_config["use_ele_temp"] = config["inputs"]["use_ele_temp"]
+
     optional_parameter = make_optional_parameter(
         config["inputs"]["mixed_type"],
     )
