@@ -12,6 +12,7 @@ from typing import (
 
 import dpdata
 import numpy as np
+
 from dpgen2.utils import (
     setup_ele_temp,
 )
@@ -71,7 +72,6 @@ class TrajRenderLammps(TrajRender):
         conf_filters: Optional["ConfFilters"] = None,
         optional_outputs: Optional[List[Path]] = None,
     ) -> dpdata.MultiSystems:
-
         ele_temp = None
         if optional_outputs:
             assert ntraj == len(optional_outputs)
