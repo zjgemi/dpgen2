@@ -71,7 +71,7 @@ class TrajRenderLammps(TrajRender):
         conf_filters: Optional["ConfFilters"] = None,
         optional_outputs: Optional[List[Path]] = None,
     ) -> dpdata.MultiSystems:
-
+        ntraj = len(trajs)
         ele_temp = None
         if optional_outputs:
             assert ntraj == len(optional_outputs)
@@ -91,7 +91,6 @@ class TrajRenderLammps(TrajRender):
                         "Invalid value for 'use_ele_temp': %s", self.use_ele_temp
                     )
 
-        ntraj = len(trajs)
         traj_fmt = "lammps/dump"
         ms = dpdata.MultiSystems(type_map=type_map)
         for ii in range(ntraj):
