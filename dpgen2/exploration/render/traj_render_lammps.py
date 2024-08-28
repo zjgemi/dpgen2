@@ -12,6 +12,7 @@ from typing import (
 
 import dpdata
 import numpy as np
+
 from dpgen2.utils import (
     setup_ele_temp,
 )
