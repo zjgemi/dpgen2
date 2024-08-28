@@ -375,14 +375,13 @@ def make_lmp_naive_exploration_scheduler(config):
     # report
     conv_style = convergence.pop("type")
     report = conv_styles[conv_style](**convergence)
-    render = TrajRenderLammps(nopbc=output_nopbc)
+    render = TrajRenderLammps(nopbc=output_nopbc, use_ele_temp=use_ele_temp)
     # selector
     selector = ConfSelectorFrames(
         render,
         report,
         fp_task_max,
         conf_filters,
-        use_ele_temp,
     )
 
     sys_configs_lmp = []

@@ -1,3 +1,4 @@
+import json
 from pathlib import (
     Path,
 )
@@ -11,6 +12,9 @@ from typing import (
 
 import dpdata
 import numpy as np
+from dpgen2.utils import (
+    setup_ele_temp,
+)
 
 from ..deviation import (
     DeviManager,
@@ -30,8 +34,10 @@ class TrajRenderLammps(TrajRender):
     def __init__(
         self,
         nopbc: bool = False,
+        use_ele_temp: int = 0,
     ):
         self.nopbc = nopbc
+        self.use_ele_temp = use_ele_temp
 
     def get_model_devi(
         self,
@@ -63,9 +69,28 @@ class TrajRenderLammps(TrajRender):
         id_selected: List[List[int]],
         type_map: Optional[List[str]] = None,
         conf_filters: Optional["ConfFilters"] = None,
-        use_ele_temp: int = 0,
-        ele_temp: Optional[List[float]] = None,
+        optional_outputs: Optional[List[Path]] = None,
     ) -> dpdata.MultiSystems:
+
+        ele_temp = None
+        if optional_outputs:
+            assert ntraj == len(optional_outputs)
+            ele_temp = []
+            for ii in range(ntraj):
+                with open(optional_outputs[ii], "r") as f:
+                    data = json.load(f)
+                if self.use_ele_temp:
+                    ele_temp.append(data["ele_temp"])
+            if self.use_ele_temp:
+                if self.use_ele_temp == 1:
+                    setup_ele_temp(False)
+                elif self.use_ele_temp == 2:
+                    setup_ele_temp(True)
+                else:
+                    raise ValueError(
+                        "Invalid value for 'use_ele_temp': %s", self.use_ele_temp
+                    )
+
         ntraj = len(trajs)
         traj_fmt = "lammps/dump"
         ms = dpdata.MultiSystems(type_map=type_map)
@@ -73,9 +98,9 @@ class TrajRenderLammps(TrajRender):
             if len(id_selected[ii]) > 0:
                 ss = dpdata.System(trajs[ii], fmt=traj_fmt, type_map=type_map)
                 ss.nopbc = self.nopbc
-                if use_ele_temp == 1 and ele_temp:
+                if self.use_ele_temp == 1 and ele_temp:
                     ss.data["fparam"] = np.tile(ele_temp[ii], [len(ss), 1])
-                elif use_ele_temp == 2 and ele_temp:
+                elif self.use_ele_temp == 2 and ele_temp:
                     ss.data["aparam"] = np.tile(
                         ele_temp[ii], [len(ss), ss.get_natoms(), 1]
                     )

@@ -1,5 +1,4 @@
 import copy
-import json
 from collections import (
     Counter,
 )
@@ -20,9 +19,6 @@ from dpgen2.exploration.render import (
 )
 from dpgen2.exploration.report import (
     ExplorationReport,
-)
-from dpgen2.utils import (
-    setup_ele_temp,
 )
 
 from . import (
@@ -48,13 +44,11 @@ class ConfSelectorFrames(ConfSelector):
         report: ExplorationReport,
         max_numb_sel: Optional[int] = None,
         conf_filters: Optional[ConfFilters] = None,
-        use_ele_temp: int = 0,
     ):
         self.max_numb_sel = max_numb_sel
         self.conf_filters = conf_filters
         self.traj_render = traj_render
         self.report = report
-        self.use_ele_temp = use_ele_temp
 
     def select(
         self,
@@ -94,32 +88,12 @@ class ConfSelectorFrames(ConfSelector):
         self.report.record(md_model_devi)
         id_cand_list = self.report.get_candidate_ids(self.max_numb_sel)
 
-        ele_temp = None
-        if optional_outputs:
-            assert ntraj == len(optional_outputs)
-            ele_temp = []
-            for ii in range(ntraj):
-                with open(optional_outputs[ii], "r") as f:
-                    data = json.load(f)
-                if self.use_ele_temp:
-                    ele_temp.append(data["ele_temp"])
-            if self.use_ele_temp:
-                if self.use_ele_temp == 1:
-                    setup_ele_temp(False)
-                elif self.use_ele_temp == 2:
-                    setup_ele_temp(True)
-                else:
-                    raise ValueError(
-                        "Invalid value for 'use_ele_temp': %s", self.use_ele_temp
-                    )
-
         ms = self.traj_render.get_confs(
             trajs,
             id_cand_list,
             type_map,
             self.conf_filters,
-            self.use_ele_temp,
-            ele_temp,
+            optional_outputs,
         )
 
         out_path = Path("confs")
