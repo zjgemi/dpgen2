@@ -219,7 +219,9 @@ class RunLmp(OP):
                 default=False,
                 doc=doc_shuffle_models,
             ),
-            Argument("model_frozen_head", str, optional=True, default=None, doc=doc_head),
+            Argument(
+                "model_frozen_head", str, optional=True, default=None, doc=doc_head
+            ),
         ]
 
     @staticmethod
