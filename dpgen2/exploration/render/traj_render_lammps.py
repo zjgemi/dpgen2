@@ -1,3 +1,6 @@
+from io import (
+    StringIO,
+)
 from pathlib import (
     Path,
 )
@@ -11,10 +14,6 @@ from typing import (
 
 import dpdata
 import numpy as np
-from io import (
-    StringIO,
-)
-
 from dflow.python.opio import (
     HDF5Dataset,
 )
