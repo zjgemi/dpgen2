@@ -65,9 +65,9 @@ class TrajRender(ABC):
             from the ii-th trajectory. id_selected[ii] may be an empty list.
         type_map : List[str]
             The type map.
-        conf_filters: ConfFilters
+        conf_filters : ConfFilters
             Configuration filters
-        optional_outputs: List[Path]
+        optional_outputs : List[Path]
             Optional outputs of the exploration
 
         Returns
