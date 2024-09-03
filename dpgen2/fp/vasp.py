@@ -60,7 +60,8 @@ vasp_kp_name = "KPOINTS"
 
 
 def clean_lines(string_list, remove_empty_lines=True):
-    """Strips whitespace, carriage returns and empty lines from a list of strings.
+    """[migrated from pymatgen]
+    Strips whitespace, carriage returns and empty lines from a list of strings.
 
     Args:
         string_list: List of strings
@@ -78,6 +79,27 @@ def clean_lines(string_list, remove_empty_lines=True):
         clean_s = clean_s.strip()
         if (not remove_empty_lines) or clean_s != "":
             yield clean_s
+
+
+def loads_incar(incar: str):
+    lines = list(clean_lines(incar.splitlines()))
+    params = {}
+    for line in lines:
+        for sline in line.split(";"):
+            m = re.match(r"(\w+)\s*=\s*(.*)", sline.strip())
+            if m:
+                key = m.group(1).strip()
+                val = m.group(2).strip()
+                params[key.upper()] = val
+    return params
+
+
+def dumps_incar(params: dict):
+    incar = (
+        "\n".join([key + " = " + str(val) for key, val in params.items()])
+        + "\n"
+    )
+    return incar
 
 
 class PrepVasp(PrepFp):
@@ -108,23 +130,12 @@ class PrepVasp(PrepFp):
             use_ele_temp = 2
             ele_temp = conf_frame.data["aparam"][0][0][0]
         if ele_temp:
-            lines = list(clean_lines(incar.splitlines()))
-            params = {}
-            for line in lines:
-                for sline in line.split(";"):
-                    m = re.match(r"(\w+)\s*=\s*(.*)", sline.strip())
-                    if m:
-                        key = m.group(1).strip()
-                        val = m.group(2).strip()
-                        params[key.upper()] = val
-            params["ISMEAR"] = -1
             import scipy.constants as pc
 
+            params = loads_incar(incar)
+            params["ISMEAR"] = -1
             params["SIGMA"] = ele_temp * pc.Boltzmann / pc.electron_volt
-            incar = (
-                "\n".join([key + " = " + str(val) for key, val in params.items()])
-                + "\n"
-            )
+            incar = dumps_incar(params)
             data = {
                 "use_ele_temp": use_ele_temp,
                 "ele_temp": ele_temp,

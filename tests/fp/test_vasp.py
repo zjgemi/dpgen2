@@ -18,6 +18,8 @@ from .context import (
 )
 from dpgen2.fp.vasp import (
     VaspInputs,
+    dumps_incar,
+    loads_incar,
     make_kspacing_kpoints,
 )
 
@@ -119,3 +121,40 @@ Cartesian
         ss = dpdata.System("POSCAR")
         kps = vi.make_kpoints(ss["cells"][0])
         self.assertEqual(ref, kps)
+
+
+class TestIncar(unittest.TestCase):
+    def test_loads_dumps_incar(self):
+        incar = """
+PREC=A
+ENCUT=600
+ISYM=0
+ALGO=fast
+EDIFF=1.000000e-06
+LREAL=A
+NPAR=1
+KPAR=1
+
+NELMIN=4
+ISIF=2
+ISMEAR=1
+SIGMA=1.000000
+IBRION=-1
+
+NSW=0
+
+LWAVE=F
+LCHARG=F
+PSTRESS=0
+
+KSPACING=0.160000
+KGAMMA=.FALSE."""
+        params = loads_incar(incar)
+        self.assertEqual(len(params), 19)
+        self.assertEqual(params["PREC"], "A")
+        self.assertEqual(params["EDIFF"], "1.000000e-06")
+        self.assertEqual(params["IBRION"], "-1")
+        self.assertEqual(params["KGAMMA"], ".FALSE.")
+        new_incar = dumps_incar(params)
+        new_params = loads_incar(new_incar)
+        self.assertEqual(params, new_params)

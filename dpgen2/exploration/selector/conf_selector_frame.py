@@ -70,6 +70,8 @@ class ConfSelectorFrames(ConfSelector):
             where `md` stands for model deviation, v for virial and f for force
         type_map : List[str]
             The `type_map` of the systems
+        optional_outputs : List[Path]
+            Optional outputs of the exploration
 
         Returns
         -------
