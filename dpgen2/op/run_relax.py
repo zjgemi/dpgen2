@@ -7,6 +7,9 @@ from typing import (
     List,
 )
 
+from dargs import (
+    Argument,
+)
 from dflow.python import (
     OP,
     OPIO,
@@ -81,11 +84,13 @@ class RunRelax(OP):
         task_group = ip["diffcsp_task_grp"]
         task = next(iter(task_group))  # Only support single task
         models = ip["models"]
-        if ip["expl_config"].get("model_frozen_head") is not None:
+        config = ip["expl_config"]
+        config = RunRelax.normalize_config(config)
+        if config["model_frozen_head"] is not None:
             frozen_models = []
             for idx in range(len(models)):
                 mname = pytorch_model_name_pattern % (idx)
-                freeze_model(models[idx], mname, ip["expl_config"]["model_frozen_head"])
+                freeze_model(models[idx], mname, config["model_frozen_head"])
                 frozen_models.append(Path(mname))
             models = frozen_models
         relaxer = Relaxer(models[0])
@@ -193,3 +198,20 @@ class RunRelax(OP):
                 "model_devis": model_devis,
             }
         )
+
+    @staticmethod
+    def relax_args():
+        doc_head = "Select a head from multitask"
+        return [
+            Argument(
+                "model_frozen_head", str, optional=True, default=None, doc=doc_head
+            ),
+        ]
+
+    @staticmethod
+    def normalize_config(data={}):
+        ta = RunRelax.relax_args()
+        base = Argument("base", dict, ta)
+        data = base.normalize_value(data, trim_pattern="_*")
+        base.check_value(data, strict=False)
+        return data
