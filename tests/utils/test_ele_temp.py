@@ -54,7 +54,9 @@ class TestSetupEleTemp(unittest.TestCase):
         system.to_deepmd_npy_mixed("ele_temp_mixed_data")
         self.assertEqual(len(glob.glob("ele_temp_mixed_data/*/aparam.npy")), 1)
         ms = dpdata.MultiSystems()
-        ms.load_systems_from_file("ele_temp_mixed_data", fmt="deepmd/npy/mixed", labeled=False)
+        ms.load_systems_from_file(
+            "ele_temp_mixed_data", fmt="deepmd/npy/mixed", labeled=False
+        )
         self.assertTrue("aparam" in ms[0].data)
 
     def tearDown(self):
