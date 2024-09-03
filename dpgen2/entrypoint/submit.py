@@ -606,7 +606,7 @@ def workflow_concurrent_learning(
             init_data = upload_artifact_and_print_uri(init_data, "multi_init_data")
         train_config["multitask"] = True
         train_config["head"] = head
-        explore_config["head"] = head
+        explore_config["model_frozen_head"] = head
     else:
         if config["inputs"]["init_data_uri"] is not None:
             init_data = get_artifact_from_uri(config["inputs"]["init_data_uri"])
