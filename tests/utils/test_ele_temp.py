@@ -1,9 +1,10 @@
-import dpdata
 import glob
-import numpy as np
 import os
 import shutil
 import unittest
+
+import dpdata
+import numpy as np
 
 # isort: off
 from .context import (

@@ -95,10 +95,7 @@ def loads_incar(incar: str):
 
 
 def dumps_incar(params: dict):
-    incar = (
-        "\n".join([key + " = " + str(val) for key, val in params.items()])
-        + "\n"
-    )
+    incar = "\n".join([key + " = " + str(val) for key, val in params.items()]) + "\n"
     return incar
 
 
