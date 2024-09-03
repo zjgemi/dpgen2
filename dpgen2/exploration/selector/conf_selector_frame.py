@@ -9,11 +9,15 @@ from typing import (
     List,
     Optional,
     Tuple,
+    Union,
 )
 
 import dpdata
 import numpy as np
 
+from dflow.python.opio import (
+    HDF5Dataset,
+)
 from dpgen2.exploration.render import (
     TrajRender,
 )
@@ -52,8 +56,8 @@ class ConfSelectorFrames(ConfSelector):
 
     def select(
         self,
-        trajs: List[Path],
-        model_devis: List[Path],
+        trajs: Union[List[Path], List[HDF5Dataset]],
+        model_devis: Union[List[Path], List[HDF5Dataset]],
         type_map: Optional[List[str]] = None,
     ) -> Tuple[List[Path], ExplorationReport]:
         """Select configurations

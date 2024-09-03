@@ -7,6 +7,7 @@ from typing import (
     List,
     Set,
     Tuple,
+    Union,
 )
 
 from dflow.python import (
@@ -15,6 +16,7 @@ from dflow.python import (
     Artifact,
     BigParameter,
     FatalError,
+    HDF5Datasets,
     OPIOSign,
 )
 
@@ -35,8 +37,8 @@ class SelectConfs(OP):
             {
                 "conf_selector": ConfSelector,
                 "type_map": List[str],
-                "trajs": Artifact(List[Path]),
-                "model_devis": Artifact(List[Path]),
+                "trajs": Artifact(Union[List[Path], HDF5Datasets]),
+                "model_devis": Artifact(Union[List[Path], HDF5Datasets]),
             }
         )
 
