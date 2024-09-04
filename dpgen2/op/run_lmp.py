@@ -151,28 +151,7 @@ class RunLmp(OP):
                 elif ext == ".pt":
                     # freeze model
                     mname = pytorch_model_name_pattern % (idx)
-                    freeze_args = "-o %s" % mname
-                    if config.get("head") is not None:
-                        freeze_args += " --head %s" % config["head"]
-                    freeze_cmd = "dp --pt freeze -c %s %s" % (mm, freeze_args)
-                    ret, out, err = run_command(freeze_cmd, shell=True)
-                    if ret != 0:
-                        logging.error(
-                            "".join(
-                                (
-                                    "freeze failed\n",
-                                    "command was",
-                                    freeze_cmd,
-                                    "out msg",
-                                    out,
-                                    "\n",
-                                    "err msg",
-                                    err,
-                                    "\n",
-                                )
-                            )
-                        )
-                        raise TransientError("freeze failed")
+                    freeze_model(mm, mname, config.get("model_frozen_head"))
                 else:
                     raise RuntimeError(
                         "Model file with extension '%s' is not supported" % ext
@@ -257,6 +236,9 @@ class RunLmp(OP):
             Argument("head", str, optional=True, default=None, doc=doc_head),
             Argument(
                 "use_ele_temp", int, optional=True, default=0, doc=doc_use_ele_temp
+            ),
+            Argument(
+                "model_frozen_head", str, optional=True, default=None, doc=doc_head
             ),
         ]
 
@@ -349,3 +331,28 @@ def get_ele_temp(lmp_log_name):
                     pass
 
     return None
+
+
+def freeze_model(input_model, frozen_model, head=None):
+    freeze_args = "-o %s" % frozen_model
+    if head is not None:
+        freeze_args += " --head %s" % head
+    freeze_cmd = "dp --pt freeze -c %s %s" % (input_model, freeze_args)
+    ret, out, err = run_command(freeze_cmd, shell=True)
+    if ret != 0:
+        logging.error(
+            "".join(
+                (
+                    "freeze failed\n",
+                    "command was",
+                    freeze_cmd,
+                    "out msg",
+                    out,
+                    "\n",
+                    "err msg",
+                    err,
+                    "\n",
+                )
+            )
+        )
+        raise TransientError("freeze failed")

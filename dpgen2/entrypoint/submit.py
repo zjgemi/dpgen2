@@ -514,13 +514,28 @@ def workflow_concurrent_learning(
         ]
         upload_python_packages = _upload_python_packages
 
-    valid_data = config["inputs"]["valid_data_sys"]
-    if config["inputs"]["valid_data_uri"] is not None:
-        valid_data = get_artifact_from_uri(config["inputs"]["valid_data_uri"])
-    elif valid_data is not None:
-        valid_data_prefix = config["inputs"]["valid_data_prefix"]
-        valid_data = get_systems_from_data(valid_data, valid_data_prefix)
-        valid_data = upload_artifact_and_print_uri(valid_data, "valid_data")
+    multitask = config["inputs"]["multitask"]
+    valid_data = None
+    if multitask:
+        if config["inputs"]["multi_valid_data_uri"] is not None:
+            valid_data = get_artifact_from_uri(config["inputs"]["multi_valid_data_uri"])
+        elif config["inputs"]["multi_valid_data"] is not None:
+            multi_valid_data = config["inputs"]["multi_valid_data"]
+            valid_data = {}
+            for k, v in multi_valid_data.items():
+                sys = v["sys"]
+                sys = get_systems_from_data(sys, v.get("prefix", None))
+                valid_data[k] = sys
+            valid_data = upload_artifact_and_print_uri(valid_data, "multi_valid_data")
+    else:
+        if config["inputs"]["valid_data_uri"] is not None:
+            valid_data = get_artifact_from_uri(config["inputs"]["valid_data_uri"])
+        elif config["inputs"]["valid_data_prefix"] is not None:
+            valid_data_prefix = config["inputs"]["valid_data_prefix"]
+            valid_data = config["inputs"]["valid_data_sys"]
+            valid_data = get_systems_from_data(valid_data, valid_data_prefix)
+            valid_data = upload_artifact_and_print_uri(valid_data, "valid_data")
+
     concurrent_learning_op = make_concurrent_learning_op(
         train_style,
         explore_style,
@@ -592,7 +607,7 @@ def workflow_concurrent_learning(
             init_data = upload_artifact_and_print_uri(init_data, "multi_init_data")
         train_config["multitask"] = True
         train_config["head"] = head
-        explore_config["head"] = head
+        explore_config["model_frozen_head"] = head
     else:
         if config["inputs"]["init_data_uri"] is not None:
             init_data = get_artifact_from_uri(config["inputs"]["init_data_uri"])
