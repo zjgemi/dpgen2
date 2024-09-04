@@ -79,7 +79,7 @@ class TrajRenderLammps(TrajRender):
         for ii in range(ntraj):
             if len(id_selected[ii]) > 0:
                 if isinstance(trajs[ii], HDF5Dataset):
-                    traj = StringIO(trajs[ii].get_data())
+                    traj = StringIO(trajs[ii].get_data())  # type: ignore
                 else:
                     traj = trajs[ii]
                 ss = dpdata.System(traj, fmt=traj_fmt, type_map=type_map)

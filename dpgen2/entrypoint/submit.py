@@ -236,7 +236,7 @@ def make_concurrent_learning_op(
             "prep-run-diffcsp",
             DiffCSPGen,
             PrepRelax,
-            RunRelaxHDF5 if explore_config["use_hdf5"] else RunRelax,
+            RunRelaxHDF5 if explore_config["use_hdf5"] else RunRelax,  # type: ignore
             prep_config=prep_explore_config,
             run_config=run_explore_config,
             upload_python_packages=upload_python_packages,
