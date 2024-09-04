@@ -227,6 +227,7 @@ class RunRelax(OP):
         base.check_value(data, strict=False)
         return data
 
+
 class RunRelaxHDF5(RunRelax):
     @classmethod
     def get_output_sign(cls):
