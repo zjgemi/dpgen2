@@ -32,5 +32,6 @@ class ConfSelector(ABC):
         trajs: List[Path],
         model_devis: List[Path],
         type_map: Optional[List[str]] = None,
+        optional_outputs: Optional[List[Path]] = None,
     ) -> Tuple[List[Path], ExplorationReport]:
         pass

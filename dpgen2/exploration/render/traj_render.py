@@ -52,6 +52,7 @@ class TrajRender(ABC):
         id_selected: List[List[int]],
         type_map: Optional[List[str]] = None,
         conf_filters: Optional["ConfFilters"] = None,
+        optional_outputs: Optional[List[Path]] = None,
     ) -> dpdata.MultiSystems:
         r"""Get configurations from trajectory by selection.
 
@@ -64,6 +65,10 @@ class TrajRender(ABC):
             from the ii-th trajectory. id_selected[ii] may be an empty list.
         type_map : List[str]
             The type map.
+        conf_filters : ConfFilters
+            Configuration filters
+        optional_outputs : List[Path]
+            Optional outputs of the exploration
 
         Returns
         -------

@@ -19,6 +19,7 @@ from pathlib import (
 )
 from typing import (
     List,
+    Optional,
     Tuple,
 )
 
@@ -864,6 +865,7 @@ class MockedConfSelector(ConfSelector):
         trajs: List[Path],
         model_devis: List[Path],
         type_map: List[str] = None,
+        optional_outputs: Optional[List[Path]] = None,
     ) -> Tuple[List[Path], ExplorationReport]:
         confs = []
         if len(trajs) == mocked_numb_lmp_tasks:
