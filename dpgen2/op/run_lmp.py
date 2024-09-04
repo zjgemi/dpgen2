@@ -79,6 +79,7 @@ class RunLmp(OP):
                 "traj": Artifact(Path),
                 "model_devi": Artifact(Path),
                 "plm_output": Artifact(Path, optional=True),
+                "optional_output": Artifact(Path, optional=True),
             }
         )
 
@@ -183,6 +184,16 @@ class RunLmp(OP):
                 )
                 raise TransientError("lmp failed")
 
+            ele_temp = None
+            if config.get("use_ele_temp", 0):
+                ele_temp = get_ele_temp(lmp_log_name)
+                if ele_temp is not None:
+                    data = {
+                        "ele_temp": ele_temp,
+                    }
+                    with open("job.json", "w") as f:
+                        json.dump(data, f, indent=4)
+
         ret_dict = {
             "log": work_dir / lmp_log_name,
             "traj": work_dir / lmp_traj_name,
@@ -194,6 +205,8 @@ class RunLmp(OP):
             else {}
         )
         ret_dict.update(plm_output)
+        if ele_temp is not None:
+            ret_dict["optional_output"] = work_dir / "job.json"
 
         return OPIO(ret_dict)
 
@@ -203,6 +216,7 @@ class RunLmp(OP):
         doc_teacher_model = "The teacher model in `Knowledge Distillation`"
         doc_shuffle_models = "Randomly pick a model from the group of models to drive theexploration MD simulation"
         doc_head = "Select a head from multitask"
+        doc_use_ele_temp = "Whether to use electronic temperature, 0 for no, 1 for frame temperature, and 2 for atomic temperature"
         return [
             Argument("command", str, optional=True, default="lmp", doc=doc_lmp_cmd),
             Argument(
@@ -218,6 +232,10 @@ class RunLmp(OP):
                 optional=True,
                 default=False,
                 doc=doc_shuffle_models,
+            ),
+            Argument("head", str, optional=True, default=None, doc=doc_head),
+            Argument(
+                "use_ele_temp", int, optional=True, default=0, doc=doc_use_ele_temp
             ),
             Argument(
                 "model_frozen_head", str, optional=True, default=None, doc=doc_head
@@ -291,6 +309,28 @@ def find_only_one_key(lmp_lines, key, raise_not_found=True):
         else:
             return None
     return found[0]
+
+
+def get_ele_temp(lmp_log_name):
+    with open(lmp_log_name, encoding="utf8") as f:
+        lmp_log_lines = f.readlines()
+
+    for line in lmp_log_lines:
+        fields = line.split()
+        if fields[:2] == ["pair_style", "deepmd"]:
+            if "fparam" in fields:
+                # for rendering variables
+                try:
+                    return float(fields[fields.index("fparam") + 1])
+                except Exception:
+                    pass
+            if "aparam" in fields:
+                try:
+                    return float(fields[fields.index("aparam") + 1])
+                except Exception:
+                    pass
+
+    return None
 
 
 def freeze_model(input_model, frozen_model, head=None):

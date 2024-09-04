@@ -372,11 +372,12 @@ def make_lmp_naive_exploration_scheduler(config):
     convergence = config["explore"]["convergence"]
     output_nopbc = config["explore"]["output_nopbc"]
     conf_filters = get_conf_filters(config["explore"]["filters"])
+    use_ele_temp = config["inputs"]["use_ele_temp"]
     scheduler = ExplorationScheduler()
     # report
     conv_style = convergence.pop("type")
     report = conv_styles[conv_style](**convergence)
-    render = TrajRenderLammps(nopbc=output_nopbc)
+    render = TrajRenderLammps(nopbc=output_nopbc, use_ele_temp=use_ele_temp)
     # selector
     selector = ConfSelectorFrames(
         render,
@@ -627,6 +628,9 @@ def workflow_concurrent_learning(
         init_models = upload_artifact_and_print_uri(init_models_paths, "init_models")
     else:
         init_models = None
+
+    if config["inputs"]["use_ele_temp"]:
+        explore_config["use_ele_temp"] = config["inputs"]["use_ele_temp"]
 
     optional_parameter = make_optional_parameter(
         config["inputs"]["mixed_type"],
