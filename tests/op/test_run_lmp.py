@@ -269,13 +269,17 @@ class TestSetModels(unittest.TestCase):
 class TestGetEleTemp(unittest.TestCase):
     def test_get_ele_temp_none(self):
         with open("log", "w") as f:
-            f.write("pair_style      deepmd model.000.pb model.001.pb model.002.pb model.003.pb model.004.pb out_freq 10 out_file model_devi.out")
+            f.write(
+                "pair_style      deepmd model.000.pb model.001.pb model.002.pb model.003.pb model.004.pb out_freq 10 out_file model_devi.out"
+            )
         ele_temp = get_ele_temp("log")
         self.assertIsNone(ele_temp)
 
     def test_get_ele_temp(self):
         with open("log", "w") as f:
-            f.write("pair_style      deepmd model.000.pb model.001.pb model.002.pb model.003.pb model.004.pb out_freq 10 out_file model_devi.out fparam 6.6")
+            f.write(
+                "pair_style      deepmd model.000.pb model.001.pb model.002.pb model.003.pb model.004.pb out_freq 10 out_file model_devi.out fparam 6.6"
+            )
         ele_temp = get_ele_temp("log")
         self.assertEqual(ele_temp, 6.6)
 

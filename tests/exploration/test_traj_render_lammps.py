@@ -9,9 +9,7 @@ import numpy as np
 from .context import (
     dpgen2,
 )
-from dpgen2.exploration.render import (
-    TrajRenderLammps
-)
+from dpgen2.exploration.render import TrajRenderLammps
 
 # isort: on
 
