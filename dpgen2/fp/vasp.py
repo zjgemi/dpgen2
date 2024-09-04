@@ -100,24 +100,7 @@ def dumps_incar(params: dict):
 
 
 class PrepVasp(PrepFp):
-    def prep_task(
-        self,
-        conf_frame: dpdata.System,
-        vasp_inputs: VaspInputs,
-    ):
-        r"""Define how one Vasp task is prepared.
-
-        Parameters
-        ----------
-        conf_frame : dpdata.System
-            One frame of configuration in the dpdata format.
-        vasp_inputs : VaspInputs
-            The VaspInputs object handels all other input files of the task.
-        """
-
-        conf_frame.to("vasp/poscar", vasp_conf_name)
-        incar = vasp_inputs.incar_template
-
+    def set_ele_temp(self, conf_frame, incar):
         use_ele_temp = 0
         ele_temp = None
         if "fparam" in conf_frame.data:
@@ -139,6 +122,26 @@ class PrepVasp(PrepFp):
             }
             with open("job.json", "w") as f:
                 json.dump(data, f, indent=4)
+        return incar
+
+    def prep_task(
+        self,
+        conf_frame: dpdata.System,
+        vasp_inputs: VaspInputs,
+    ):
+        r"""Define how one Vasp task is prepared.
+
+        Parameters
+        ----------
+        conf_frame : dpdata.System
+            One frame of configuration in the dpdata format.
+        vasp_inputs : VaspInputs
+            The VaspInputs object handels all other input files of the task.
+        """
+
+        conf_frame.to("vasp/poscar", vasp_conf_name)
+        incar = vasp_inputs.incar_template
+        self.set_ele_temp(conf_frame, incar)
 
         Path(vasp_input_name).write_text(incar)
         # fix the case when some element have 0 atom, e.g. H0O2
@@ -169,6 +172,20 @@ class RunVasp(RunFp):
 
         """
         return ["job.json"]
+
+    def set_ele_temp(self, system):
+        if os.path.exists("job.json"):
+            with open("job.json", "r") as f:
+                data = json.load(f)
+            if "use_ele_temp" in data and "ele_temp" in data:
+                if data["use_ele_temp"] == 1:
+                    setup_ele_temp(False)
+                    system.data["fparam"] = np.tile(data["ele_temp"], [1, 1])
+                elif data["use_ele_temp"] == 2:
+                    setup_ele_temp(True)
+                    system.data["aparam"] = np.tile(
+                        data["ele_temp"], [1, system.get_natoms(), 1]
+                    )
 
     def run_task(
         self,
@@ -209,18 +226,7 @@ class RunVasp(RunFp):
             raise TransientError("vasp failed")
         # convert the output to deepmd/npy format
         sys = dpdata.LabeledSystem("OUTCAR")
-        if os.path.exists("job.json"):
-            with open("job.json", "r") as f:
-                data = json.load(f)
-            if "use_ele_temp" in data and "ele_temp" in data:
-                if data["use_ele_temp"] == 1:
-                    setup_ele_temp(False)
-                    sys.data["fparam"] = np.tile(data["ele_temp"], [1, 1])
-                elif data["use_ele_temp"] == 2:
-                    setup_ele_temp(True)
-                    sys.data["aparam"] = np.tile(
-                        data["ele_temp"], [1, sys.get_natoms(), 1]
-                    )
+        self.set_ele_temp(sys)
         sys.to("deepmd/npy", out_name)
         return out_name, log_name
 
