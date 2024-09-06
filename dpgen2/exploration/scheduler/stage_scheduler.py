@@ -14,6 +14,7 @@ from typing import (
 from dflow.python.opio import (
     HDF5Dataset,
 )
+
 from dpgen2.exploration.report import (
     ExplorationReport,
 )
@@ -100,11 +101,9 @@ class StageScheduler(ABC):
 
         Parameters
         ----------
-        hist_reports : List[ExplorationReport]
-            The historical exploration report of the stage. If this is the first iteration of the stage, this list is empty.
         report : ExplorationReport
             The exploration report of this iteration.
-        trajs: Union[List[Path], List[HDF5Dataset]]
+        trajs : Union[List[Path], List[HDF5Dataset]]
             A list of configurations generated during the exploration. May be used to generate new configurations for the next iteration.
 
         Returns
