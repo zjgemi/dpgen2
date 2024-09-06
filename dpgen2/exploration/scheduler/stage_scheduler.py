@@ -8,8 +8,12 @@ from pathlib import (
 from typing import (
     List,
     Tuple,
+    Union,
 )
 
+from dflow.python.opio import (
+    HDF5Dataset,
+)
 from dpgen2.exploration.report import (
     ExplorationReport,
 )
@@ -87,7 +91,7 @@ class StageScheduler(ABC):
     def plan_next_iteration(
         self,
         report: ExplorationReport,
-        trajs: List[Path],
+        trajs: Union[List[Path], List[HDF5Dataset]],
     ) -> Tuple[bool, ExplorationTaskGroup, ConfSelector]:
         """
         Make the plan for the next iteration of the stage.
@@ -100,7 +104,7 @@ class StageScheduler(ABC):
             The historical exploration report of the stage. If this is the first iteration of the stage, this list is empty.
         report : ExplorationReport
             The exploration report of this iteration.
-        confs : List[Path]
+        trajs: Union[List[Path], List[HDF5Dataset]]
             A list of configurations generated during the exploration. May be used to generate new configurations for the next iteration.
 
         Returns
