@@ -15,6 +15,7 @@ from dflow.python import (
     OPIO,
     Artifact,
     BigParameter,
+    HDF5Datasets,
     OPIOSign,
 )
 
@@ -53,6 +54,31 @@ class RunRelax(OP):
                 "model_devis": Artifact(List[Path]),
             }
         )
+
+    def write_traj(self, dump_str, traj_file):
+        traj_file.write_text(dump_str)
+        return traj_file
+
+    def write_model_devi(self, devi, model_devi_file):
+        import numpy as np
+
+        header = "%10s%19s%19s%19s%19s%19s%19s" % (
+            "step",
+            "max_devi_v",
+            "min_devi_v",
+            "avg_devi_v",
+            "max_devi_f",
+            "min_devi_f",
+            "avg_devi_f",
+        )
+        np.savetxt(
+            model_devi_file,
+            devi,
+            fmt=["%12d"] + ["%19.6e"] * 6,
+            delimiter="",
+            header=header,
+        )
+        return model_devi_file
 
     @OP.exec_sign_check
     def execute(
@@ -168,29 +194,14 @@ class RunRelax(OP):
                 forces_list[j] = forces
                 virial_list[j] = virial / len(atype)
             traj_file = ip["task_path"] / ("traj.%s.dump" % fname)
-            traj_file.write_text(dump_str)
+            traj_file = self.write_traj(dump_str, traj_file)
             trajs.append(traj_file)
             devi = [np.array(step_list)]
             devi += list(calc_model_devi_v(np.array(virial_list)))
             devi += list(calc_model_devi_f(np.array(forces_list)))
             devi = np.vstack(devi).T
-            header = "%10s%19s%19s%19s%19s%19s%19s" % (
-                "step",
-                "max_devi_v",
-                "min_devi_v",
-                "avg_devi_v",
-                "max_devi_f",
-                "min_devi_f",
-                "avg_devi_f",
-            )
             model_devi_file = ip["task_path"] / ("model_devi.%s.out" % fname)
-            np.savetxt(
-                model_devi_file,
-                devi,
-                fmt=["%12d"] + ["%19.6e"] * 6,
-                delimiter="",
-                header=header,
-            )
+            model_devi_file = self.write_model_devi(devi, model_devi_file)
             model_devis.append(model_devi_file)
         return OPIO(
             {
@@ -215,3 +226,18 @@ class RunRelax(OP):
         data = base.normalize_value(data, trim_pattern="_*")
         base.check_value(data, strict=False)
         return data
+
+
+class RunRelaxHDF5(RunRelax):
+    @classmethod
+    def get_output_sign(cls):
+        output_sign = super().get_output_sign()
+        output_sign["trajs"] = Artifact(HDF5Datasets)
+        output_sign["model_devis"] = Artifact(HDF5Datasets)
+        return output_sign
+
+    def write_traj(self, dump_str, traj_file):
+        return dump_str
+
+    def write_model_devi(self, devi, model_devi_file):
+        return devi

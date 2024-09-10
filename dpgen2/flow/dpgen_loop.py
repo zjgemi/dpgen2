@@ -9,6 +9,7 @@ from pathlib import (
 from typing import (
     List,
     Optional,
+    Union,
 )
 
 import jsonpickle
@@ -35,6 +36,7 @@ from dflow.python import (
     OPIO,
     Artifact,
     BigParameter,
+    HDF5Datasets,
     OPIOSign,
     PythonOPTemplate,
     Slices,
@@ -91,7 +93,7 @@ class SchedulerWrapper(OP):
             {
                 "exploration_scheduler": BigParameter(ExplorationScheduler),
                 "exploration_report": BigParameter(ExplorationReport),
-                "trajs": Artifact(List[Path]),
+                "trajs": Artifact(Union[List[Path], HDF5Datasets]),
             }
         )
 

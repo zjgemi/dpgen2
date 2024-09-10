@@ -359,6 +359,7 @@ def run_diffcsp_args():
     doc_gen_tasks = "Number of DiffCSP generation tasks"
     doc_gen_command = "Command for DiffCSP generation"
     doc_relax_group_size = "Group size for relaxation"
+    doc_use_hdf5 = "Use HDF5 to store trajs and model_devis"
     return [
         Argument(
             "gen_tasks",
@@ -379,6 +380,13 @@ def run_diffcsp_args():
             optional=True,
             default=100,
             doc=doc_relax_group_size,
+        ),
+        Argument(
+            "use_hdf5",
+            bool,
+            optional=True,
+            default=False,
+            doc=doc_use_hdf5,
         ),
     ]
 

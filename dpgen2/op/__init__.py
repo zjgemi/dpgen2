@@ -39,6 +39,7 @@ from .run_lmp import (
 )
 from .run_relax import (
     RunRelax,
+    RunRelaxHDF5,
 )
 from .select_confs import (
     SelectConfs,

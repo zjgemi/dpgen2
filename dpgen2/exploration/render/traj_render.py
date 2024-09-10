@@ -15,6 +15,9 @@ from typing import (
 
 import dpdata
 import numpy as np
+from dflow.python.opio import (
+    HDF5Dataset,
+)
 
 from ..deviation import (
     DeviManager,
@@ -30,7 +33,7 @@ class TrajRender(ABC):
     @abstractmethod
     def get_model_devi(
         self,
-        files: List[Path],
+        files: Union[List[Path], List[HDF5Dataset]],
     ) -> DeviManager:
         r"""Get model deviations from recording files.
 
@@ -48,7 +51,7 @@ class TrajRender(ABC):
     @abstractmethod
     def get_confs(
         self,
-        traj: List[Path],
+        traj: Union[List[Path], List[HDF5Dataset]],
         id_selected: List[List[int]],
         type_map: Optional[List[str]] = None,
         conf_filters: Optional["ConfFilters"] = None,

@@ -111,6 +111,7 @@ from dpgen2.op import (
     RunDPTrain,
     RunLmp,
     RunRelax,
+    RunRelaxHDF5,
     SelectConfs,
 )
 from dpgen2.op.caly_evo_step_merge import (
@@ -167,6 +168,7 @@ def make_concurrent_learning_op(
     upload_python_packages: Optional[List[os.PathLike]] = None,
     valid_data: Optional[S3Artifact] = None,
     train_optional_files: Optional[List[str]] = None,
+    explore_config: Optional[dict] = None,
 ):
     if train_style in ("dp", "dp-dist"):
         prep_run_train_op = PrepRunDPTrain(
@@ -234,7 +236,7 @@ def make_concurrent_learning_op(
             "prep-run-diffcsp",
             DiffCSPGen,
             PrepRelax,
-            RunRelax,
+            RunRelaxHDF5 if explore_config["use_hdf5"] else RunRelax,  # type: ignore
             prep_config=prep_explore_config,
             run_config=run_explore_config,
             upload_python_packages=upload_python_packages,
@@ -552,6 +554,7 @@ def workflow_concurrent_learning(
         upload_python_packages=upload_python_packages,
         valid_data=valid_data,
         train_optional_files=train_optional_files,
+        explore_config=explore_config,
     )
     scheduler = make_naive_exploration_scheduler(config)
 

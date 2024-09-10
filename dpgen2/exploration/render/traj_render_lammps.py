@@ -1,4 +1,7 @@
 import json
+from io import (
+    StringIO,
+)
 from pathlib import (
     Path,
 )
@@ -12,6 +15,9 @@ from typing import (
 
 import dpdata
 import numpy as np
+from dflow.python.opio import (
+    HDF5Dataset,
+)
 
 from dpgen2.utils import (
     setup_ele_temp,
@@ -42,7 +48,7 @@ class TrajRenderLammps(TrajRender):
 
     def get_model_devi(
         self,
-        files: List[Path],
+        files: Union[List[Path], List[HDF5Dataset]],
     ) -> DeviManager:
         ntraj = len(files)
 
@@ -53,7 +59,10 @@ class TrajRenderLammps(TrajRender):
         return model_devi
 
     def _load_one_model_devi(self, fname, model_devi):
-        dd = np.loadtxt(fname)
+        if isinstance(fname, HDF5Dataset):
+            dd = fname.get_data()
+        else:
+            dd = np.loadtxt(fname)
         if len(np.shape(dd)) == 1:  # In case model-devi.out is 1-dimensional
             dd = dd.reshape((1, len(dd)))
 
@@ -92,7 +101,7 @@ class TrajRenderLammps(TrajRender):
 
     def get_confs(
         self,
-        trajs: List[Path],
+        trajs: Union[List[Path], List[HDF5Dataset]],
         id_selected: List[List[int]],
         type_map: Optional[List[str]] = None,
         conf_filters: Optional["ConfFilters"] = None,
@@ -108,7 +117,11 @@ class TrajRenderLammps(TrajRender):
         ms = dpdata.MultiSystems(type_map=type_map)
         for ii in range(ntraj):
             if len(id_selected[ii]) > 0:
-                ss = dpdata.System(trajs[ii], fmt=traj_fmt, type_map=type_map)
+                if isinstance(trajs[ii], HDF5Dataset):
+                    traj = StringIO(trajs[ii].get_data())  # type: ignore
+                else:
+                    traj = trajs[ii]
+                ss = dpdata.System(traj, fmt=traj_fmt, type_map=type_map)
                 ss.nopbc = self.nopbc
                 if ele_temp:
                     self.set_ele_temp(ss, ele_temp[ii])
