@@ -211,8 +211,8 @@ class ExplorationReportAdaptiveLower(ExplorationReport):
     ):
         self.ntraj = 0
         self.nframes = 0
-        self.candi = set()
-        self.accur = set()
+        self.candi = []
+        self.accur = []
         self.failed = []
         self.candi_picked = []
         self.model_devi = None
@@ -239,7 +239,7 @@ class ExplorationReportAdaptiveLower(ExplorationReport):
                 ii, md_f[ii], md_v[ii]
             )
             self.nframes += add_nframes
-            self.accur = self.accur.union(add_accur)
+            self.accur += add_accur
             self.failed += add_failed
             coll_f += add_f
             coll_v += add_v
@@ -268,11 +268,11 @@ class ExplorationReportAdaptiveLower(ExplorationReport):
             self.level_f_lo = coll_f[-numb_candi_f][0]
         # add to candidate set
         for ii in range(len(coll_f) - numb_candi_f, len(coll_f)):
-            self.candi.add(tuple(coll_f[ii][1:]))
+            self.candi.append(tuple(coll_f[ii][1:]))
         for ii in range(len(coll_v) - numb_candi_v, len(coll_v)):
-            self.candi.add(tuple(coll_v[ii][1:]))
+            self.candi.append(tuple(coll_v[ii][1:]))
         # accurate set is substracted by the candidate set
-        self.accur = self.accur - self.candi
+        self.accur = list(set(self.accur) - set(self.candi))
         self.model_devi = model_devi
 
     def _record_one_traj(
@@ -300,7 +300,7 @@ class ExplorationReportAdaptiveLower(ExplorationReport):
         nframes = md_f.shape[0]
         assert nframes == md_v.shape[0]
         failed = []
-        accur = set()
+        accur = []
         coll_f = []
         coll_v = []
         for ii in range(nframes):
@@ -311,7 +311,7 @@ class ExplorationReportAdaptiveLower(ExplorationReport):
                 coll_v.append([md_v[ii], tt, ii])
                 # now accur takes all non-failed frames,
                 # will be substracted by candidate later
-                accur.add((tt, ii))
+                accur.append((tt, ii))
         return nframes, accur, failed, coll_f, coll_v
 
     def _sequence_conv(
