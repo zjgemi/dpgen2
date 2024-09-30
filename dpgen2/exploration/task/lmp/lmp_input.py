@@ -101,10 +101,17 @@ def make_lmp_input(
     graph_list = ""
     for ii in graphs:
         graph_list += ii + " "
-    model_devi_file_name = lmp_pimd_model_devi_name % pimd_bead if pimd_bead is not None else lmp_model_devi_name
+    model_devi_file_name = (
+        lmp_pimd_model_devi_name % pimd_bead
+        if pimd_bead is not None
+        else lmp_model_devi_name
+    )
     if Version(deepmd_version) < Version("1"):
         # 0.x
-        ret += "pair_style      deepmd %s ${THERMO_FREQ} %s\n" % (graph_list, model_devi_file_name)
+        ret += "pair_style      deepmd %s ${THERMO_FREQ} %s\n" % (
+            graph_list,
+            model_devi_file_name,
+        )
     else:
         # 1.x
         keywords = ""
@@ -118,9 +125,10 @@ def make_lmp_input(
             keywords += "fparam ${ELE_TEMP}"
         if ele_temp_a is not None:
             keywords += "aparam ${ELE_TEMP}"
-        ret += (
-            "pair_style      deepmd %s out_freq ${THERMO_FREQ} out_file %s %s\n"
-            % (graph_list, model_devi_file_name, keywords)
+        ret += "pair_style      deepmd %s out_freq ${THERMO_FREQ} out_file %s %s\n" % (
+            graph_list,
+            model_devi_file_name,
+            keywords,
         )
     ret += "pair_coeff      * *\n"
     ret += "\n"
@@ -129,7 +137,9 @@ def make_lmp_input(
     if trj_seperate_files:
         ret += "dump            1 all custom ${DUMP_FREQ} traj/*.lammpstrj id type x y z fx fy fz\n"
     else:
-        lmp_traj_file_name = lmp_pimd_traj_name % pimd_bead if pimd_bead is not None else lmp_traj_name
+        lmp_traj_file_name = (
+            lmp_pimd_traj_name % pimd_bead if pimd_bead is not None else lmp_traj_name
+        )
         ret += (
             "dump            1 all custom ${DUMP_FREQ} %s id type x y z fx fy fz\n"
             % lmp_traj_file_name

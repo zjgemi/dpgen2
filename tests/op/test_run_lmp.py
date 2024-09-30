@@ -294,7 +294,8 @@ class TestMergePIMDFiles(unittest.TestCase):
     def test_merge_pimd_files(self):
         for i in range(1, 3):
             with open("traj.%s.dump" % i, "w") as f:
-                f.write("""ITEM: TIMESTEP
+                f.write(
+                    """ITEM: TIMESTEP
 0
 ITEM: NUMBER OF ATOMS
 3
@@ -318,13 +319,16 @@ ITEM: ATOMS id type x y z
 1 8 7.23103 0.814939 4.59892
 2 1 7.96453 0.61699 5.19158
 3 1 6.43661 0.370311 5.09854
-""")
+"""
+                )
         for i in range(1, 3):
             with open("model_devi.%s.out" % i, "w") as f:
-                f.write("""#       step         max_devi_v         min_devi_v         avg_devi_v         max_devi_f         min_devi_f         avg_devi_f
+                f.write(
+                    """#       step         max_devi_v         min_devi_v         avg_devi_v         max_devi_f         min_devi_f         avg_devi_f
            0       9.023897e-17       3.548771e-17       5.237314e-17       8.196123e-16       1.225653e-16       3.941002e-16
           10       1.081667e-16       4.141596e-17       7.534462e-17       9.070597e-16       1.067947e-16       4.153524e-16
-""")
+"""
+                )
 
         merge_pimd_files()
         self.assertTrue(os.path.exists(lmp_traj_name))
@@ -335,6 +339,13 @@ ITEM: ATOMS id type x y z
         assert model_devi.shape[0] == 4
 
     def tearDown(self):
-        for f in [lmp_traj_name, "traj.1.dump", "traj.2.dump", lmp_model_devi_name, "model_devi.1.out", "model_devi.2.out"]:
+        for f in [
+            lmp_traj_name,
+            "traj.1.dump",
+            "traj.2.dump",
+            lmp_model_devi_name,
+            "model_devi.1.out",
+            "model_devi.2.out",
+        ]:
             if os.path.exists(f):
                 os.remove(f)
