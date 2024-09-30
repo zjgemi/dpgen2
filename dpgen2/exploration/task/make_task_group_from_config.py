@@ -47,6 +47,7 @@ def npt_task_group_args():
     doc_relative_v_epsilon = "Calculate relative virial model deviation"
     doc_ele_temp_f = "The electron temperature set by frame style"
     doc_ele_temp_a = "The electron temperature set by atomistic style"
+    doc_pimd_bead = "Bead index for PIMD, None for non-PIMD"
 
     return [
         Argument("conf_idx", list, optional=False, doc=doc_conf_idx, alias=["sys_idx"]),
@@ -108,6 +109,13 @@ def npt_task_group_args():
             default=None,
             doc=doc_ele_temp_a,
         ),
+        Argument(
+            "pimd_bead",
+            str,
+            optional=True,
+            default=None,
+            doc=doc_pimd_bead,
+        ),
     ]
 
 
@@ -117,6 +125,7 @@ def lmp_template_task_group_args():
     doc_revisions = "The revisions. Should be a dict providing the key - list of desired values pair. Key is the word to be replaced in the templates, and it may appear in both the lammps and plumed input templates. All values in the value list will be enmerated."
     doc_traj_freq = "The frequency of dumping configurations and thermodynamic states"
     doc_extra_pair_style_args = "The extra arguments for pair_style"
+    doc_pimd_bead = "Bead index for PIMD, None for non-PIMD"
 
     return [
         Argument("conf_idx", list, optional=False, doc=doc_conf_idx, alias=["sys_idx"]),
@@ -157,6 +166,13 @@ def lmp_template_task_group_args():
             optional=True,
             default="",
             doc=doc_extra_pair_style_args,
+        ),
+        Argument(
+            "pimd_bead",
+            str,
+            optional=True,
+            default=None,
+            doc=doc_pimd_bead,
         ),
     ]
 
