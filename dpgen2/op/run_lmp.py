@@ -1,3 +1,4 @@
+import glob
 import json
 import logging
 import os
@@ -194,6 +195,7 @@ class RunLmp(OP):
                     with open("job.json", "w") as f:
                         json.dump(data, f, indent=4)
 
+        merge_pimd_files()
         ret_dict = {
             "log": work_dir / lmp_log_name,
             "traj": work_dir / lmp_traj_name,
@@ -356,3 +358,18 @@ def freeze_model(input_model, frozen_model, head=None):
             )
         )
         raise TransientError("freeze failed")
+
+
+def merge_pimd_files():
+    traj_files = glob.glob("traj.*.dump")
+    if len(traj_files) > 0:
+        with open(lmp_traj_name, "w") as f:
+            for traj_file in sorted(traj_files):
+                with open(traj_file, "r") as f2:
+                    f.write(f2.read())
+    model_devi_files = glob.glob("model_devi.*.out")
+    if len(model_devi_files) > 0:
+        with open(lmp_model_devi_name, "w") as f:
+            for model_devi_file in sorted(model_devi_files):
+                with open(model_devi_file, "r") as f2:
+                    f.write(f2.read())
