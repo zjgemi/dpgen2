@@ -722,7 +722,7 @@ def split_valid(systems: List[str], valid_ratio: float):
                 os.rmdir("%s.tmp" % target)
             else:
                 train_multi_systems[0].to_deepmd_npy(target)
-            train_systems.append(target)
+            train_systems.append(os.path.abspath(target))
 
         if len(valid_multi_systems) > 0:
             target = "valid_data/" + system
@@ -735,7 +735,7 @@ def split_valid(systems: List[str], valid_ratio: float):
                 os.rmdir("%s.tmp" % target)
             else:
                 valid_multi_systems[0].to_deepmd_npy(target)
-            valid_systems.append(target)
+            valid_systems.append(os.path.abspath(target))
 
     return train_systems, valid_systems
 
