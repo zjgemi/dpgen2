@@ -14,6 +14,7 @@ from typing import (
     Tuple,
 )
 
+import numpy as np
 from dargs import (
     Argument,
     ArgumentEncoder,
@@ -26,6 +27,7 @@ from dflow.python import (
     Artifact,
     BigParameter,
     FatalError,
+    HDF5Datasets,
     OPIOSign,
     TransientError,
 )
@@ -200,7 +202,7 @@ class RunLmp(OP):
         ret_dict = {
             "log": work_dir / lmp_log_name,
             "traj": work_dir / lmp_traj_name,
-            "model_devi": work_dir / lmp_model_devi_name,
+            "model_devi": self.get_model_devi(work_dir / lmp_model_devi_name),
         }
         plm_output = (
             {"plm_output": work_dir / plm_output_name}
@@ -213,6 +215,9 @@ class RunLmp(OP):
 
         return OPIO(ret_dict)
 
+    def get_model_devi(self, model_devi_file):
+        return model_devi_file
+
     @staticmethod
     def lmp_args():
         doc_lmp_cmd = "The command of LAMMPS"
@@ -220,6 +225,7 @@ class RunLmp(OP):
         doc_shuffle_models = "Randomly pick a model from the group of models to drive theexploration MD simulation"
         doc_head = "Select a head from multitask"
         doc_use_ele_temp = "Whether to use electronic temperature, 0 for no, 1 for frame temperature, and 2 for atomic temperature"
+        doc_use_hdf5 = "Use HDF5 to store trajs and model_devis"
         return [
             Argument("command", str, optional=True, default="lmp", doc=doc_lmp_cmd),
             Argument(
@@ -242,6 +248,13 @@ class RunLmp(OP):
             ),
             Argument(
                 "model_frozen_head", str, optional=True, default=None, doc=doc_head
+            ),
+            Argument(
+                "use_hdf5",
+                bool,
+                optional=True,
+                default=False,
+                doc=doc_use_hdf5,
             ),
         ]
 
@@ -374,3 +387,15 @@ def merge_pimd_files():
             for model_devi_file in sorted(model_devi_files):
                 with open(model_devi_file, "r") as f2:
                     f.write(f2.read())
+
+
+class RunLmpHDF5(RunLmp):
+    @classmethod
+    def get_output_sign(cls):
+        output_sign = super().get_output_sign()
+        output_sign["traj"] = Artifact(HDF5Datasets)
+        output_sign["model_devi"] = Artifact(HDF5Datasets)
+        return output_sign
+
+    def get_model_devi(self, model_devi_file):
+        return np.loadtxt(model_devi_file)

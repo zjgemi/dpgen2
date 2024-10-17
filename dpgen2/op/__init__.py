@@ -36,6 +36,7 @@ from .run_dp_train import (
 )
 from .run_lmp import (
     RunLmp,
+    RunLmpHDF5,
 )
 from .run_relax import (
     RunRelax,
