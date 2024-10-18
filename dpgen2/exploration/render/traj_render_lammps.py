@@ -60,7 +60,7 @@ class TrajRenderLammps(TrajRender):
 
     def _load_one_model_devi(self, fname, model_devi):
         if isinstance(fname, HDF5Dataset):
-            dd = fname.get_data()
+            dd = fname.get_data()  # type: ignore
         else:
             dd = np.loadtxt(fname)
         if len(np.shape(dd)) == 1:  # In case model-devi.out is 1-dimensional
