@@ -60,18 +60,18 @@ class TrajRenderLammps(TrajRender):
 
     def _load_one_model_devi(self, fname, model_devi):
         if isinstance(fname, HDF5Dataset):
-            dd = fname.get_data()  # type: ignore
+            dd = fname.get_data()
         else:
             dd = np.loadtxt(fname)
-        if len(np.shape(dd)) == 1:  # In case model-devi.out is 1-dimensional
-            dd = dd.reshape((1, len(dd)))
+        if len(np.shape(dd)) == 1:  # In case model-devi.out is 1-dimensional  # type: ignore
+            dd = dd.reshape((1, len(dd)))  # type: ignore
 
-        model_devi.add(DeviManager.MAX_DEVI_V, dd[:, 1])
-        model_devi.add(DeviManager.MIN_DEVI_V, dd[:, 2])
-        model_devi.add(DeviManager.AVG_DEVI_V, dd[:, 3])
-        model_devi.add(DeviManager.MAX_DEVI_F, dd[:, 4])
-        model_devi.add(DeviManager.MIN_DEVI_F, dd[:, 5])
-        model_devi.add(DeviManager.AVG_DEVI_F, dd[:, 6])
+        model_devi.add(DeviManager.MAX_DEVI_V, dd[:, 1])  # type: ignore
+        model_devi.add(DeviManager.MIN_DEVI_V, dd[:, 2])  # type: ignore
+        model_devi.add(DeviManager.AVG_DEVI_V, dd[:, 3])  # type: ignore
+        model_devi.add(DeviManager.MAX_DEVI_F, dd[:, 4])  # type: ignore
+        model_devi.add(DeviManager.MIN_DEVI_F, dd[:, 5])  # type: ignore
+        model_devi.add(DeviManager.AVG_DEVI_F, dd[:, 6])  # type: ignore
 
     def get_ele_temp(self, optional_outputs):
         ele_temp = []
