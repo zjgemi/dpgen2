@@ -63,7 +63,9 @@ class TrajRenderLammps(TrajRender):
             dd = fname.get_data()
         else:
             dd = np.loadtxt(fname)
-        if len(np.shape(dd)) == 1:  # In case model-devi.out is 1-dimensional  # type: ignore
+        if (
+            len(np.shape(dd)) == 1
+        ):  # In case model-devi.out is 1-dimensional  # type: ignore
             dd = dd.reshape((1, len(dd)))  # type: ignore
 
         model_devi.add(DeviManager.MAX_DEVI_V, dd[:, 1])  # type: ignore
