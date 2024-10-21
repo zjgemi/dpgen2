@@ -1,4 +1,7 @@
 import logging
+from concurrent.futures import (
+    ProcessPoolExecutor,
+)
 from copy import (
     deepcopy,
 )
@@ -133,7 +136,8 @@ def check_multiples(a, b, c, multiple):
 
 
 class DistanceConfFilter(ConfFilter):
-    def __init__(self, custom_safe_dist=None, safe_dist_ratio=1.0):
+    def __init__(self, max_workers=None, custom_safe_dist=None, safe_dist_ratio=1.0):
+        self.max_workers = max_workers
         self.custom_safe_dist = custom_safe_dist if custom_safe_dist is not None else {}
         self.safe_dist_ratio = safe_dist_ratio
 
@@ -187,6 +191,16 @@ class DistanceConfFilter(ConfFilter):
 
         return True
 
+    def batched_check(
+        self,
+        frames: List[dpdata.System],
+    ):
+        if self.max_workers == 1:
+            return list(map(self.check, frames))
+        else:
+            with ProcessPoolExecutor(self.max_workers) as executor:
+                return list(executor.map(self.check, frames))
+
     @staticmethod
     def args() -> List[dargs.Argument]:
         r"""The argument definition of the `ConfFilter`.
@@ -197,9 +211,18 @@ class DistanceConfFilter(ConfFilter):
             List of dargs.Argument defines the arguments of the `ConfFilter`.
         """
 
+        doc_max_workers = "The maximum number of processes used to filter configurations, " + \
+            "None represents as many as the processors of the machine, and 1 for serial"
         doc_custom_safe_dist = "Custom safe distance (in unit of bohr) for each element"
         doc_safe_dist_ratio = "The ratio multiplied to the safe distance"
         return [
+            Argument(
+                "max_workers",
+                int,
+                optional=True,
+                default=None,
+                doc=doc_max_workers,
+            ),
             Argument(
                 "custom_safe_dist",
                 dict,
@@ -218,7 +241,8 @@ class DistanceConfFilter(ConfFilter):
 
 
 class BoxSkewnessConfFilter(ConfFilter):
-    def __init__(self, theta=60.0):
+    def __init__(self, max_workers=None, theta=60.0):
+        self.max_workers = max_workers
         self.theta = theta
 
     def check(
@@ -251,6 +275,16 @@ class BoxSkewnessConfFilter(ConfFilter):
             return False
         return True
 
+    def batched_check(
+        self,
+        frames: List[dpdata.System],
+    ):
+        if self.max_workers == 1:
+            return list(map(self.check, frames))
+        else:
+            with ProcessPoolExecutor(self.max_workers) as executor:
+                return list(executor.map(self.check, frames))
+
     @staticmethod
     def args() -> List[dargs.Argument]:
         r"""The argument definition of the `ConfFilter`.
@@ -261,8 +295,17 @@ class BoxSkewnessConfFilter(ConfFilter):
             List of dargs.Argument defines the arguments of the `ConfFilter`.
         """
 
+        doc_max_workers = "The maximum number of processes used to filter configurations, " + \
+            "None represents as many as the processors of the machine, and 1 for serial"
         doc_theta = "The threshold for angles between the edges of the cell. If all angles are larger than this value the check is passed"
         return [
+            Argument(
+                "max_workers",
+                int,
+                optional=True,
+                default=None,
+                doc=doc_max_workers,
+            ),
             Argument(
                 "theta",
                 float,
@@ -274,7 +317,8 @@ class BoxSkewnessConfFilter(ConfFilter):
 
 
 class BoxLengthFilter(ConfFilter):
-    def __init__(self, length_ratio=5.0):
+    def __init__(self, max_workers=None, length_ratio=5.0):
+        self.max_workers = max_workers
         self.length_ratio = length_ratio
 
     def check(
@@ -307,6 +351,16 @@ class BoxLengthFilter(ConfFilter):
             return False
         return True
 
+    def batched_check(
+        self,
+        frames: List[dpdata.System],
+    ):
+        if self.max_workers == 1:
+            return list(map(self.check, frames))
+        else:
+            with ProcessPoolExecutor(self.max_workers) as executor:
+                return list(executor.map(self.check, frames))
+
     @staticmethod
     def args() -> List[dargs.Argument]:
         r"""The argument definition of the `ConfFilter`.
@@ -317,8 +371,17 @@ class BoxLengthFilter(ConfFilter):
             List of dargs.Argument defines the arguments of the `ConfFilter`.
         """
 
+        doc_max_workers = "The maximum number of processes used to filter configurations, " + \
+            "None represents as many as the processors of the machine, and 1 for serial"
         doc_length_ratio = "The threshold for the length ratio between the edges of the cell. If all length ratios are smaller than this value the check is passed"
         return [
+            Argument(
+                "max_workers",
+                int,
+                optional=True,
+                default=None,
+                doc=doc_max_workers,
+            ),
             Argument(
                 "length_ratio",
                 float,
