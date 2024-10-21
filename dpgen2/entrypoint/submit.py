@@ -110,6 +110,7 @@ from dpgen2.op import (
     RunCalyModelDevi,
     RunDPTrain,
     RunLmp,
+    RunLmpHDF5,
     RunRelax,
     RunRelaxHDF5,
     SelectConfs,
@@ -187,7 +188,7 @@ def make_concurrent_learning_op(
         prep_run_explore_op = PrepRunLmp(
             "prep-run-lmp",
             PrepLmp,
-            RunLmp,
+            RunLmpHDF5 if explore_config["use_hdf5"] else RunLmp,  # type: ignore
             prep_config=prep_explore_config,
             run_config=run_explore_config,
             upload_python_packages=upload_python_packages,
