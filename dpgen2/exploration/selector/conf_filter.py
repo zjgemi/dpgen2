@@ -6,7 +6,9 @@ from abc import (
     ABC,
     abstractmethod,
 )
-from typing import List
+from typing import (
+    List,
+)
 
 import dpdata
 import numpy as np
@@ -70,7 +72,9 @@ class ConfFilters:
         self,
         ms: dpdata.MultiSystems,
     ) -> dpdata.MultiSystems:
-        selected_idx = sum([[(i, j) for j in range(s.get_nframes())] for i, s in enumerate(ms)], [])
+        selected_idx = sum(
+            [[(i, j) for j in range(s.get_nframes())] for i, s in enumerate(ms)], []
+        )
         for ff in self._filters:
             res = ff.batched_check([ms[i][j] for i, j in selected_idx])
             selected_idx = [idx for i, idx in enumerate(selected_idx) if res[i]]
