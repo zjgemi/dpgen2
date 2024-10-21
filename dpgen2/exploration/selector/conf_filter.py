@@ -6,6 +6,7 @@ from abc import (
     ABC,
     abstractmethod,
 )
+from typing import List
 
 import dpdata
 import numpy as np
@@ -32,6 +33,25 @@ class ConfFilter(ABC):
         """
         pass
 
+    def batched_check(
+        self,
+        frames: List[dpdata.System],
+    ) -> List[bool]:
+        """Check if a list of configurations are valid.
+
+        Parameters
+        ----------
+        frames : List[dpdata.System]
+            A list of dpdata.System each containing a single frame
+
+        Returns
+        -------
+        valid : List[bool]
+            `True` if the configuration is a valid configuration, else `False`.
+
+        """
+        return list(map(self.check, frames))
+
 
 class ConfFilters:
     def __init__(
@@ -48,11 +68,17 @@ class ConfFilters:
 
     def check(
         self,
-        conf: dpdata.System,
-    ) -> dpdata.System:
-        natoms = sum(conf["atom_numbs"])  # type: ignore
-        selected_idx = np.arange(conf.get_nframes())
+        ms: dpdata.MultiSystems,
+    ) -> dpdata.MultiSystems:
+        selected_idx = sum([[(i, j) for j in range(s.get_nframes())] for i, s in enumerate(ms)], [])
         for ff in self._filters:
-            fsel = np.where([ff.check(conf[ii]) for ii in range(conf.get_nframes())])[0]
-            selected_idx = np.intersect1d(selected_idx, fsel)
-        return conf.sub_system(selected_idx)
+            res = ff.batched_check([ms[i][j] for i, j in selected_idx])
+            selected_idx = [idx for i, idx in enumerate(selected_idx) if res[i]]
+        selected_idx_list = [[] for _ in range(len(ms))]
+        for i, j in selected_idx:
+            selected_idx_list[i].append(j)
+        ms2 = dpdata.MultiSystems(type_map=ms.atom_names)
+        for i in range(len(ms)):
+            if len(selected_idx_list[i]) > 0:
+                ms2.append(ms[i].sub_system(selected_idx_list[i]))
+        return ms2
