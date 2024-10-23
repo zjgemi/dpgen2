@@ -211,8 +211,10 @@ class DistanceConfFilter(ConfFilter):
             List of dargs.Argument defines the arguments of the `ConfFilter`.
         """
 
-        doc_max_workers = "The maximum number of processes used to filter configurations, " + \
-            "None represents as many as the processors of the machine, and 1 for serial"
+        doc_max_workers = (
+            "The maximum number of processes used to filter configurations, "
+            + "None represents as many as the processors of the machine, and 1 for serial"
+        )
         doc_custom_safe_dist = "Custom safe distance (in unit of bohr) for each element"
         doc_safe_dist_ratio = "The ratio multiplied to the safe distance"
         return [
@@ -295,8 +297,10 @@ class BoxSkewnessConfFilter(ConfFilter):
             List of dargs.Argument defines the arguments of the `ConfFilter`.
         """
 
-        doc_max_workers = "The maximum number of processes used to filter configurations, " + \
-            "None represents as many as the processors of the machine, and 1 for serial"
+        doc_max_workers = (
+            "The maximum number of processes used to filter configurations, "
+            + "None represents as many as the processors of the machine, and 1 for serial"
+        )
         doc_theta = "The threshold for angles between the edges of the cell. If all angles are larger than this value the check is passed"
         return [
             Argument(
@@ -371,8 +375,10 @@ class BoxLengthFilter(ConfFilter):
             List of dargs.Argument defines the arguments of the `ConfFilter`.
         """
 
-        doc_max_workers = "The maximum number of processes used to filter configurations, " + \
-            "None represents as many as the processors of the machine, and 1 for serial"
+        doc_max_workers = (
+            "The maximum number of processes used to filter configurations, "
+            + "None represents as many as the processors of the machine, and 1 for serial"
+        )
         doc_length_ratio = "The threshold for the length ratio between the edges of the cell. If all length ratios are smaller than this value the check is passed"
         return [
             Argument(
