@@ -130,10 +130,5 @@ class TrajRenderLammps(TrajRender):
                 ss = ss.sub_system(id_selected[ii])
                 ms.append(ss)
         if conf_filters is not None:
-            ms2 = dpdata.MultiSystems(type_map=type_map)
-            for s in ms:
-                s2 = conf_filters.check(s)
-                if len(s2) > 0:
-                    ms2.append(s2)
-            ms = ms2
+            ms = conf_filters.check(ms)
         return ms
