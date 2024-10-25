@@ -812,12 +812,12 @@ def get_resubmit_keys(
     wf,
 ):
     wf_info = wf.query()
-    all_steps = [step for step in wf_info.get_step(sort_by_generation=True) if step.key is not None]
-    super_keys = [
-        "prep-run-train",
-        "prep-run-explore",
-        "prep-run-fp"
+    all_steps = [
+        step
+        for step in wf_info.get_step(sort_by_generation=True)
+        if step.key is not None
     ]
+    super_keys = ["prep-run-train", "prep-run-explore", "prep-run-fp"]
     other_keys = [
         "select-confs",
         "collect-data",
@@ -829,7 +829,11 @@ def get_resubmit_keys(
     for step in all_steps:
         if len(matched_step_key([step.key], super_keys)) > 0:
             sub_steps = wf_info.get_step(parent_id=step.id, sort_by_generation=True)
-            sub_keys = [step.key for step in sub_steps if step.key is not None and step.phase == "Succeeded"]
+            sub_keys = [
+                step.key
+                for step in sub_steps
+                if step.key is not None and step.phase == "Succeeded"
+            ]
             sub_keys = sort_slice_ops(
                 sub_keys,
                 ["run-train", "run-lmp", "run-fp", "diffcsp-gen", "run-relax"],
