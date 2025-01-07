@@ -41,7 +41,9 @@ class ExplorationReportTrustLevelsMax(ExplorationReportTrustLevels):
         converged  bool
             If the exploration is converged.
         """
-        return self.accurate_ratio() >= self.conv_accuracy
+        accurate_ratio = self.accurate_ratio()
+        assert isinstance(accurate_ratio, float)
+        return accurate_ratio >= self.conv_accuracy
 
     def get_candidate_ids(
         self,
