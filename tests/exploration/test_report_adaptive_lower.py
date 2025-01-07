@@ -88,7 +88,7 @@ class TestTrajsExplorationReport(unittest.TestCase):
         self.assertFalse(ter.converged([mr, mr1, mr]))
         self.assertTrue(ter.converged([mr1, mr, mr]))
 
-        picked = ter.get_candidate_ids(2)
+        picked = ter.get_candidate_ids(2, clear=False)
         npicked = 0
         self.assertEqual(len(picked), 2)
         for ii in range(2):
@@ -218,12 +218,12 @@ class TestTrajsExplorationReport(unittest.TestCase):
             return ret
 
         ter.record(model_devi)
-        with mock.patch("random.choices", faked_choices):
-            picked = ter.get_candidate_ids(11)
-        self.assertFalse(ter.converged([]))
         self.assertEqual(ter.candi, expected_cand)
         self.assertEqual(ter.accur, expected_accu)
         self.assertEqual(set(ter.failed), expected_fail)
+        with mock.patch("random.choices", faked_choices):
+            picked = ter.get_candidate_ids(11)
+        self.assertFalse(ter.converged([]))
         self.assertEqual(len(picked), 2)
         self.assertEqual(sorted(picked[0]), [1, 3])
         self.assertEqual(sorted(picked[1]), [1, 5, 7])
