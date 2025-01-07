@@ -278,7 +278,7 @@ class ExplorationReportAdaptiveLower(ExplorationReport):
         # accurate set is substracted by the candidate set
         self.accur = self.accur - self.candi
         self.model_devi = model_devi
-        self._no_candidate = (len(self.candi) == 0)
+        self._no_candidate = len(self.candi) == 0
         self._failed_ratio = float(len(self.failed)) / float(self.nframes)
         self._accurate_ratio = float(len(self.accur)) / float(self.nframes)
         self._candidate_ratio = float(len(self.candi)) / float(self.nframes)
