@@ -137,10 +137,16 @@ class ExplorationReportTrustLevels(ExplorationReport):
         assert len(self.traj_accu) == ntraj
         assert len(self.traj_fail) == ntraj
         self.model_devi = model_devi
-        self._no_candidate = (sum([len(ii) for ii in self.traj_cand]) == 0)
-        self._failed_ratio = float(sum([len(ii) for ii in self.traj_fail])) / float(sum(self.traj_nframes))
-        self._accurate_ratio = float(sum([len(ii) for ii in self.traj_accu])) / float(sum(self.traj_nframes))
-        self._candidate_ratio = float(sum([len(ii) for ii in self.traj_cand])) / float(sum(self.traj_nframes))
+        self._no_candidate = sum([len(ii) for ii in self.traj_cand]) == 0
+        self._failed_ratio = float(sum([len(ii) for ii in self.traj_fail])) / float(
+            sum(self.traj_nframes)
+        )
+        self._accurate_ratio = float(sum([len(ii) for ii in self.traj_accu])) / float(
+            sum(self.traj_nframes)
+        )
+        self._candidate_ratio = float(sum([len(ii) for ii in self.traj_cand])) / float(
+            sum(self.traj_nframes)
+        )
 
     def _get_indexes(
         self,
