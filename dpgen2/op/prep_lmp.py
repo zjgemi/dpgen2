@@ -50,6 +50,7 @@ class PrepLmp(OP):
             {
                 "task_names": BigParameter(List[str]),
                 "task_paths": Artifact(List[Path]),
+                "ntasks": int,
             }
         )
 
@@ -88,6 +89,7 @@ class PrepLmp(OP):
             {
                 "task_names": task_names,
                 "task_paths": task_paths,
+                "ntasks": len(task_names),
             }
         )
 

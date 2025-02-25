@@ -194,7 +194,7 @@ def _prep_run_lmp(
             "models": prep_run_steps.inputs.artifacts["models"],
         },
         with_sequence=argo_sequence(
-            argo_len(prep_lmp.outputs.parameters["task_names"]),
+            prep_lmp.outputs.parameters["ntasks"],
             format=lmp_index_pattern,
         ),
         key=step_keys["run-lmp"],
