@@ -284,7 +284,7 @@ class RunDPTrain(OP):
                 train_args,
             )
 
-            ret, out, err = run_command(command)
+            ret, out, err = run_command(command, stdout=fplog, stderr=fplog)
             if ret != 0:
                 clean_before_quit()
                 logging.error(
@@ -301,10 +301,6 @@ class RunDPTrain(OP):
                     )
                 )
                 raise FatalError("dp train failed")
-            fplog.write("#=================== train std out ===================\n")
-            fplog.write(out)
-            fplog.write("#=================== train std err ===================\n")
-            fplog.write(err)
 
             if finetune_mode == "finetune" and os.path.exists("input_v2_compat.json"):
                 shutil.copy2("input_v2_compat.json", train_script_name)
@@ -313,7 +309,7 @@ class RunDPTrain(OP):
             if impl == "pytorch":
                 model_file = "model.ckpt.pt"
             else:
-                ret, out, err = run_command(["dp", "freeze", "-o", "frozen_model.pb"])
+                ret, out, err = run_command(["dp", "freeze", "-o", "frozen_model.pb"], stdout=fplog, stderr=fplog)
                 if ret != 0:
                     clean_before_quit()
                     logging.error(
@@ -331,10 +327,6 @@ class RunDPTrain(OP):
                     )
                     raise FatalError("dp freeze failed")
                 model_file = "frozen_model.pb"
-            fplog.write("#=================== freeze std out ===================\n")
-            fplog.write(out)
-            fplog.write("#=================== freeze std err ===================\n")
-            fplog.write(err)
 
             clean_before_quit()
 
