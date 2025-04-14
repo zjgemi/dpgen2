@@ -1,4 +1,7 @@
 import logging
+from concurrent.futures import (
+    ProcessPoolExecutor,
+)
 from copy import (
     deepcopy,
 )
@@ -18,7 +21,7 @@ from . import (
 )
 
 safe_dist_dict = {
-    "H": 1.2255,
+    "H": 0.612,
     "He": 0.936,
     "Li": 1.8,
     "Be": 1.56,
@@ -133,7 +136,8 @@ def check_multiples(a, b, c, multiple):
 
 
 class DistanceConfFilter(ConfFilter):
-    def __init__(self, custom_safe_dist=None, safe_dist_ratio=1.0):
+    def __init__(self, max_workers=None, custom_safe_dist=None, safe_dist_ratio=1.0):
+        self.max_workers = max_workers
         self.custom_safe_dist = custom_safe_dist if custom_safe_dist is not None else {}
         self.safe_dist_ratio = safe_dist_ratio
 
@@ -165,16 +169,48 @@ class DistanceConfFilter(ConfFilter):
             pbc=(not frame.nopbc),
         )
 
-        P = [[2, 0, 0], [0, 2, 0], [0, 0, 2]]
-        extended_structure = make_supercell(structure, P)
+        coords = structure.positions
+        symbols = structure.get_chemical_symbols()
+        cell, _ = structure.get_cell().standard_form()
 
-        coords = extended_structure.positions
-        symbols = extended_structure.get_chemical_symbols()
+        a1 = cell[0]
+        a2 = cell[1]
+        a3 = cell[2]
+
+        all_combinations = {
+    'a1': np.linalg.norm(a1),
+    'a2': np.linalg.norm(a2),
+    'a3': np.linalg.norm(a3),
+    'a1+a2': np.linalg.norm(a1 + a2),
+    'a1+a3': np.linalg.norm(a1 + a3),
+    'a2+a3': np.linalg.norm(a2 + a3),
+    'a1-a2': np.linalg.norm(a1 - a2),
+    'a1-a3': np.linalg.norm(a1 - a3),
+    'a2-a3': np.linalg.norm(a2 - a3),
+    'a1+a2+a3': np.linalg.norm(a1 + a2 + a3),
+    'a1+a2-a3': np.linalg.norm(a1 + a2 - a3),
+    'a1-a2+a3': np.linalg.norm(a1 - a2 + a3),
+    'a1-a2-a3': np.linalg.norm(a1 - a2 - a3),
+    '-a1+a2+a3': np.linalg.norm(-a1 + a2 + a3),
+    '-a1+a2-a3': np.linalg.norm(-a1 + a2 - a3),
+    '-a1-a2+a3': np.linalg.norm(-a1 - a2 + a3),
+    '-a1-a2-a3': np.linalg.norm(-a1 - a2 - a3)
+}
+
+
+        A = list(all_combinations.values())
+        B = [safe_dist[type_i] * 2 for type_i in symbols]
+
+        for a in A:
+            for b in B:
+                if a < b:
+                    print(f"Lattice length {a:.3f} is less than safe distance {b:.3f} ")
+                    return False
 
         num_atoms = len(coords)
         for i in range(num_atoms):
             for j in range(i + 1, num_atoms):
-                dist = extended_structure.get_distance(i, j, mic=True)
+                dist = structure.get_distance(i, j, mic=True)
                 type_i = symbols[i]
                 type_j = symbols[j]
                 dr = safe_dist[type_i] + safe_dist[type_j]
@@ -187,6 +223,16 @@ class DistanceConfFilter(ConfFilter):
 
         return True
 
+    def batched_check(
+        self,
+        frames: List[dpdata.System],
+    ):
+        if self.max_workers == 1:
+            return list(map(self.check, frames))
+        else:
+            with ProcessPoolExecutor(self.max_workers) as executor:
+                return list(executor.map(self.check, frames))
+
     @staticmethod
     def args() -> List[dargs.Argument]:
         r"""The argument definition of the `ConfFilter`.
@@ -197,9 +243,18 @@ class DistanceConfFilter(ConfFilter):
             List of dargs.Argument defines the arguments of the `ConfFilter`.
         """
 
+        doc_max_workers = "The maximum number of processes used to filter configurations, " + \
+            "None represents as many as the processors of the machine, and 1 for serial"
         doc_custom_safe_dist = "Custom safe distance (in unit of bohr) for each element"
         doc_safe_dist_ratio = "The ratio multiplied to the safe distance"
         return [
+            Argument(
+                "max_workers",
+                int,
+                optional=True,
+                default=None,
+                doc=doc_max_workers,
+            ),
             Argument(
                 "custom_safe_dist",
                 dict,
@@ -218,7 +273,8 @@ class DistanceConfFilter(ConfFilter):
 
 
 class BoxSkewnessConfFilter(ConfFilter):
-    def __init__(self, theta=60.0):
+    def __init__(self, max_workers=None, theta=60.0):
+        self.max_workers = max_workers
         self.theta = theta
 
     def check(
@@ -243,13 +299,23 @@ class BoxSkewnessConfFilter(ConfFilter):
         cell, _ = structure.get_cell().standard_form()
 
         if (
-            cell[1][0] > np.tan(self.theta / 180.0 * np.pi) * cell[1][1]  # type: ignore
-            or cell[2][0] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]  # type: ignore
-            or cell[2][1] > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]  # type: ignore
+            np.abs(cell[1][0]) > np.tan(self.theta / 180.0 * np.pi) * cell[1][1]  # type: ignore
+            or np.abs(cell[2][0]) > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]  # type: ignore
+            or np.abs(cell[2][1]) > np.tan(self.theta / 180.0 * np.pi) * cell[2][2]  # type: ignore
         ):
             logging.warning("Inclined box")
             return False
         return True
+
+    def batched_check(
+        self,
+        frames: List[dpdata.System],
+    ):
+        if self.max_workers == 1:
+            return list(map(self.check, frames))
+        else:
+            with ProcessPoolExecutor(self.max_workers) as executor:
+                return list(executor.map(self.check, frames))
 
     @staticmethod
     def args() -> List[dargs.Argument]:
@@ -261,8 +327,17 @@ class BoxSkewnessConfFilter(ConfFilter):
             List of dargs.Argument defines the arguments of the `ConfFilter`.
         """
 
+        doc_max_workers = "The maximum number of processes used to filter configurations, " + \
+            "None represents as many as the processors of the machine, and 1 for serial"
         doc_theta = "The threshold for angles between the edges of the cell. If all angles are larger than this value the check is passed"
         return [
+            Argument(
+                "max_workers",
+                int,
+                optional=True,
+                default=None,
+                doc=doc_max_workers,
+            ),
             Argument(
                 "theta",
                 float,
@@ -274,7 +349,8 @@ class BoxSkewnessConfFilter(ConfFilter):
 
 
 class BoxLengthFilter(ConfFilter):
-    def __init__(self, length_ratio=5.0):
+    def __init__(self, max_workers=None, length_ratio=5.0):
+        self.max_workers = max_workers
         self.length_ratio = length_ratio
 
     def check(
@@ -307,6 +383,16 @@ class BoxLengthFilter(ConfFilter):
             return False
         return True
 
+    def batched_check(
+        self,
+        frames: List[dpdata.System],
+    ):
+        if self.max_workers == 1:
+            return list(map(self.check, frames))
+        else:
+            with ProcessPoolExecutor(self.max_workers) as executor:
+                return list(executor.map(self.check, frames))
+
     @staticmethod
     def args() -> List[dargs.Argument]:
         r"""The argument definition of the `ConfFilter`.
@@ -317,8 +403,17 @@ class BoxLengthFilter(ConfFilter):
             List of dargs.Argument defines the arguments of the `ConfFilter`.
         """
 
+        doc_max_workers = "The maximum number of processes used to filter configurations, " + \
+            "None represents as many as the processors of the machine, and 1 for serial"
         doc_length_ratio = "The threshold for the length ratio between the edges of the cell. If all length ratios are smaller than this value the check is passed"
         return [
+            Argument(
+                "max_workers",
+                int,
+                optional=True,
+                default=None,
+                doc=doc_max_workers,
+            ),
             Argument(
                 "length_ratio",
                 float,
