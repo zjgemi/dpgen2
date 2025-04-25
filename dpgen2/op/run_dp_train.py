@@ -200,7 +200,9 @@ class RunDPTrain(OP):
         iter_data_old_exp = _expand_all_multi_sys_to_sys(iter_data[:-1])
         iter_data_new_exp = _expand_all_multi_sys_to_sys(iter_data[-1:])
         if config["split_last_iter_valid_ratio"] is not None:
-            train_systems, valid_systems = split_valid(iter_data_new_exp, config["split_last_iter_valid_ratio"])
+            train_systems, valid_systems = split_valid(
+                iter_data_new_exp, config["split_last_iter_valid_ratio"]
+            )
             iter_data_new_exp = train_systems
             valid_data = append_valid_data(config, valid_data, valid_systems)
         iter_data_exp = iter_data_old_exp + iter_data_new_exp
@@ -523,7 +525,9 @@ class RunDPTrain(OP):
         doc_head = "Head to use in the multitask training"
         doc_init_model_with_finetune = "Use finetune for init model"
         doc_train_args = "Extra arguments for dp train"
-        doc_split_last_iter_valid_ratio = "Ratio of valid data if split data of last iter"
+        doc_split_last_iter_valid_ratio = (
+            "Ratio of valid data if split data of last iter"
+        )
         return [
             Argument(
                 "command",
@@ -701,8 +705,8 @@ def split_valid(systems: List[str], valid_ratio: float):
         train_multi_systems = dpdata.MultiSystems()
         valid_multi_systems = dpdata.MultiSystems()
         for s in d:
-            nvalid = math.floor(len(s)*valid_ratio)
-            if random.random() < len(s)*valid_ratio - nvalid:
+            nvalid = math.floor(len(s) * valid_ratio)
+            if random.random() < len(s) * valid_ratio - nvalid:
                 nvalid += 1
             valid_indices = random.sample(range(len(s)), nvalid)
             train_indices = list(set(range(len(s))).difference(valid_indices))
