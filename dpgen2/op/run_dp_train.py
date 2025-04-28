@@ -719,26 +719,26 @@ def split_valid(systems: List[str], valid_ratio: float):
             target = "train_data/" + system
             if mixed_type:
                 # The multisystem is loaded from one dir, thus we can safely keep one dir
-                train_multi_systems.to_deepmd_npy_mixed("%s.tmp" % target)
+                train_multi_systems.to_deepmd_npy_mixed("%s.tmp" % target)  # type: ignore
                 fs = os.listdir("%s.tmp" % target)
                 assert len(fs) == 1
                 os.rename(os.path.join("%s.tmp" % target, fs[0]), target)
                 os.rmdir("%s.tmp" % target)
             else:
-                train_multi_systems[0].to_deepmd_npy(target)
+                train_multi_systems[0].to_deepmd_npy(target)  # type: ignore
             train_systems.append(os.path.abspath(target))
 
         if len(valid_multi_systems) > 0:
             target = "valid_data/" + system
             if mixed_type:
                 # The multisystem is loaded from one dir, thus we can safely keep one dir
-                valid_multi_systems.to_deepmd_npy_mixed("%s.tmp" % target)
+                valid_multi_systems.to_deepmd_npy_mixed("%s.tmp" % target)  # type: ignore
                 fs = os.listdir("%s.tmp" % target)
                 assert len(fs) == 1
                 os.rename(os.path.join("%s.tmp" % target, fs[0]), target)
                 os.rmdir("%s.tmp" % target)
             else:
-                valid_multi_systems[0].to_deepmd_npy(target)
+                valid_multi_systems[0].to_deepmd_npy(target)  # type: ignore
             valid_systems.append(os.path.abspath(target))
 
     return train_systems, valid_systems
