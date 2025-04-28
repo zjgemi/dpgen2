@@ -964,7 +964,8 @@ class TestSplitValid(unittest.TestCase):
 
     def test_split_valid_mixed(self):
         train_systems, valid_systems = split_valid(
-            ["fake_mixed_data/1", "fake_mixed_data/2"], 0.1)
+            ["fake_mixed_data/1", "fake_mixed_data/2"], 0.1
+        )
         self.assertEqual(len(train_systems), 2)
         ms = dpdata.MultiSystems()
         ms.load_systems_from_file(train_systems[0], fmt="deepmd/npy/mixed")
