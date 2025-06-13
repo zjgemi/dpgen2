@@ -359,9 +359,9 @@ def _dl_step_item(
     [step_key, io, name] = item.split(global_step_def_split)
     pref = _item_path(prefix, item)
     if io in ["input"]:
-        target = step.inputs.artifacts[name]
+        target = step.inputs.artifacts.get(name)
     elif io in ["output"]:
-        target = step.outputs.artifacts[name]
+        target = step.outputs.artifacts.get(name)
     else:
         raise RuntimeError("unknown io style {io}")
     try:
