@@ -83,7 +83,7 @@ class RunLmp(OP):
                 "model_devi": Artifact(Path),
                 "plm_output": Artifact(Path, optional=True),
                 "optional_output": Artifact(Path, optional=True),
-                "extra_outputs": Artifact(List[Path], optional=True),
+                "extra_outputs": Artifact(List[Path]),
             }
         )
 
