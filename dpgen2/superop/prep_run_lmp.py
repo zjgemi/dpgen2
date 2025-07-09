@@ -219,8 +219,8 @@ def _prep_run_lmp(
     prep_run_steps.outputs.artifacts[
         "optional_outputs"
     ]._from = run_lmp.outputs.artifacts["optional_output"]
-    prep_run_steps.outputs.artifacts[
+    prep_run_steps.outputs.artifacts["extra_outputs"]._from = run_lmp.outputs.artifacts[
         "extra_outputs"
-    ]._from = run_lmp.outputs.artifacts["extra_outputs"]
+    ]
 
     return prep_run_steps
