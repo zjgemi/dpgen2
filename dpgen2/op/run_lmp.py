@@ -217,7 +217,7 @@ class RunLmp(OP):
         extra_outputs = []
         for fname in config["extra_output_files"]:
             extra_outputs += list(work_dir.glob(fname))
-        ret_dict["extra_outputs"] = extra_outputs
+        ret_dict["extra_outputs"] = extra_outputs  # type: ignore
         return OPIO(ret_dict)
 
     def get_model_devi(self, model_devi_file):
