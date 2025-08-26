@@ -490,7 +490,7 @@ def fp_args(inputs, run):
             "async_ratio",
             float,
             optional=True,
-            default=0.,
+            default=0.0,
             doc=doc_async_ratio,
         ),
         Argument(

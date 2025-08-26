@@ -50,7 +50,7 @@ class ConfSelectorFrames(ConfSelector):
         report: ExplorationReport,
         max_numb_sel: Optional[int] = None,
         conf_filters: Optional[ConfFilters] = None,
-        async_ratio: float = 0.,
+        async_ratio: float = 0.0,
     ):
         self.max_numb_sel = max_numb_sel
         self.conf_filters = conf_filters

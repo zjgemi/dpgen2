@@ -592,11 +592,10 @@ class TestBlockCLAsyncFp(unittest.TestCase):
         download_artifact(step.outputs.artifacts["labeled_data"], path="res")
         self.assertEqual(
             (Path("res") / "task.000000" / "data_task.000000" / "data").read_text(),
-            "labeled_data of task.000000\nconf of async_data"
+            "labeled_data of task.000000\nconf of async_data",
         )
         step = wf.query_step(name="step")[0]
         download_artifact(step.outputs.artifacts["async_confs"], path="res")
         self.assertEqual(
-            (Path("res") / "async_confs").read_text(),
-            "conf of async_confs"
+            (Path("res") / "async_confs").read_text(), "conf of async_confs"
         )
