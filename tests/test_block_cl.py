@@ -56,6 +56,7 @@ from mock import (
     patch,
 )
 from mocked_ops import (
+    MockedAsyncConfSelector,
     MockedCollectData,
     MockedCollectDataCheckOptParam,
     MockedConfSelector,
