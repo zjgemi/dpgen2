@@ -707,6 +707,7 @@ def update_reuse_step_scheduler(
 def copy_scheduler_plans(
     scheduler_new,
     scheduler_old,
+    keep_complete_scheduler: bool = False,
 ):
     if len(scheduler_old.stage_schedulers) == 0:
         return scheduler_new
@@ -720,6 +721,10 @@ def copy_scheduler_plans(
         scheduler_new.plan_next_iteration()
     for ii in range(len(scheduler_old.stage_schedulers)):
         old_stage = scheduler_old.stage_schedulers[ii]
+        if keep_complete_scheduler and old_stage.complete():
+            scheduler_new.stage_schedulers[ii] = old_stage
+            scheduler_new.force_stage_complete()
+            continue
         old_reports = old_stage.get_reports()
         if old_stage.next_iteration() > 0:
             if ii != scheduler_new.get_stage():
@@ -744,6 +749,7 @@ def submit_concurrent_learning(
     wf_config,
     reuse_step: Optional[List[ArgoStep]] = None,
     replace_scheduler: bool = False,
+    keep_complete_scheduler: bool = False,
     no_submission: bool = False,
 ):
     # normalize args
@@ -761,7 +767,11 @@ def submit_concurrent_learning(
         scheduler_old = (
             reuse_step[idx_old].inputs.parameters["exploration_scheduler"].value
         )
-        scheduler_new = copy_scheduler_plans(scheduler_new, scheduler_old)
+        scheduler_new = copy_scheduler_plans(
+            scheduler_new,
+            scheduler_old,
+            keep_complete_scheduler=keep_complete_scheduler,
+        )
         exploration_report = (
             reuse_step[idx_old].inputs.parameters["exploration_report"].value
         )
@@ -854,6 +864,7 @@ def resubmit_concurrent_learning(
     list_steps=False,
     reuse=None,
     replace_scheduler=False,
+    keep_complete_scheduler=False,
     fold=False,
 ):
     wf_config = normalize_args(wf_config)
@@ -898,6 +909,7 @@ def resubmit_concurrent_learning(
         wf_config,
         reuse_step=reuse_step,
         replace_scheduler=replace_scheduler,
+        keep_complete_scheduler=keep_complete_scheduler,
     )
 
     return wf

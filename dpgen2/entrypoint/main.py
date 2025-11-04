@@ -120,6 +120,11 @@ def main_parser() -> argparse.ArgumentParser:
         help="if set then keep schedule of the old workflow. otherwise use the schedule defined in the input file",
     )
     parser_resubmit.add_argument(
+        "--keep-complete-schedule",
+        action="store_true",
+        help="if set then keep schedule of only complete stages of the old workflow.",
+    )
+    parser_resubmit.add_argument(
         "-f",
         "--fold",
         action="store_true",
@@ -345,6 +350,7 @@ def main():
             list_steps=args.list,
             reuse=args.reuse,
             replace_scheduler=(not args.keep_schedule),
+            keep_complete_scheduler=args.keep_complete_schedule,
             fold=args.fold,
         )
     elif args.command == "status":
